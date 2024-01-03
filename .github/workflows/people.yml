@@ -1,0 +1,231 @@
+name: People Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-git:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Enforce absence of print statements in code
+        run: |
+          ! git diff origin/main..HEAD -- . ':(exclude).circleci' | grep "print("
+      - name: Check absence of fixup commits
+        run: |
+          ! git log | grep 'fixup!'
+      - name: Install gitlint
+        run: pip install --user requests gitlint
+      - name: Lint commit messages added to main
+        run: ~/.local/bin/gitlint --commits origin/main..HEAD
+
+  check-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Check that the CHANGELOG has been modified in the current branch
+        run: git whatchanged --name-only --pretty="" origin..HEAD | grep CHANGELOG
+
+  lint-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Check CHANGELOG max line length
+        run: |
+          max_line_length=$(cat CHANGELOG.md | grep -Ev "^\[.*\]: https://github.com" | wc -L)
+          if [ $max_line_length -ge 80 ]; then
+            echo "ERROR: CHANGELOG has lines longer than 80 characters."
+            exit 1
+          fi
+
+  build-mails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install yarn
+        run: npm install -g yarn
+      - name: Install node dependencies
+        run: yarn install --frozen-lockfile
+      - name: Build mails
+        run: yarn build
+
+  build-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Generate a version.json file describing app release
+        run: |
+          printf '{"commit":"${{ github.sha }}","version":"${{ github.ref }}","source":"https://github.com/${{ github.repository_owner }}/${{ github.repository }}","build":"${{ github.run_id }}"}\n' > src/backend/people/version.json
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build production image
+        run: docker build -t people:${{ github.sha }} --target production .
+      - name: Check built image availability
+        run: docker images "people:${{ github.sha }}*"
+
+  build-back:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+      - name: Install development dependencies
+        run: pip install --user .[dev]
+        working-directory: src/backend
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.local
+          key: v1-back-dependencies-${{ hashFiles('src/backend/requirements.txt') }}
+          restore-keys: |
+            v1-back-dependencies-
+      - name: Check code formatting with ruff
+        run: ~/.local/bin/ruff format people --diff
+      - name: Lint code with ruff
+        run: ~/.local/bin/ruff check people
+      - name: Lint code with pylint
+        run: ~/.local/bin/pylint people
+
+  test-back:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: test_people
+          POSTGRES_USER: dinum
+          POSTGRES_PASSWORD: pass
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install --user -r src/backend/requirements.txt
+      - name: Create writable /data
+        run: |
+          sudo mkdir -p /data/media && \
+          sudo mkdir -p /data/static && \
+          sudo chown -R $USER:$USER /data
+      - name: Install gettext (required to compile messages)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext
+      - name: Generate a MO file from strings extracted from the project
+        run: python manage.py compilemessages
+      - name: Run tests
+        run: ~/.local/bin/pytest -n 2
+
+  build-back-i18n:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Attach workspace
+        uses: actions/checkout@v2
+        with:
+          path: ~/people
+      - name: Install Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+      - name: Install gettext (required to make messages)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext
+      - name: Generate and persist the translations base file
+        run: ~/.local/bin/django-admin makemessages --keep-pot --all
+      - name: Persist translations to workspace
+        uses: actions/upload-artifact@v2
+        with:
+          name: translations
+          path: src/backend/locale
+
+  upload-i18n-strings:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Attach workspace
+        uses: actions/checkout@v2
+        with:
+          path: ~/people
+      - name: Upload files to Crowdin
+        run: crowdin upload sources -c crowdin/config.yml
+
+  package-back:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+      - name: Build python package
+        run: python setup.py sdist bdist_wheel
+      - name: Persist build packages to workspace
+        uses: actions/upload-artifact@v2
+        with:
+          name: packages
+          path: src/backend/dist
+      - name: Store packages as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: packages
+          path: src/backend/dist
+
+  hub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Generate a version.json file describing app release
+        run: |
+          printf '{"commit":"${{ github.sha }}","version":"${{ github.ref }}","source":"https://github.com/${{ github.repository_owner }}/${{ github.repository }}","build":"${{ github.run_id }}"}\n' > src/backend/people/version.json
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build production image
+        run: docker build -t people:${{ github.sha }} --target production .
+      - name: Check built images availability
+        run: docker images "people:${{ github.sha }}*"
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USER }}" --password-stdin
+      - name: Tag images
+        run: |
+          DOCKER_TAG=$([[ -z "${{ github.event.ref }}" ]] && echo "${{ github.event.ref }}" || echo "${{ github.event.ref }}" | sed 's/^v//')
+          RELEASE_TYPE=$([[ -z "${{ github.event.ref }}" ]] && echo "branch" || echo "tag ")
+          echo "DOCKER_TAG: ${DOCKER_TAG} (Git ${RELEASE_TYPE}${{ github.event.ref }})"
+          docker tag people:${{ github.sha }} numerique-gouv/people:${DOCKER_TAG}
+          if [[ -n "${{ github.event.ref }}" ]]; then
+            docker tag people:${{ github.sha }} numerique-gouv/people:latest
+          fi
+          docker images | grep -E "^numerique-gouv/people\s*(${DOCKER_TAG}.*|latest|main)"
+      - name: Publish images
+        run: |
+          DOCKER_TAG=$([[ -z "${{ github.event.ref }}" ]] && echo "${{ github.event.ref }}" || echo "${{ github.event.ref }}" | sed 's/^v//')
+          RELEASE_TYPE=$([[ -z "${{ github.event.ref }}" ]] && echo "branch" || echo "tag ")
+          echo "DOCKER_TAG: ${DOCKER_TAG} (Git ${RELEASE_TYPE}${{ github.event.ref }})"
+          docker push numerique-gouv/people:${DOCKER_TAG}
+          if [[ -n "${{ github.event.ref }}" ]]; then
+            docker push numerique-gouv/people:latest
+          fi
