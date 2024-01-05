@@ -217,14 +217,12 @@ crowdin-upload: ## Upload source translations to crowdin
 
 i18n-compile: ## compile all translations
 i18n-compile: \
-	back-i18n-compile \
-	admin-i18n-compile
+	back-i18n-compile
 .PHONY: i18n-compile
 
 i18n-generate: ## create the .pot files and extract frontend messages
 i18n-generate: \
-	back-i18n-generate \
-	admin-i18n-extract
+	back-i18n-generate
 .PHONY: i18n-generate
 
 i18n-download-and-compile: ## download all translated messages and compile them to be used by all applications

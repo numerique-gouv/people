@@ -4,26 +4,33 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
   pull_request:
     branches:
-      - main
+      - '*'
 
 jobs:
   lint-git:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' # Makes sense only for pull requests
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+            fetch-depth: 0
+      - name: show
+        run: git log
       - name: Enforce absence of print statements in code
         run: |
-          ! git diff origin/main..HEAD -- . ':(exclude).circleci' | grep "print("
+          ! git diff origin/${{ github.event.pull_request.base.ref }}..HEAD -- . ':(exclude)**/people.yml' | grep "print("
       - name: Check absence of fixup commits
         run: |
           ! git log | grep 'fixup!'
       - name: Install gitlint
         run: pip install --user requests gitlint
       - name: Lint commit messages added to main
-        run: ~/.local/bin/gitlint --commits origin/main..HEAD
+        run: ~/.local/bin/gitlint --commits origin/${{ github.event.pull_request.base.ref }}..HEAD
 
   check-changelog:
     runs-on: ubuntu-latest
@@ -48,6 +55,9 @@ jobs:
 
   build-mails:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/mail
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -77,8 +87,11 @@ jobs:
       - name: Check built image availability
         run: docker images "people:${{ github.sha }}*"
 
-  build-back:
+  lint-back:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -88,14 +101,6 @@ jobs:
           python-version: '3.10'
       - name: Install development dependencies
         run: pip install --user .[dev]
-        working-directory: src/backend
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.local
-          key: v1-back-dependencies-${{ hashFiles('src/backend/requirements.txt') }}
-          restore-keys: |
-            v1-back-dependencies-
       - name: Check code formatting with ruff
         run: ~/.local/bin/ruff format people --diff
       - name: Lint code with ruff
@@ -105,27 +110,46 @@ jobs:
 
   test-back:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend
+
     services:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: test_people
+          POSTGRES_DB: people
           POSTGRES_USER: dinum
           POSTGRES_PASSWORD: pass
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      DJANGO_CONFIGURATION: Test
+      DJANGO_SETTINGS_MODULE: people.settings
+      DJANGO_SECRET_KEY: ThisIsAnExampleKeyForTestPurposeOnly
+      DJANGO_JWT_PRIVATE_SIGNING_KEY: ThisIsAnExampleKeyForDevPurposeOnly
+      DB_HOST: localhost
+      DB_NAME: people
+      DB_USER: dinum
+      DB_PASSWORD: pass
+      DB_PORT: 5432
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Create writable /data
+        run: |
+          sudo mkdir -p /data/media && \
+          sudo mkdir -p /data/static
       - name: Install Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.10'
-      - name: Install dependencies
-        run: pip install --user -r src/backend/requirements.txt
-      - name: Create writable /data
-        run: |
-          sudo mkdir -p /data/media && \
-          sudo mkdir -p /data/static && \
-          sudo chown -R $USER:$USER /data
+      - name: Install development dependencies
+        run: pip install --user .[dev]
       - name: Install gettext (required to compile messages)
         run: |
           sudo apt-get update
@@ -135,67 +159,38 @@ jobs:
       - name: Run tests
         run: ~/.local/bin/pytest -n 2
 
-  build-back-i18n:
+  i18n-back:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Attach workspace
-        uses: actions/checkout@v2
-        with:
-          path: ~/people
-      - name: Install Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.10'
       - name: Install gettext (required to make messages)
         run: |
           sudo apt-get update
           sudo apt-get install -y gettext
-      - name: Generate and persist the translations base file
-        run: ~/.local/bin/django-admin makemessages --keep-pot --all
-      - name: Persist translations to workspace
-        uses: actions/upload-artifact@v2
-        with:
-          name: translations
-          path: src/backend/locale
-
-  upload-i18n-strings:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Attach workspace
-        uses: actions/checkout@v2
-        with:
-          path: ~/people
-      - name: Upload files to Crowdin
-        run: crowdin upload sources -c crowdin/config.yml
-
-  package-back:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
       - name: Install Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.10'
-      - name: Build python package
-        run: python setup.py sdist bdist_wheel
-      - name: Persist build packages to workspace
-        uses: actions/upload-artifact@v2
-        with:
-          name: packages
-          path: src/backend/dist
-      - name: Store packages as artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: packages
-          path: src/backend/dist
+      - name: Install development dependencies
+        working-directory: src/backend
+        run: pip install --user .[dev]
+      - name: Generate the translation base file
+        run: ~/.local/bin/django-admin makemessages --keep-pot --all
+      - name: Upload files to Crowdin
+        run: |
+          docker run \
+          --rm \
+          -e CROWDIN_API_TOKEN=${{ secrets.CROWDIN_API_TOKEN }} \
+          -e CROWDIN_PROJECT_ID=${{ vars.CROWDIN_PROJECT_ID }} \
+          -e CROWDIN_BASE_PATH=${{ vars.CROWDIN_BASE_PATH }} \
+          -v "${{ github.workspace }}:/app" \
+          crowdin/cli:3.16.0 \
+          crowdin upload sources -c /app/crowdin/config.yml
 
   hub:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
