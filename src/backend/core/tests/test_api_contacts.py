@@ -1,14 +1,10 @@
 """
 Test contacts API endpoints in People's core app.
 """
-import random
-from unittest import mock
-
 from django.test.utils import override_settings
 
 import pytest
 from rest_framework.test import APIClient
-from rest_framework_simplejwt.tokens import AccessToken
 
 from core import factories, models
 from core.api import serializers
@@ -120,7 +116,7 @@ def test_api_contacts_list_authenticated_by_full_name():
     dave = factories.BaseContactFactory(full_name="David Bowman")
     nicole = factories.BaseContactFactory(full_name="Nicole Foole")
     frank = factories.BaseContactFactory(full_name="Frank Poole")
-    heywood = factories.BaseContactFactory(full_name="Heywood Floyd")
+    factories.BaseContactFactory(full_name="Heywood Floyd")
 
     # Full query should work
     response = APIClient().get(
@@ -433,7 +429,7 @@ def test_api_contacts_create_authenticated_existing_override():
     jwt_token = OIDCToken.for_user(user)
 
     base_contact = factories.BaseContactFactory()
-    contact = factories.ContactFactory(base=base_contact, owner=user)
+    factories.ContactFactory(base=base_contact, owner=user)
 
     response = APIClient().post(
         "/api/v1.0/contacts/",

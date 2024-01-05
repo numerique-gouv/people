@@ -1,16 +1,13 @@
 """Authentication for the People core app."""
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.utils.functional import SimpleLazyObject
 from django.utils.module_loading import import_string
-from django.utils.translation import get_supported_language_variant
 from django.utils.translation import gettext_lazy as _
 
 from drf_spectacular.authentication import SessionScheme, TokenScheme
 from drf_spectacular.plumbing import build_bearer_security_scheme_object
 from rest_framework import authentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.exceptions import InvalidToken
 
 
 class DelegatedJWTAuthentication(JWTAuthentication):

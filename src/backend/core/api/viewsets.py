@@ -1,30 +1,24 @@
 """API endpoints"""
-import io
-import uuid
-from http import HTTPStatus
-
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
 from django.db.models import (
-    CharField,
-    Count,
-    F,
     Func,
     OuterRef,
-    Prefetch,
     Q,
     Subquery,
-    TextField,
     Value,
-    functions,
 )
 
-from rest_framework import decorators, mixins, pagination, response, viewsets
-from rest_framework import permissions as drf_permissions
-from rest_framework.exceptions import ValidationError as DRFValidationError
+from rest_framework import (
+    decorators,
+    exceptions,
+    mixins,
+    pagination,
+    response,
+    viewsets,
+)
 
-from core import enums, models
+from core import models
 
 from . import permissions, serializers
 
@@ -109,6 +103,7 @@ class Pagination(pagination.PageNumberPagination):
     page_size_query_param = "page_size"
 
 
+# pylint: disable=too-many-ancestors
 class ContactViewSet(
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
@@ -159,7 +154,6 @@ class ContactViewSet(
         key_base = f"throttle-contact-list-{user.id!s}"
         key_minute = f"{key_base:s}-minute"
         key_hour = f"{key_base:s}-hour"
-        key_day = f"{key_base:s}-day"
 
         try:
             count_minute = cache.incr(key_minute)
@@ -173,14 +167,8 @@ class ContactViewSet(
             cache.set(key_hour, 1, 3600)
             count_hour = 1
 
-        try:
-            count_day = cache.incr(key_day)
-        except ValueError:
-            cache.set(key_day, 1, 86400)
-            count_day = 1
-
-        if count_minute > 20 or count_hour > 150 or count_day > 500:
-            raise drf_exceptions.Throttled()
+        if count_minute > 20 or count_hour > 150:
+            raise exceptions.Throttled()
 
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
@@ -333,7 +321,7 @@ class TeamAccessViewSet(
 
         # Check if the access being deleted is the last owner access for the team
         if instance.role == "owner" and team.accesses.filter(role="owner").count() == 1:
-            return Response(
+            return response.Response(
                 {"detail": "Cannot delete the last owner access for the team."},
                 status=400,
             )
@@ -355,10 +343,7 @@ class TeamAccessViewSet(
                 instance.role == models.RoleChoices.OWNER
                 and team.accesses.filter(role=models.RoleChoices.OWNER).count() == 1
             ):
-                raise serializers.ValidationError(
-                    {
-                        "role": "Cannot change the role to a non-owner role for the last owner access."
-                    }
-                )
+                message = "Cannot change the role to a non-owner role for the last owner access."
+                raise exceptions.ValidationError({"role": message})
 
         serializer.save()

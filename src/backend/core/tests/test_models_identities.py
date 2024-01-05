@@ -37,7 +37,7 @@ def test_models_identities_is_main_automatic():
 def test_models_identities_is_main_exists():
     """A user should always keep one and only one of its identities as main."""
     user = factories.UserFactory()
-    main_identity, secondary_identity = factories.IdentityFactory.create_batch(
+    main_identity, _secondary_identity = factories.IdentityFactory.create_batch(
         2, user=user
     )
 
@@ -127,8 +127,8 @@ def test_models_identities_sub_null():
         models.Identity.objects.create(user=user, sub=None)
 
 
-def test_models_identities_sub_null():
-    """The "sub" field should not be null."""
+def test_models_identities_sub_blank():
+    """The "sub" field should not be blank."""
     user = factories.UserFactory()
     with pytest.raises(ValidationError, match="This field cannot be blank."):
         models.Identity.objects.create(user=user, email="david@example.com", sub="")
@@ -165,9 +165,9 @@ def test_models_identities_sub_spaces():
     with pytest.raises(ValidationError) as excinfo:
         factories.IdentityFactory(sub="a b")
 
-    assert (
-        str(excinfo.value)
-        == "{'sub': ['Enter a valid sub. This value may contain only letters, numbers, and @/./+/-/_ characters.']}"
+    assert str(excinfo.value) == (
+        "{'sub': ['Enter a valid sub. This value may contain only letters, numbers, "
+        "and @/./+/-/_ characters.']}"
     )
 
 

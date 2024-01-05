@@ -1,12 +1,6 @@
 """
 Test users API endpoints in the People core app.
 """
-import random
-from unittest import mock
-from zoneinfo import ZoneInfo
-
-from django.test.utils import override_settings
-
 import pytest
 from rest_framework.test import APIClient
 
@@ -151,6 +145,8 @@ def test_api_users_create_authenticated():
             "language": "fr-fr",
             "password": "mypassword",
         },
+        format="json",
+        HTTP_AUTHORIZATION=f"Bearer {jwt_token}",
     )
     assert response.status_code == 404
     assert "Not Found" in response.content.decode("utf-8")
@@ -161,7 +157,7 @@ def test_api_users_update_anonymous():
     """Anonymous users should not be able to update users via the API."""
     user = factories.UserFactory()
 
-    old_user_values = serializers.UserSerializer(instance=user).data
+    old_user_values = dict(serializers.UserSerializer(instance=user).data)
     new_user_values = serializers.UserSerializer(instance=factories.UserFactory()).data
 
     response = APIClient().put(
@@ -176,21 +172,24 @@ def test_api_users_update_anonymous():
     }
 
     user.refresh_from_db()
-    user_values = serializers.UserSerializer(instance=user).data
+    user_values = dict(serializers.UserSerializer(instance=user).data)
     for key, value in user_values.items():
         assert value == old_user_values[key]
 
 
 def test_api_users_update_authenticated_self():
     """
-    Authenticated users should be able to update their own user but only "language" and "timezone" fields.
+    Authenticated users should be able to update their own user but only "language"
+    and "timezone" fields.
     """
     identity = factories.IdentityFactory()
     user = identity.user
     jwt_token = OIDCToken.for_user(user)
 
-    old_user_values = serializers.UserSerializer(instance=user).data
-    new_user_values = serializers.UserSerializer(instance=factories.UserFactory()).data
+    old_user_values = dict(serializers.UserSerializer(instance=user).data)
+    new_user_values = dict(
+        serializers.UserSerializer(instance=factories.UserFactory()).data
+    )
 
     response = APIClient().put(
         f"/api/v1.0/users/{user.id!s}/",
@@ -201,7 +200,7 @@ def test_api_users_update_authenticated_self():
 
     assert response.status_code == 200
     user.refresh_from_db()
-    user_values = serializers.UserSerializer(instance=user).data
+    user_values = dict(serializers.UserSerializer(instance=user).data)
     for key, value in user_values.items():
         if key in ["language", "timezone"]:
             assert value == new_user_values[key]
@@ -215,7 +214,7 @@ def test_api_users_update_authenticated_other():
     jwt_token = OIDCToken.for_user(identity.user)
 
     user = factories.UserFactory()
-    old_user_values = serializers.UserSerializer(instance=user).data
+    old_user_values = dict(serializers.UserSerializer(instance=user).data)
     new_user_values = serializers.UserSerializer(instance=factories.UserFactory()).data
 
     response = APIClient().put(
@@ -227,7 +226,7 @@ def test_api_users_update_authenticated_other():
 
     assert response.status_code == 403
     user.refresh_from_db()
-    user_values = serializers.UserSerializer(instance=user).data
+    user_values = dict(serializers.UserSerializer(instance=user).data)
     for key, value in user_values.items():
         assert value == old_user_values[key]
 
@@ -236,8 +235,10 @@ def test_api_users_patch_anonymous():
     """Anonymous users should not be able to patch users via the API."""
     user = factories.UserFactory()
 
-    old_user_values = serializers.UserSerializer(instance=user).data
-    new_user_values = serializers.UserSerializer(instance=factories.UserFactory()).data
+    old_user_values = dict(serializers.UserSerializer(instance=user).data)
+    new_user_values = dict(
+        serializers.UserSerializer(instance=factories.UserFactory()).data
+    )
 
     for key, new_value in new_user_values.items():
         response = APIClient().patch(
@@ -251,21 +252,24 @@ def test_api_users_patch_anonymous():
         }
 
     user.refresh_from_db()
-    user_values = serializers.UserSerializer(instance=user).data
+    user_values = dict(serializers.UserSerializer(instance=user).data)
     for key, value in user_values.items():
         assert value == old_user_values[key]
 
 
 def test_api_users_patch_authenticated_self():
     """
-    Authenticated users should be able to patch their own user but only "language" and "timezone" fields.
+    Authenticated users should be able to patch their own user but only "language"
+    and "timezone" fields.
     """
     identity = factories.IdentityFactory()
     user = identity.user
     jwt_token = OIDCToken.for_user(user)
 
-    old_user_values = serializers.UserSerializer(instance=user).data
-    new_user_values = serializers.UserSerializer(instance=factories.UserFactory()).data
+    old_user_values = dict(serializers.UserSerializer(instance=user).data)
+    new_user_values = dict(
+        serializers.UserSerializer(instance=factories.UserFactory()).data
+    )
 
     for key, new_value in new_user_values.items():
         response = APIClient().patch(
@@ -277,7 +281,7 @@ def test_api_users_patch_authenticated_self():
         assert response.status_code == 200
 
     user.refresh_from_db()
-    user_values = serializers.UserSerializer(instance=user).data
+    user_values = dict(serializers.UserSerializer(instance=user).data)
     for key, value in user_values.items():
         if key in ["language", "timezone"]:
             assert value == new_user_values[key]
@@ -291,8 +295,10 @@ def test_api_users_patch_authenticated_other():
     jwt_token = OIDCToken.for_user(identity.user)
 
     user = factories.UserFactory()
-    old_user_values = serializers.UserSerializer(instance=user).data
-    new_user_values = serializers.UserSerializer(instance=factories.UserFactory()).data
+    old_user_values = dict(serializers.UserSerializer(instance=user).data)
+    new_user_values = dict(
+        serializers.UserSerializer(instance=factories.UserFactory()).data
+    )
 
     for key, new_value in new_user_values.items():
         response = APIClient().put(
@@ -304,7 +310,7 @@ def test_api_users_patch_authenticated_other():
         assert response.status_code == 403
 
     user.refresh_from_db()
-    user_values = serializers.UserSerializer(instance=user).data
+    user_values = dict(serializers.UserSerializer(instance=user).data)
     for key, value in user_values.items():
         assert value == old_user_values[key]
 

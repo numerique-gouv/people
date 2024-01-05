@@ -27,13 +27,12 @@ do
 done
 
 if [[ -n "${diff_from}" ]]; then
-    # Run pylint only on modified files located in src/backend/joanie
+    # Run pylint only on modified files located in src/backend
     # (excluding deleted files and migration files)
     # shellcheck disable=SC2207
-    paths=($(git diff "${diff_from}" --name-only --diff-filter=d -- src/backend/joanie ':!**/migrations/*.py' | grep -E '^src/backend/joanie/.*\.py$'))
+    paths=($(git diff "${diff_from}" --name-only --diff-filter=d -- src/backend ':!**/migrations/*.py' | grep -E '^src/backend/.*\.py$'))
 fi
 
 # Fix docker vs local path when project sources are mounted as a volume
 read -ra paths <<< "$(echo "${paths[@]}" | sed "s|src/backend/||g")"
-
 _dc_run app-dev pylint "${paths[@]}" "${args[@]}"

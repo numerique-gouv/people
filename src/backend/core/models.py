@@ -4,30 +4,23 @@ Declare and configure the models for the People core application
 import json
 import os
 import uuid
-from datetime import timedelta
-from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.contrib.auth import models as auth_models
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.postgres.fields import ArrayField
-from django.contrib.postgres.indexes import GinIndex
 from django.core import exceptions, mail, validators
 from django.db import models
-from django.db.models import F, Q
-from django.utils import timezone as timezone_util
 from django.utils.functional import lazy
-from django.utils.text import capfirst, slugify
 from django.utils.translation import gettext_lazy as _
 
 import jsonschema
-from dateutil.relativedelta import relativedelta
+from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework_simplejwt.settings import api_settings
 from timezone_field import TimeZoneField
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 contact_schema_path = os.path.join(current_dir, "jsonschema", "contact_data.json")
-with open(contact_schema_path, "r") as contact_schema_file:
+with open(contact_schema_path, "r", encoding="utf-8") as contact_schema_file:
     contact_schema = json.load(contact_schema_file)
 
 
@@ -43,7 +36,7 @@ class BaseModel(models.Model):
     """
     Serves as an abstract base model for other models, ensuring that records are validated
     before saving as Django doesn't do it by default.
-    
+
     Includes fields common to all models: a UUID primary key and creation/update timestamps.
     """
 
@@ -140,7 +133,7 @@ class Contact(BaseModel):
         # Check if the contact points to a base contact that itself points to another base contact
         if self.base_id and self.base.base_id:
             raise exceptions.ValidationError(
-                "A contact cannot point to a base contact that itself points to another base contact."
+                "A contact cannot point to a base contact that itself points to a base contact."
             )
 
         # Validate the content of the "data" field against our jsonschema definition
@@ -159,6 +152,7 @@ class UserManager(auth_models.UserManager):
     """
 
     def get_queryset(self):
+        """Always select the related contact when doing a query on users."""
         return super().get_queryset().select_related("profile_contact")
 
 
@@ -467,8 +461,8 @@ def oidc_user_getter(validated_token):
             **{api_settings.USER_ID_FIELD: user_id}, profile_contact=contact
         )
 
-    # If the identity in the token is seen for the first time, make it the main email. Otherwise, update the
-    # email and respect the main identity set by the user
+    # If the identity in the token is seen for the first time, make it the main email.
+    # Otherwise, update the email and respect the main identity set by the user
     if email := validated_token["email"]:
         Identity.objects.update_or_create(
             user=user, email=email, create_defaults={"is_main": True}

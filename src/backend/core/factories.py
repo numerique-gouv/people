@@ -2,19 +2,13 @@
 """
 Core application factories
 """
-import hashlib
-import json
-import random
-from datetime import datetime, timedelta, timezone
-
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
-from django.utils import timezone as django_timezone
 
 import factory.fuzzy
 from faker import Faker
 
-from core import enums, models
+from core import models
 
 fake = Faker()
 
