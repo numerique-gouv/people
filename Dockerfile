@@ -144,7 +144,7 @@ USER ${DOCKER_USER}
 COPY --from=link-collector ${PEOPLE_STATIC_ROOT} ${PEOPLE_STATIC_ROOT}
 
 # Copy people mails
-COPY --from=mail-builder /mail/backend/people/core/templates/mail /app/people/core/templates/mail
+COPY --from=mail-builder /mail/backend/core/templates/mail /app/core/templates/mail
 
 # The default command runs gunicorn WSGI server in people's main module
 CMD gunicorn -c /usr/local/etc/gunicorn/people.py people.wsgi:application

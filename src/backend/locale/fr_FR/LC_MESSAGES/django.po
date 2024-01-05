@@ -1,0 +1,191 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: lasuite-people\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-03 23:15+0000\n"
+"PO-Revision-Date: 2024-01-03 23:15\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Crowdin-Project: lasuite-people\n"
+"X-Crowdin-Project-ID: 637934\n"
+"X-Crowdin-Language: fr\n"
+"X-Crowdin-File: backend.pot\n"
+"X-Crowdin-File-ID: 2\n"
+
+#: core/models.py:30
+msgid "Member"
+msgstr ""
+
+#: core/models.py:31
+msgid "Administrator"
+msgstr ""
+
+#: core/models.py:32
+msgid "Owner"
+msgstr ""
+
+#: core/models.py:44
+msgid "id"
+msgstr ""
+
+#: core/models.py:45
+msgid "primary key for the record as UUID"
+msgstr ""
+
+#: core/models.py:51
+msgid "created on"
+msgstr ""
+
+#: core/models.py:52
+msgid "date and time at which a record was created"
+msgstr ""
+
+#: core/models.py:57
+msgid "updated on"
+msgstr ""
+
+#: core/models.py:58
+msgid "date and time at which a record was last updated"
+msgstr ""
+
+#: core/models.py:89
+msgid "full name"
+msgstr ""
+
+#: core/models.py:90
+msgid "short name"
+msgstr ""
+
+#: core/models.py:95
+msgid "contact information"
+msgstr ""
+
+#: core/models.py:96
+msgid "A JSON object containing the contact information"
+msgstr ""
+
+#: core/models.py:110
+msgid "contact"
+msgstr ""
+
+#: core/models.py:111
+msgid "contacts"
+msgstr ""
+
+#: core/models.py:173
+msgid "language"
+msgstr ""
+
+#: core/models.py:174
+msgid "The language in which the user wants to see the interface."
+msgstr ""
+
+#: core/models.py:180
+msgid "The timezone in which the user wants to see times."
+msgstr ""
+
+#: core/models.py:183
+msgid "device"
+msgstr ""
+
+#: core/models.py:185
+msgid "Whether the user is a device or a real user."
+msgstr ""
+
+#: core/models.py:188
+msgid "staff status"
+msgstr ""
+
+#: core/models.py:190
+msgid "Whether the user can log into this admin site."
+msgstr ""
+
+#: core/models.py:193
+msgid "active"
+msgstr ""
+
+#: core/models.py:196
+msgid "Whether this user should be treated as active. Unselect this instead of deleting accounts."
+msgstr ""
+
+#: core/models.py:208
+msgid "user"
+msgstr ""
+
+#: core/models.py:209
+msgid "users"
+msgstr ""
+
+#: core/models.py:245
+msgid "Enter a valid sub. This value may contain only letters, numbers, and @/./+/-/_ characters."
+msgstr ""
+
+#: core/models.py:252
+msgid "sub"
+msgstr ""
+
+#: core/models.py:254
+msgid "Required. 255 characters or fewer. Letters, numbers, and @/./+/-/_ characters only."
+msgstr ""
+
+#: core/models.py:260
+msgid "email address"
+msgstr ""
+
+#: core/models.py:262
+msgid "main"
+msgstr ""
+
+#: core/models.py:264
+msgid "Designates whether the email is the main one."
+msgstr ""
+
+#: core/models.py:270
+msgid "identity"
+msgstr ""
+
+#: core/models.py:271
+msgid "identities"
+msgstr ""
+
+#: core/models.py:278
+msgid "This email address is already declared for this user."
+msgstr ""
+
+#: core/models.py:323
+msgid "Team"
+msgstr ""
+
+#: core/models.py:324
+msgid "Teams"
+msgstr ""
+
+#: core/models.py:375
+msgid "Team/user relation"
+msgstr ""
+
+#: core/models.py:376
+msgid "Team/user relations"
+msgstr ""
+
+#: core/models.py:381
+msgid "This user is already in this team."
+msgstr ""
+
+#: core/models.py:451
+msgid "Token contained no recognizable user identification"
+msgstr ""
+
+#: people/settings.py:132
+msgid "English"
+msgstr ""
+
+#: people/settings.py:133
+msgid "French"
+msgstr ""
+

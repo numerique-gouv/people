@@ -14,10 +14,28 @@ pytestmark = pytest.mark.django_db
 
 def test_openapi_client_schema():
     """
-    Generated OpenAPI client schema should be correct.
+    Generated and served OpenAPI client schema should be correct.
     """
+    # Start by generating the swagger.json file
+    output = StringIO()
+    call_command(
+        "spectacular",
+        "--api-version",
+        "v1.0",
+        "--urlconf",
+        "people.api_urls",
+        "--format",
+        "openapi-json",
+        "--file",
+        "core/tests/swagger/swagger.json",
+        stdout=output,
+    )
+    assert output.getvalue() == ""
+
     response = Client().get("/v1.0/swagger.json")
 
     assert response.status_code == 200
-    with open("core/tests/swagger/swagger.json") as expected_schema:
+    with open(
+        "core/tests/swagger/swagger.json", "r", encoding="utf-8"
+    ) as expected_schema:
         assert response.json() == json.load(expected_schema)
