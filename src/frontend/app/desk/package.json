@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build-theme": "cunningham -g css,ts -o src/cunningham --utility-classes",
     "start": "next start",
     "lint": "next lint",
     "prettier": "prettier --write ."
   },
   "dependencies": {
+    "@openfun/cunningham-react": "2.4.0",
     "next": "14.0.4",
     "react": "18",
     "react-dom": "18"
