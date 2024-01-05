@@ -105,11 +105,11 @@ jobs:
       - name: Install development dependencies
         run: pip install --user .[dev]
       - name: Check code formatting with ruff
-        run: ~/.local/bin/ruff format people --diff
+        run: ~/.local/bin/ruff format . --diff
       - name: Lint code with ruff
-        run: ~/.local/bin/ruff check people
+        run: ~/.local/bin/ruff check .
       - name: Lint code with pylint
-        run: ~/.local/bin/pylint people
+        run: ~/.local/bin/pylint .
 
   test-back:
     runs-on: ubuntu-latest
