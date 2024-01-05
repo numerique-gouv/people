@@ -1,10 +1,6 @@
 """
 Utils that can be useful throughout the People core app
 """
-from django.conf import settings
-from django.utils import timezone
-
-import jwt
 from rest_framework_simplejwt.tokens import RefreshToken
 
 

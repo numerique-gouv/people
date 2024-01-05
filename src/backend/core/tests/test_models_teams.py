@@ -41,7 +41,7 @@ def test_models_teams_name_max_length():
     factories.TeamFactory(name="a " * 50)
     with pytest.raises(
         ValidationError,
-        match="Ensure this value has at most 100 characters \(it has 102\).",
+        match=r"Ensure this value has at most 100 characters \(it has 102\)\.",
     ):
         factories.TeamFactory(name="a " * 51)
 

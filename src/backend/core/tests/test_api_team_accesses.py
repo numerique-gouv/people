@@ -6,7 +6,6 @@ from uuid import uuid4
 
 import pytest
 from rest_framework.test import APIClient
-from rest_framework_simplejwt.tokens import AccessToken
 
 from core import factories, models
 from core.api import serializers
@@ -38,7 +37,7 @@ def test_api_team_accesses_list_authenticated_unrelated():
     jwt_token = OIDCToken.for_user(user)
 
     team = factories.TeamFactory()
-    accesses = factories.TeamAccessFactory.create_batch(3, team=team)
+    factories.TeamAccessFactory.create_batch(3, team=team)
 
     # Accesses for other teams to which the user is related should not be listed either
     other_access = factories.TeamAccessFactory(user=user)
@@ -82,8 +81,7 @@ def test_api_team_accesses_list_authenticated_related():
     assert response.status_code == 200
     content = response.json()
     assert len(content["results"]) == 3
-    id_sorter = lambda x: x["id"]
-    assert sorted(content["results"], key=id_sorter) == sorted(
+    assert sorted(content["results"], key=lambda x: x["id"]) == sorted(
         [
             {
                 "id": str(user_access.id),
@@ -104,7 +102,7 @@ def test_api_team_accesses_list_authenticated_related():
                 "abilities": access2.get_abilities(user),
             },
         ],
-        key=id_sorter,
+        key=lambda x: x["id"],
     )
 
 
@@ -576,7 +574,7 @@ def test_api_team_accesses_update_owner_except_owner():
     jwt_token = OIDCToken.for_user(user)
 
     team = factories.TeamFactory(users=[(user, "owner")])
-    other_user = factories.UserFactory()
+    factories.UserFactory()
     access = factories.TeamAccessFactory(
         team=team,
         role=random.choice(["administrator", "member"]),

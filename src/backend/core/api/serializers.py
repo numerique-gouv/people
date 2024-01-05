@@ -1,5 +1,4 @@
 """Client serializers for the People core app."""
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import exceptions, serializers
 from timezone_field.rest_framework import TimeZoneSerializerField
 

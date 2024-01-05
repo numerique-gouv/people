@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 import pytest
 
-from core import factories, models
+from core import factories
 
 pytestmark = pytest.mark.django_db
 
@@ -31,7 +31,7 @@ def test_models_contacts_base_self():
         contact.save()
 
     error_message = (
-        "{'__all__': ['A contact cannot point to a base contact that itself points to another "
+        "{'__all__': ['A contact cannot point to a base contact that itself points to a "
         "base contact.', 'A contact cannot be based on itself.']}"
     )
     assert str(excinfo.value) == error_message
@@ -45,7 +45,7 @@ def test_models_contacts_base_to_base():
         factories.ContactFactory(base=contact)
 
     error_message = (
-        "{'__all__': ['A contact cannot point to a base contact that itself points to another "
+        "{'__all__': ['A contact cannot point to a base contact that itself points to a "
         "base contact.']}"
     )
     assert str(excinfo.value) == error_message
@@ -103,7 +103,7 @@ def test_models_contacts_profile_owned_by_other():
 
 def test_models_contacts_data_valid():
     """Contact information matching the jsonschema definition should be valid"""
-    contact = factories.ContactFactory(
+    factories.ContactFactory(
         data={
             "emails": [
                 {"type": "Work", "value": "john.doe@work.com"},
@@ -157,7 +157,7 @@ def test_models_contacts_data_invalid():
             }
         )
 
-    assert (
-        str(excinfo.value)
-        == "{'data': [\"Validation error in 'emails.0.type': 'invalid type' is not one of ['Work', 'Home', 'Other']\"]}"
+    assert str(excinfo.value) == (
+        "{'data': [\"Validation error in 'emails.0.type': 'invalid type' is not one of ['Work', "
+        "'Home', 'Other']\"]}"
     )

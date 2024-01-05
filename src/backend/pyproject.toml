@@ -65,6 +65,8 @@ dev = [
     "ipdb==0.13.13",
     "ipython==8.18.1",
     "pyfakefs==5.3.2",
+    "pylint-django==2.5.5",
+    "pylint==3.0.3",
     "pytest-cov==4.1.0",
     "pytest-django==4.7.0",
     "pytest==7.4.3",

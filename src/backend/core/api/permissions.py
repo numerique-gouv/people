@@ -27,8 +27,8 @@ class IsSelf(IsAuthenticated):
 
 class IsOwnedOrPublic(IsAuthenticated):
     """
-    Allows access to authenticated users only for objects that are owned or not related to any user via*
-    the "owner" field.
+    Allows access to authenticated users only for objects that are owned or not related
+    to any user via the "owner" field.
     """
 
     def has_object_permission(self, request, view, obj):

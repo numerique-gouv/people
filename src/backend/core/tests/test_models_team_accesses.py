@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 import pytest
 
-from core import factories, models
+from core import factories
 
 pytestmark = pytest.mark.django_db
 
@@ -72,7 +72,9 @@ def test_models_team_access_get_abilities_authenticated():
 
 
 def test_models_team_access_get_abilities_for_owner_of_self_allowed():
-    """Check abilities of self access for the owner of a team when there is more than one user left."""
+    """
+    Check abilities of self access for the owner of a team when there is more than one user left.
+    """
     access = factories.TeamAccessFactory(role="owner")
     factories.TeamAccessFactory(team=access.team, role="owner")
     abilities = access.get_abilities(access.user)
