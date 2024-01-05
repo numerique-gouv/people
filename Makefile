@@ -51,6 +51,11 @@ MANAGE              = $(COMPOSE_RUN_APP) python manage.py
 MAIL_YARN           = $(COMPOSE_RUN) -w /app/src/mail node yarn
 TSCLIENT_YARN       = $(COMPOSE_RUN) -w /app/src/tsclient node yarn
 
+# -- Demo app superuser
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_EMAIL=django@example.com
+RANDOM_UUID=$(shell uuidgen)
+
 # ==============================================================================
 # RULES
 
@@ -73,6 +78,7 @@ bootstrap: \
 	env.d/development/postgresql \
 	build \
 	run \
+	makemigrations \
 	migrate \
 	i18n-compile \
 	mails-install \
@@ -169,7 +175,7 @@ migrate:  ## run django migrations for the people project.
 
 superuser: ## Create an admin superuser with password "admin"
 	@echo "$(BOLD)Creating a Django superuser$(RESET)"
-	@$(MANAGE) createsuperuser --username admin --email admin@example.com --no-input
+	@$(MANAGE) createsuperuser  --id $(RANDOM_UUID) --no-input
 .PHONY: superuser
 
 back-i18n-compile: ## compile the gettext files

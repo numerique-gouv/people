@@ -148,12 +148,45 @@ class Contact(BaseModel):
 
 class UserManager(auth_models.UserManager):
     """
-    Override user manager to get the related contact in the same query by default (Contact model)
+    Override user manager to 
+    - get the related contact in the same query by default (Contact model)
+    - allows for user and superuser creation without username
     """
+
+    use_in_migrations = True
+
 
     def get_queryset(self):
         """Always select the related contact when doing a query on users."""
         return super().get_queryset().select_related("profile_contact")
+
+    def _create_user(self, id, password, **extra_fields):
+        '''Create and save a user with the given id, and password. Does not use usernames.
+        '''
+        user = self.model(id=id, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, id, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        return self._create_user(id, password, **extra_fields)
+
+    def create_superuser(self, id, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError(
+                'Superuser must have is_staff=True.'
+            )
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError(
+                'Superuser must have is_superuser=True.'
+            )
+
+        return self._create_user(id, password, **extra_fields)
 
 
 class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
