@@ -272,13 +272,18 @@ jobs:
         run: pip install --user .[dev]
       - name: Generate the translation base file
         run: ~/.local/bin/django-admin makemessages --keep-pot --all
+      - name: Load sops secrets
+        uses: rouja/actions-sops@main
+        with:
+          secret-file: .github/workflows/secrets.enc.env
+          age-key: ${{ secrets.SOPS_PRIVATE }}
       - name: Upload files to Crowdin
         run: |
           docker run \
           --rm \
-          -e CROWDIN_API_TOKEN=${{ secrets.CROWDIN_API_TOKEN }} \
-          -e CROWDIN_PROJECT_ID=${{ vars.CROWDIN_PROJECT_ID }} \
-          -e CROWDIN_BASE_PATH=${{ vars.CROWDIN_BASE_PATH }} \
+          -e CROWDIN_API_TOKEN=$CROWDIN_API_TOKEN \
+          -e CROWDIN_PROJECT_ID=$CROWDIN_PROJECT_ID \
+          -e CROWDIN_BASE_PATH=$CROWDIN_BASE_PATH \
           -v "${{ github.workspace }}:/app" \
           crowdin/cli:3.16.0 \
           crowdin upload sources -c /app/crowdin/config.yml
@@ -298,8 +303,13 @@ jobs:
         run: docker build -t people:${{ github.sha }} --target production .
       - name: Check built images availability
         run: docker images "people:${{ github.sha }}*"
+      - name: Load sops secrets
+        uses: rouja/actions-sops@main
+        with:
+          secret-file: .github/workflows/secrets.enc.env
+          age-key: ${{ secrets.SOPS_PRIVATE }}
       - name: Login to DockerHub
-        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USER }}" --password-stdin
+        run: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USER" --password-stdin
       - name: Tag images
         run: |
           DOCKER_TAG=$([[ -z "${{ github.event.ref }}" ]] && echo "${{ github.event.ref }}" || echo "${{ github.event.ref }}" | sed 's/^v//')
