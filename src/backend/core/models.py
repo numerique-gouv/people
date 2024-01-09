@@ -151,9 +151,9 @@ class UserManager(auth_models.UserManager):
     Override user manager to get the related contact in the same query by default (Contact model)
     """
 
-    def get_queryset(self):
-        """Always select the related contact when doing a query on users."""
-        return super().get_queryset().select_related("profile_contact")
+    # def get_queryset(self):
+    #     """Always select the related contact when doing a query on users."""
+    #     return super().get_queryset().select_related("profile_contact")
 
 
 class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
@@ -173,6 +173,7 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
         verbose_name=_("language"),
         help_text=_("The language in which the user wants to see the interface."),
     )
+    jwt_sub = models.CharField(_("OIDC subject"), max_length=255, blank=True, null=True)
     timezone = TimeZoneField(
         choices_display="WITH_GMT_OFFSET",
         use_pytz=False,

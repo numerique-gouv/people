@@ -18,6 +18,8 @@ import sentry_sdk
 from configurations import Configuration, values
 from sentry_sdk.integrations.django import DjangoIntegration
 
+from core.settings.mixins import PeopleCoreConfigurationMixin
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join("/", "data")
@@ -42,7 +44,7 @@ def get_release():
         return "NA"  # Default: not available
 
 
-class Base(Configuration):
+class Base(PeopleCoreConfigurationMixin, Configuration):
     """
     This is the base configuration every configuration (aka environnement) should inherit from. It
     is recommended to configure third-party applications by creating a configuration mixins in
@@ -209,8 +211,10 @@ class Base(Configuration):
     }
 
     REST_FRAMEWORK = {
-        "DEFAULT_AUTHENTICATION_CLASSES": (
-            "core.authentication.DelegatedJWTAuthentication",
+        "DEFAULT_AUTHENTICATION_CLASSES": values.ListValue(
+            ["rest_framework_simplejwt.authentication.JWTAuthentication"],
+            environ_name="DRF_DEFAULT_AUTHENTICATION_CLASSES",
+            environ_prefix=None,
         ),
         "DEFAULT_PARSER_CLASSES": [
             "rest_framework.parsers.JSONParser",
@@ -239,17 +243,38 @@ class Base(Configuration):
         "REDOC_DIST": "SIDECAR",
     }
 
+    # Simple JWT
     SIMPLE_JWT = {
-        "ALGORITHM": values.Value("HS256", environ_name="JWT_ALGORITHM"),
-        "SIGNING_KEY": values.SecretValue(
-            environ_name="JWT_PRIVATE_SIGNING_KEY",
+        "ALGORITHM": values.Value(
+            "HS256", environ_name="SIMPLE_JWT_ALGORITHM", environ_prefix=None
+        ),
+        "JWK_URL": values.Value(
+            None, environ_name="SIMPLE_JWT_JWK_URL", environ_prefix=None
+        ),
+        "SIGNING_KEY": values.Value(
+            None, environ_name="SIMPLE_JWT_SIGNING_KEY", environ_prefix=None
+        ),
+        "VERIFYING_KEY": values.Value(
+            None, environ_name="SIMPLE_JWT_VERIFYING_KEY", environ_prefix=None
         ),
         "AUTH_HEADER_TYPES": ("Bearer",),
         "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
-        "USER_ID_FIELD": "id",
+        "TOKEN_TYPE_CLAIM": "typ",
+        "USER_ID_FIELD": "jwt_sub",
         "USER_ID_CLAIM": "sub",
-        "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+        "AUTH_TOKEN_CLASSES": ("core.tokens.BearerToken",),
     }
+
+    JWT_USER_FIELDS_SYNC = values.DictValue(
+        {
+            # "email": "email",
+            # "name": "name",
+            # "username": "preferred_username",
+        },
+        environ_name="JWT_USER_FIELDS_SYNC",
+        environ_prefix=None,
+    )
+
     JWT_USER_GETTER = values.Value(
         "core.models.oidc_user_getter",
         environ_name="PEOPLE_JWT_USER_GETTER",
@@ -334,6 +359,11 @@ class Base(Configuration):
             with sentry_sdk.configure_scope() as scope:
                 scope.set_extra("application", "backend")
 
+        cls.REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = (
+            "core.authentication.DelegatedJWTAuthentication",
+            "rest_framework.authentication.SessionAuthentication",
+        )
+
 
 class Build(Base):
     """Settings used when the application is built.
@@ -379,6 +409,8 @@ class Development(Base):
 
 class Test(Base):
     """Test environment settings"""
+
+    SIMPLE_JWT = {}
 
     LOGGING = values.DictValue(
         {
