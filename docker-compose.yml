@@ -133,3 +133,33 @@ services:
     working_dir: /app
     volumes:
       - ./src/terraform:/app
+
+  kc_postgresql:
+      image: postgres:14.3
+      platform: linux/amd64
+      ports:
+        - "5433:5432"
+      env_file:
+        - env.d/development/kc_postgresql
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:20.0.1
+    volumes:
+      - ./docker/auth/realm.json:/opt/keycloak/data/import/realm.json
+    command:
+      - start-dev
+      - --features=preview
+      - --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL_HOST: kc_postgresql
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_PASSWORD: pass
+      KC_DB_USERNAME: people
+      KC_DB_SCHEMA: public
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kc_postgresql

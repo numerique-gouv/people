@@ -18,3 +18,6 @@ DJANGO_EMAIL_PORT=1025
 
 # Backend url
 PEOPLE_BASE_URL="http://localhost:8072"
+
+# Keycloak
+SIMPLE_JWT_JWK_URL="http://keycloak:8080/realms/people/protocol/openid-connect/certs"
