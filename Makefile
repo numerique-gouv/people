@@ -45,6 +45,7 @@ COMPOSE_RUN         = $(COMPOSE) run --rm
 COMPOSE_RUN_APP     = $(COMPOSE_RUN) app-dev
 COMPOSE_RUN_CROWDIN = $(COMPOSE_RUN) crowdin crowdin
 WAIT_DB             = @$(COMPOSE_RUN) dockerize -wait tcp://$(DB_HOST):$(DB_PORT) -timeout 60s
+WAIT_KC_DB           = $(COMPOSE_RUN) dockerize -wait tcp://kc_postgresql:5432 -timeout 60s
 
 # -- Backend
 MANAGE              = $(COMPOSE_RUN_APP) python manage.py
@@ -96,7 +97,9 @@ run: ## start the wsgi (production) and development server
 	@$(COMPOSE) up --force-recreate -d nginx
 	@$(COMPOSE) up --force-recreate -d app-dev
 	@$(COMPOSE) up --force-recreate -d celery-dev
+	@$(COMPOSE) up --force-recreate -d keycloak
 	@echo "Wait for postgresql to be up..."
+	@$(WAIT_KC_DB)
 	@$(WAIT_DB)
 .PHONY: run
 
