@@ -1,7 +1,7 @@
 :root {
   /**
-      * Input
-     */
+  * Input
+  */
   --c--components--forms-input--border-radius--hover: var(
     --c--components--forms-input--border-radius
   );
@@ -11,15 +11,17 @@
   --c--components--forms-input--border-color--hover: var(
     --c--components--forms-input--border-color
   );
+
   /**
-      * Datepicker
-     **/
+  * Datepicker
+  **/
   --c--components--forms-datepicker--border-color--hover: var(
     --c--components--forms-datepicker--border-color
   );
+
   /**
-      * Select
-     **/
+  * Select
+  **/
   --c--components--forms-select--value-color--disabled: var(
     --c--theme--colors--greyscale-400
   );

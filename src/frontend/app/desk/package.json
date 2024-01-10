@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prettier --check . && yarn stylelint && next build",
     "build-theme": "cunningham -g css,ts -o src/cunningham --utility-classes",
     "start": "next start",
     "lint": "next lint",
-    "prettier": "prettier --write ."
+    "prettier": "prettier --write .",
+    "stylelint": "stylelint \"**/*.css\""
   },
   "dependencies": {
     "@openfun/cunningham-react": "2.4.0",
@@ -26,6 +27,9 @@
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-prettier": "5.1.2",
     "prettier": "3.1.1",
+    "stylelint": "16.1.0",
+    "stylelint-config-standard": "36.0.0",
+    "stylelint-prettier": "5.0.0",
     "typescript": "5"
   }
 }
