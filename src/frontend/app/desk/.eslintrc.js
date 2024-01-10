@@ -1,5 +1,9 @@
 module.exports = {
-  extends: ['next', 'plugin:prettier/recommended'],
+  extends: [
+    'next',
+    'plugin:prettier/recommended',
+    'plugin:@tanstack/eslint-plugin-query/recommended',
+  ],
   settings: {
     next: {
       rootDir: __dirname,
@@ -12,7 +16,6 @@ module.exports = {
   },
   rules: {
     'block-scoped-var': 'error',
-    'no-alert': 'error',
     'import/no-duplicates': ['error', { considerQueryString: false }],
     'import/order': [
       'error',
@@ -38,6 +41,7 @@ module.exports = {
         'newlines-between': 'always',
       },
     ],
+    'no-alert': 'error',
     'no-unused-vars': [
       'error',
       { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
