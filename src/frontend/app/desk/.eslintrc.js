@@ -2,17 +2,20 @@ module.exports = {
   extends: [
     'next',
     'plugin:prettier/recommended',
-    'plugin:@typescript-eslint/recommended',
+    'plugin:@tanstack/eslint-plugin-query/recommended',
   ],
   settings: {
     next: {
-      rootDir: 'src/frontend/app/desk',
+      rootDir: __dirname,
+    },
+  },
+  parserOptions: {
+    babelOptions: {
+      presets: [require.resolve('next/babel')],
     },
   },
   rules: {
-    '@typescript-eslint/no-explicit-any': 'error',
     'block-scoped-var': 'error',
-    'no-alert': 'error',
     'import/no-duplicates': ['error', { considerQueryString: false }],
     'import/order': [
       'error',
@@ -30,7 +33,7 @@ module.exports = {
         ],
         pathGroups: [
           {
-            pattern: '+@/**',
+            pattern: '@/**',
             group: 'internal',
           },
         ],
@@ -38,6 +41,7 @@ module.exports = {
         'newlines-between': 'always',
       },
     ],
+    'no-alert': 'error',
     'no-unused-vars': [
       'error',
       { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
@@ -51,4 +55,29 @@ module.exports = {
       },
     ],
   },
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      extends: [
+        'plugin:@typescript-eslint/recommended',
+        'plugin:@typescript-eslint/recommended-requiring-type-checking',
+      ],
+      parser: '@typescript-eslint/parser', // Specifies the ESLint parser
+      parserOptions: {
+        ecmaVersion: 2018,
+        tsconfigRootDir: __dirname,
+        project: ['./tsconfig.json'],
+      },
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        'sort-imports': [
+          'error',
+          {
+            ignoreDeclarationSort: true,
+          },
+        ],
+      },
+    },
+  ],
 };
