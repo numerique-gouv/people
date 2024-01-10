@@ -81,6 +81,8 @@ jobs:
 
   build-front-desk:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:8071/api/v1.0/
     defaults:
       run:
         working-directory: src/frontend/app/desk

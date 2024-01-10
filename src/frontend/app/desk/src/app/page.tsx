@@ -1,11 +1,12 @@
 'use client';
 
-import { Button, Loader } from '@openfun/cunningham-react';
+import { Loader } from '@openfun/cunningham-react';
 import { useEffect } from 'react';
 
-import styles from './page.module.css';
-
 import useAuthStore from '@/auth/useAuthStore';
+
+import { Teams } from './Teams';
+import styles from './page.module.css';
 
 export default function Home() {
   const { initAuth, authenticated } = useAuthStore();
@@ -21,7 +22,7 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <h2>Hello world!</h2>
-      <Button>Button Cunningham</Button>
+      <Teams />
     </main>
   );
 }
