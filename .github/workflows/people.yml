@@ -79,6 +79,49 @@ jobs:
       - name: Build Desk App
         run: yarn build
 
+  e2e-front-desk-dev:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set env variables
+        run: |
+          cp env.d/development/common.dist env.d/development/common
+          cp env.d/development/postgresql.dist env.d/development/postgresql
+          cp env.d/development/kc_postgresql.dist env.d/development/kc_postgresql
+          cp env.d/development/crowdin.dist env.d/development/crowdin
+
+      - name: Run Makefile Commands
+        run: |
+          make build
+          make migrate
+          make run
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+          cache-dependency-path: src/frontend/app/desk/yarn.lock
+
+      - name: Install dependencies
+        run: cd src/frontend/app/desk/ && yarn install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: cd src/frontend/app/desk/ && yarn playwright install --with-deps
+
+      - name: Run e2e tests
+        run: cd src/frontend/app/desk/ && yarn test:e2e
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: src/frontend/app/desk/playwright-report/
+          retention-days: 7
+
   build-mails:
     runs-on: ubuntu-latest
     defaults:
