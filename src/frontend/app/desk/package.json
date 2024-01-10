@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "prettier": "prettier --write .",
-    "stylelint": "stylelint \"**/*.css\""
+    "stylelint": "stylelint \"**/*.css\"",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "yarn test:e2e --ui" 
   },
   "dependencies": {
     "@openfun/cunningham-react": "2.4.0",
@@ -20,6 +22,7 @@
     "zustand": "4.4.7"
   },
   "devDependencies": {
+    "@playwright/test": "1.40.1",
     "@tanstack/eslint-plugin-query": "5.17.1",
     "@types/node": "20",
     "@types/react": "18",
