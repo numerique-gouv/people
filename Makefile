@@ -52,6 +52,9 @@ MANAGE              = $(COMPOSE_RUN_APP) python manage.py
 MAIL_YARN           = $(COMPOSE_RUN) -w /app/src/mail node yarn
 TSCLIENT_YARN       = $(COMPOSE_RUN) -w /app/src/tsclient node yarn
 
+# -- Frontend
+FRONTPATH       	= ./src/frontend/app/desk
+
 # ==============================================================================
 # RULES
 
@@ -279,3 +282,8 @@ help:
 	@echo "Please use 'make $(BOLD)target$(RESET)' where $(BOLD)target$(RESET) is one of:"
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(GREEN)%-30s$(RESET) %s\n", $$1, $$2}'
 .PHONY: help
+
+# Front 
+front-dev: 
+	cd $(FRONTPATH) && yarn dev
+.PHONY: front-dev
