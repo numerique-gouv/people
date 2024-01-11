@@ -53,7 +53,7 @@ MAIL_YARN           = $(COMPOSE_RUN) -w /app/src/mail node yarn
 TSCLIENT_YARN       = $(COMPOSE_RUN) -w /app/src/tsclient node yarn
 
 # -- Frontend
-PATH_FRONT_DESK       	= ./src/frontend/app/desk
+PATH_FRONT_DESK       	= ./src/frontend/apps/desk
 
 # ==============================================================================
 # RULES
