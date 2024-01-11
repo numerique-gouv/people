@@ -6,8 +6,8 @@ export const keyCloakSignIn = async (page: Page) => {
   });
 
   if (title?.includes('Sign in to your account')) {
-    await page.getByRole('textbox', { name: 'username' }).fill('Anto');
-    await page.getByRole('textbox', { name: 'password' }).fill('toto');
+    await page.getByRole('textbox', { name: 'username' }).fill('user-e2e');
+    await page.getByRole('textbox', { name: 'password' }).fill('password-e2e');
 
     await page.click('input[type="submit"]');
   }
