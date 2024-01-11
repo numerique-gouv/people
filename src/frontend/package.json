@@ -1,0 +1,23 @@
+{
+  "name": "people",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*"
+    ]
+  },
+  "scripts": {
+    "APP_DESK": "yarn workspace app-desk",
+    "APP_E2E": "yarn workspace app-e2e",
+    "app:dev": "yarn APP_DESK run dev",
+    "app:start": "yarn APP_DESK run start",
+    "app:build": "yarn APP_DESK run build",
+    "app:test": "yarn APP_DESK run test",
+    "e2e:test": "yarn APP_E2E run test"
+  },
+  "resolutions": {
+    "@types/node": "20.10.8",
+    "typescript": "5.3.3"
+  }
+}

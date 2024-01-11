@@ -71,7 +71,7 @@ jobs:
         with:
           node-version: '18.x'
           cache: 'yarn'
-          cache-dependency-path: src/frontend/apps/desk/yarn.lock
+          cache-dependency-path: src/frontend/yarn.lock
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Test Desk App

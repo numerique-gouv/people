@@ -1,0 +1,15 @@
+{
+  "name": "app-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "install": "playwright install --with-deps",
+    "test": "playwright test",
+    "test:ui": "yarn test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.40.1",
+    "@types/node": "*",
+    "typescript": "*"
+  }
+}
