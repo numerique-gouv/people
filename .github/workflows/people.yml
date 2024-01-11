@@ -75,30 +75,56 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Test Desk App
-        env:
-          CI: true
         run: yarn test
 
-  build-front-desk:
+  test-e2e:
     runs-on: ubuntu-latest
-    env:
-      NEXT_PUBLIC_API_URL: http://localhost:8071/api/v1.0/
-    defaults:
-      run:
-        working-directory: src/frontend/apps/desk
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+            
+      - name: Set services env variables
+        run: |
+          make create-env-files
+
+      - name: Build and Start Docker Servers
+        env:
+          DOCKER_BUILDKIT: 1
+          COMPOSE_DOCKER_CLI_BUILD: 1
+        run: |
+          docker-compose build --pull --build-arg BUILDKIT_INLINE_CACHE=1
+          make run
+        
+      - name: Apply DRH migrations 
+        run: |
+          make migrate
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
           cache: 'yarn'
-          cache-dependency-path: src/frontend/apps/desk/yarn.lock
+          cache-dependency-path: src/frontend/yarn.lock
+
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
-      - name: Build Desk App
-        run: yarn build
+        run: cd src/frontend/ && yarn install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: cd src/frontend/apps/e2e && yarn install
+
+      - name: Build CI App
+        run: cd src/frontend/ && yarn ci:build
+
+      - name: Run e2e tests
+        run: cd src/frontend/ && yarn e2e:test
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: src/frontend/apps/e2e/report/
+          retention-days: 7
 
   build-mails:
     runs-on: ubuntu-latest

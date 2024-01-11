@@ -16,7 +16,7 @@ const useAuthStore = create<AuthStore>((set) => ({
 
   initAuth: () =>
     set((state) => {
-      if (process.env.NODE_ENV === 'development' && !state.initialized) {
+      if (process.env.NEXT_PUBLIC_KEYCLOAK_LOGIN && !state.initialized) {
         initKeycloak((token) => set({ authenticated: true, token }));
         return { initialized: true };
       }
