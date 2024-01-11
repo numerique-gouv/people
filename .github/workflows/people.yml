@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/frontend/app/desk
+        working-directory: src/frontend/apps/desk
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -71,7 +71,7 @@ jobs:
         with:
           node-version: '18.x'
           cache: 'yarn'
-          cache-dependency-path: src/frontend/app/desk/yarn.lock
+          cache-dependency-path: src/frontend/apps/desk/yarn.lock
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Test Desk App
@@ -85,7 +85,7 @@ jobs:
       NEXT_PUBLIC_API_URL: http://localhost:8071/api/v1.0/
     defaults:
       run:
-        working-directory: src/frontend/app/desk
+        working-directory: src/frontend/apps/desk
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
         with:
           node-version: '18.x'
           cache: 'yarn'
-          cache-dependency-path: src/frontend/app/desk/yarn.lock
+          cache-dependency-path: src/frontend/apps/desk/yarn.lock
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Build Desk App
