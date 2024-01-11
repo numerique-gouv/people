@@ -56,6 +56,19 @@
           "realmRoles": [
               "user"
           ]
+      },
+      {
+        "username": "user-e2e",
+        "enabled": true,
+        "credentials": [
+            {
+                "type": "password",
+                "value": "password-e2e"
+            }
+        ],
+        "realmRoles": [
+            "user"
+        ]
       }
     ],
     "roles": {
@@ -2260,3 +2273,4 @@
       "policies": []
     }
   }
+  

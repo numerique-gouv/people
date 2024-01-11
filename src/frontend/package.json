@@ -14,6 +14,7 @@
     "app:start": "yarn APP_DESK run start",
     "app:build": "yarn APP_DESK run build",
     "app:test": "yarn APP_DESK run test",
+    "ci:build": "yarn APP_DESK run build:ci",
     "e2e:test": "yarn APP_E2E run test"
   },
   "resolutions": {

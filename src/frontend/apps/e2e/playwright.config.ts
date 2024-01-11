@@ -32,7 +32,7 @@ export default defineConfig({
   },
 
   webServer: {
-    command: 'cd ../.. && yarn dev:desk --port ' + PORT,
+    command:  `cd ../.. && yarn app:${process.env.CI ? "start" : "dev"} --port ${PORT}`,
     url: baseURL,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,
