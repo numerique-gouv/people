@@ -185,6 +185,7 @@ class Base(Configuration):
     INSTALLED_APPS = [
         # People
         "core",
+        "demo",
         "drf_spectacular",
         # Third party apps
         "corsheaders",
