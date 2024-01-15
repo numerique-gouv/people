@@ -38,7 +38,7 @@ msgid "primary key for the record as UUID"
 msgstr ""
 
 #: core/models.py:51
-msgid "created on"
+msgid "created at"
 msgstr ""
 
 #: core/models.py:52
@@ -46,7 +46,7 @@ msgid "date and time at which a record was created"
 msgstr ""
 
 #: core/models.py:57
-msgid "updated on"
+msgid "updated at"
 msgstr ""
 
 #: core/models.py:58
