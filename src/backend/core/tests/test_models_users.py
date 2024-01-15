@@ -29,6 +29,23 @@ def test_models_users_id_unique():
         factories.UserFactory(id=user.id)
 
 
+def test_models_users_email_unique():
+    """The "email" field should be unique except for the null value."""
+    user = factories.UserFactory()
+    with pytest.raises(
+        ValidationError, match="User with this Email address already exists."
+    ):
+        factories.UserFactory(email=user.email)
+
+
+def test_models_users_email_several_null():
+    """Several users with a null value for the "email" field can co-exist."""
+    factories.UserFactory(email=None)
+    factories.UserFactory(email=None)
+
+    assert models.User.objects.filter(email__isnull=True).count() == 2
+
+
 def test_models_users_profile_not_owned():
     """A user cannot declare as profile a contact that not is owned."""
     user = factories.UserFactory()

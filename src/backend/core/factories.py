@@ -124,6 +124,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.User
 
+    email = factory.Faker("email")
     language = factory.fuzzy.FuzzyChoice([lang[0] for lang in settings.LANGUAGES])
     password = make_password("password")
 

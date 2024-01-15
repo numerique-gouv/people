@@ -177,7 +177,7 @@ migrate:  ## run django migrations for the people project.
 
 superuser: ## Create an admin superuser with password "admin"
 	@echo "$(BOLD)Creating a Django superuser$(RESET)"
-	@$(MANAGE) createsuperuser --username admin --email admin@example.com --no-input
+	@$(MANAGE) createsuperuser --email admin@example.com --password admin
 .PHONY: superuser
 
 back-i18n-compile: ## compile the gettext files

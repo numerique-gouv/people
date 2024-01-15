@@ -159,6 +159,7 @@ class UserManager(auth_models.UserManager):
 class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
     """User model to work with OIDC only authentication."""
 
+    email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
     profile_contact = models.OneToOneField(
         Contact,
         on_delete=models.SET_NULL,
@@ -200,7 +201,7 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = "id"
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     class Meta:
@@ -209,7 +210,11 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
         verbose_name_plural = _("users")
 
     def __str__(self):
-        return str(self.profile_contact) if self.profile_contact else str(self.id)
+        return (
+            str(self.profile_contact)
+            if self.profile_contact
+            else self.email or str(self.id)
+        )
 
     def clean(self):
         """Validate fields."""
@@ -257,7 +262,7 @@ class Identity(BaseModel):
         unique=True,
         validators=[sub_validator],
     )
-    email = models.EmailField(_("email address"))
+    email = models.EmailField(_("email address"), null=True, blank=True)
     is_main = models.BooleanField(
         _("main"),
         default=False,
@@ -286,7 +291,8 @@ class Identity(BaseModel):
 
     def clean(self):
         """Normalize the email field and clean the 'is_main' field."""
-        self.email = User.objects.normalize_email(self.email)
+        if self.email:
+            self.email = User.objects.normalize_email(self.email)
         if not self.user.identities.exclude(pk=self.pk).filter(is_main=True).exists():
             if not self.created_at:
                 self.is_main = True
@@ -452,20 +458,21 @@ def oidc_user_getter(validated_token):
         ) from exc
 
     try:
-        user = User.objects.select_related("profile_contact").get(
-            **{api_settings.USER_ID_FIELD: user_id}
-        )
-    except User.DoesNotExist:
-        contact = Contact.objects.create()
-        user = User.objects.create(
-            **{api_settings.USER_ID_FIELD: user_id}, profile_contact=contact
-        )
+        email_param = {"email": validated_token["email"]}
+    except KeyError:
+        email_param = {}
 
-    # If the identity in the token is seen for the first time, make it the main email.
-    # Otherwise, update the email and respect the main identity set by the user
-    if email := validated_token["email"]:
-        Identity.objects.update_or_create(
-            user=user, email=email, create_defaults={"is_main": True}
-        )
+    user = (
+        User.objects.filter(identities__sub=user_id)
+        .annotate(identity_email=models.F("identities__email"))
+        .distinct()
+        .first()
+    )
+
+    if user is None:
+        user = User.objects.create(password="!", **email_param)  # noqa: S106
+        Identity.objects.create(user=user, sub=user_id, **email_param)
+    elif email_param and validated_token["email"] != user.identity_email:
+        Identity.objects.filter(sub=user_id).update(email=validated_token["email"])
 
     return user
