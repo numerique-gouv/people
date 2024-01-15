@@ -69,11 +69,10 @@ def test_models_identities_is_main_switch():
     assert first_identity.is_main is False
 
 
-def test_models_identities_email_required():
-    """The "email" field is required."""
+def test_models_identities_email_not_required():
+    """The "email" field can be blank."""
     user = factories.UserFactory()
-    with pytest.raises(ValidationError, match="This field cannot be null."):
-        models.Identity.objects.create(user=user, email=None)
+    models.Identity.objects.create(user=user, sub="123", email=None)
 
 
 def test_models_identities_user_required():

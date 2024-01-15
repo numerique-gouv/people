@@ -239,17 +239,28 @@ class Base(Configuration):
         "REDOC_DIST": "SIDECAR",
     }
 
+    # Simple JWT
     SIMPLE_JWT = {
-        "ALGORITHM": values.Value("HS256", environ_name="JWT_ALGORITHM"),
-        "SIGNING_KEY": values.SecretValue(
-            environ_name="JWT_PRIVATE_SIGNING_KEY",
+        "ALGORITHM": values.Value(
+            "RS256", environ_name="SIMPLE_JWT_ALGORITHM", environ_prefix=None
+        ),
+        "JWK_URL": values.Value(
+            None, environ_name="SIMPLE_JWT_JWK_URL", environ_prefix=None
+        ),
+        "SIGNING_KEY": values.Value(
+            None, environ_name="SIMPLE_JWT_SIGNING_KEY", environ_prefix=None
+        ),
+        "VERIFYING_KEY": values.Value(
+            None, environ_name="SIMPLE_JWT_VERIFYING_KEY", environ_prefix=None
         ),
         "AUTH_HEADER_TYPES": ("Bearer",),
         "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
-        "USER_ID_FIELD": "id",
+        "TOKEN_TYPE_CLAIM": "typ",
+        "USER_ID_FIELD": "sub",
         "USER_ID_CLAIM": "sub",
-        "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+        "AUTH_TOKEN_CLASSES": ("core.tokens.BearerToken",),
     }
+
     JWT_USER_GETTER = values.Value(
         "core.models.oidc_user_getter",
         environ_name="PEOPLE_JWT_USER_GETTER",
@@ -380,6 +391,10 @@ class Development(Base):
 class Test(Base):
     """Test environment settings"""
 
+    SIMPLE_JWT = {
+        "USER_ID_FIELD": "sub",
+        "USER_ID_CLAIM": "sub",
+    }
     LOGGING = values.DictValue(
         {
             "version": 1,
@@ -412,10 +427,6 @@ class Test(Base):
     }
 
     CELERY_TASK_ALWAYS_EAGER = values.BooleanValue(True)
-
-    def __init__(self):
-        # pylint: disable=invalid-name
-        self.INSTALLED_APPS += ["drf_spectacular_sidecar"]
 
 
 class ContinuousIntegration(Test):
