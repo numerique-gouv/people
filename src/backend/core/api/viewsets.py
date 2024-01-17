@@ -1,8 +1,8 @@
 """API endpoints"""
-from core import models
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.cache import cache
 from django.db.models import Func, OuterRef, Q, Subquery, Value
+
 from rest_framework import (
     decorators,
     exceptions,
@@ -11,6 +11,8 @@ from rest_framework import (
     response,
     viewsets,
 )
+
+from core import models
 
 from . import permissions, serializers
 
@@ -176,7 +178,12 @@ class UserViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-    """User ViewSet"""
+    """
+    User ViewSet for all interactions with user infos and teams.
+
+    GET /api/users/&q=query
+        Return a list of all users whose email matches the query, completely or partially
+    """
 
     permission_classes = [permissions.IsSelf]
     queryset = models.User.objects.all().select_related("profile_contact")
@@ -206,13 +213,13 @@ class UserViewSet(
             queryset = (
                 queryset.annotate(similarity=similarity)
                 .filter(
-                    similarity__gte=0.05
-                )  # Value determined by testing (test_api_contacts.py)
+                    similarity__gte=0.01
+                )  # Value lowered to match every email containing the queries
                 .order_by("-similarity")
             )
 
         # Throttle protection
-        key_base = f"throttle-contact-list-{user.id!s}"
+        key_base = f"throttle-user-list-{user.id!s}"
         key_minute = f"{key_base:s}-minute"
         key_hour = f"{key_base:s}-hour"
 
