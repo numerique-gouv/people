@@ -18,7 +18,8 @@
         "npm"
       ],
       "matchPackageNames": [
-        "node"
+        "node",
+        "node-fetch"
       ]
     }
   ]
