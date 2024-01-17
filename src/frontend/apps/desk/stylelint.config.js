@@ -5,4 +5,5 @@ module.exports = {
     'selector-class-pattern': null,
     'no-descending-specificity': null,
   },
+  ignoreFiles: ['out/**/*'],
 };
