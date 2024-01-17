@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import useAuthStore from '@/auth/useAuthStore';
+import { fetchAPI } from '@/api';
 
 import { KEY_LIST_TEAM } from './useTeams';
 
@@ -13,13 +13,7 @@ export interface CreateTeamResponseError {
 }
 
 export const createTeam = async (name: string) => {
-  const { token } = useAuthStore.getState();
-
-  const response = await fetch(`/api/teams/`, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+  const response = await fetchAPI(`teams/`, {
     method: 'POST',
     body: JSON.stringify({
       name,

@@ -1,7 +1,6 @@
 import { UseQueryOptions, useQuery } from '@tanstack/react-query';
 
-import useAuthStore from '@/auth/useAuthStore';
-import { APIList } from '@/types/api';
+import { APIList, fetchAPI } from '@/api';
 
 interface TeamResponse {
   id: string;
@@ -14,19 +13,11 @@ export interface TeamsResponseError {
 }
 
 export const getTeams = async () => {
-  const token = useAuthStore.getState().token;
-
-  const response = await fetch(`/api/teams/`, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await fetchAPI(`teams/`);
 
   if (!response.ok) {
     throw new Error(`Couldn't fetch teams: ${response.statusText}`);
   }
-
   return response.json();
 };
 

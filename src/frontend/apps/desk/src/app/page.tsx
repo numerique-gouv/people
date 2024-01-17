@@ -9,11 +9,15 @@ import { Teams } from './Teams';
 import styles from './page.module.css';
 
 export default function Home() {
-  const { initAuth, authenticated } = useAuthStore();
+  const { initAuth, authenticated, initialized } = useAuthStore();
 
   useEffect(() => {
+    if (initialized) {
+      return;
+    }
+
     initAuth();
-  }, [initAuth]);
+  }, [initAuth, initialized]);
 
   if (!authenticated) {
     return <Loader />;

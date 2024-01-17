@@ -3,16 +3,23 @@ import { create } from 'zustand';
 import { initKeycloak } from './keycloak';
 
 interface AuthStore {
-  initialized: boolean;
   authenticated: boolean;
-  token: string | null;
   initAuth: () => void;
+  initialized: boolean;
+  logout: () => void;
+  token: string | null;
 }
 
-const useAuthStore = create<AuthStore>((set) => ({
-  initialized: false,
+const initialState = {
   authenticated: false,
+  initialized: false,
   token: null,
+};
+
+const useAuthStore = create<AuthStore>((set) => ({
+  authenticated: initialState.authenticated,
+  initialized: initialState.initialized,
+  token: initialState.token,
 
   initAuth: () =>
     set((state) => {
@@ -27,6 +34,10 @@ const useAuthStore = create<AuthStore>((set) => ({
 
       return {};
     }),
+
+  logout: () => {
+    set(initialState);
+  },
 }));
 
 export default useAuthStore;
