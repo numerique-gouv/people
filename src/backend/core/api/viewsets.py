@@ -1,14 +1,8 @@
 """API endpoints"""
+from core import models
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.cache import cache
-from django.db.models import (
-    Func,
-    OuterRef,
-    Q,
-    Subquery,
-    Value,
-)
-
+from django.db.models import Func, OuterRef, Q, Subquery, Value
 from rest_framework import (
     decorators,
     exceptions,
@@ -17,8 +11,6 @@ from rest_framework import (
     response,
     viewsets,
 )
-
-from core import models
 
 from . import permissions, serializers
 
@@ -189,6 +181,58 @@ class UserViewSet(
     permission_classes = [permissions.IsSelf]
     queryset = models.User.objects.all().select_related("profile_contact")
     serializer_class = serializers.UserSerializer
+
+    def list(self, request, *args, **kwargs):
+        """Limit listed users by a query with throttle protection."""
+        user = self.request.user
+        queryset = self.filter_queryset(self.get_queryset())
+
+        if not user.is_authenticated:
+            return queryset.none()
+
+        # Exclude contacts that:
+        queryset = queryset.filter(
+            # - inactive users
+            is_active=True,
+        )
+
+        # Search by case-insensitive and accent-insensitive trigram similarity
+        if query := self.request.GET.get("q", ""):
+            query = Func(Value(query), function="unaccent")
+            similarity = TrigramSimilarity(
+                Func("email", function="unaccent"),
+                query,
+            )
+            queryset = (
+                queryset.annotate(similarity=similarity)
+                .filter(
+                    similarity__gte=0.05
+                )  # Value determined by testing (test_api_contacts.py)
+                .order_by("-similarity")
+            )
+
+        # Throttle protection
+        key_base = f"throttle-contact-list-{user.id!s}"
+        key_minute = f"{key_base:s}-minute"
+        key_hour = f"{key_base:s}-hour"
+
+        try:
+            count_minute = cache.incr(key_minute)
+        except ValueError:
+            cache.set(key_minute, 1, 60)
+            count_minute = 1
+
+        try:
+            count_hour = cache.incr(key_hour)
+        except ValueError:
+            cache.set(key_hour, 1, 3600)
+            count_hour = 1
+
+        if count_minute > 20 or count_hour > 150:
+            raise exceptions.Throttled()
+
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
 
     @decorators.action(
         detail=False,

@@ -2,10 +2,9 @@
 Test users API endpoints in the People core app.
 """
 import pytest
-from rest_framework.test import APIClient
-
 from core import factories, models
 from core.api import serializers
+from rest_framework.test import APIClient
 
 from .utils import OIDCToken
 
@@ -34,6 +33,59 @@ def test_api_users_list_authenticated():
     )
     assert response.status_code == 404
     assert "Not Found" in response.content.decode("utf-8")
+
+
+def test_api_users_list_by_email_authenticated():
+    """
+    Authenticated users should be able to search users with a case insensitive and
+    partial query on the email.
+    """
+    identity = factories.IdentityFactory()
+    user = identity.user
+    jwt_token = OIDCToken.for_user(user)
+
+    dave = factories.UserFactory(email="david.bowman@work.com")
+    nicole = factories.UserFactory(email="nicole_foole@work.com")
+    frank = factories.UserFactory(email="frank_poole@work.com")
+    factories.UserFactory(email="heywood_floyd@work.com")
+
+
+    # Full query should work
+    response = APIClient().get(
+        "/api/v1.0/users/?q=david.bowman@work.com",
+        HTTP_AUTHORIZATION=f"Bearer {jwt_token}",
+    )
+
+    assert response.status_code == 200
+    user_ids = [user["id"] for user in response.json()]
+    assert user_ids == [str(dave.id)]
+
+    # Partial query should work
+    response = APIClient().get(
+        "/api/v1.0/contacts/?q=fran", HTTP_AUTHORIZATION=f"Bearer {jwt_token}"
+    )
+
+    assert response.status_code == 200
+    user_ids = [user["id"] for user in response.json()]
+    assert user_ids == [str(frank.id)]
+
+    # Result that matches a trigram twice ranks better than result that matches once
+    response = APIClient().get(
+        "/api/v1.0/contacts/?q=ole", HTTP_AUTHORIZATION=f"Bearer {jwt_token}"
+    )
+
+    assert response.status_code == 200
+    user_ids = [user["id"] for contact in response.json()]
+    # "Nicole Foole" matches twice on "ole"
+    assert user_ids == [str(nicole.id), str(frank.id)]
+
+    response = APIClient().get(
+        "/api/v1.0/contacts/?q=ool", HTTP_AUTHORIZATION=f"Bearer {jwt_token}"
+    )
+
+    assert response.status_code == 200
+    user_ids = [user["id"] for contact in response.json()]
+    assert user_ids == [str(nicole.id), str(frank.id)]
 
 
 def test_api_users_retrieve_me_anonymous():
