@@ -34,5 +34,7 @@ test.describe("Header", () => {
     await expect(header.getByText("FAQ")).toBeVisible();
 
     await expect(header.getByAltText("Cells icon")).toBeVisible();
+
+    await expect(header.getByAltText("Language Icon")).toBeVisible();
   });
 });

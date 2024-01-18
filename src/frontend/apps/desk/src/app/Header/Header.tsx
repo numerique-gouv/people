@@ -5,6 +5,8 @@ import styled from 'styled-components';
 
 import { Box, Text } from '@/components/';
 
+import { LanguagePicker } from '../Language/';
+
 import { default as IconCells } from './assets/icon-cells.svg';
 import { default as IconDesk } from './assets/icon-desk.svg';
 import { default as IconFAQ } from './assets/icon-faq.svg';
@@ -66,6 +68,7 @@ const Header = () => {
             >
               FAQ
             </Button>
+            <LanguagePicker />
           </Box>
           <Button
             aria-label="Access to the cells menu"
