@@ -18,7 +18,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body>
+      <body suppressHydrationWarning={process.env.NODE_ENV === 'development'}>
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools />
           <CunninghamProvider theme={theme}>{children}</CunninghamProvider>
