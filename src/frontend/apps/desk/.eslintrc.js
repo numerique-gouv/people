@@ -3,10 +3,21 @@ module.exports = {
     'next',
     'plugin:prettier/recommended',
     'plugin:@tanstack/eslint-plugin-query/recommended',
+    'plugin:jsx-a11y/recommended',
   ],
   settings: {
     next: {
       rootDir: __dirname,
+    },
+    'jsx-a11y': {
+      polymorphicPropName: 'as',
+      components: {
+        Input: 'input',
+        Button: 'button',
+        Box: 'div',
+        Text: 'span',
+        Select: 'select',
+      },
     },
   },
   parserOptions: {

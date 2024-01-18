@@ -38,6 +38,7 @@
     "eslint-config-next": "14.0.4",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-jest": "27.6.2",
+    "eslint-plugin-jsx-a11y": "6.8.0",
     "eslint-plugin-prettier": "5.1.2",
     "eslint-plugin-testing-library": "6.2.0",
     "fetch-mock": "9.11.0",

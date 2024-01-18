@@ -3529,7 +3529,7 @@ eslint-plugin-jest@27.6.2:
   dependencies:
     "@typescript-eslint/utils" "^5.10.0"
 
-eslint-plugin-jsx-a11y@^6.7.1:
+eslint-plugin-jsx-a11y@6.8.0, eslint-plugin-jsx-a11y@^6.7.1:
   version "6.8.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-jsx-a11y/-/eslint-plugin-jsx-a11y-6.8.0.tgz#2fa9c701d44fcd722b7c771ec322432857fcbad2"
   integrity sha512-Hdh937BS3KdwwbBaKd5+PLCOmYY6U4f2h9Z2ktwtNKvIdIEu137rjYbcb9ApSbVJfWxANNuiKTD/9tOKjK9qOA==
