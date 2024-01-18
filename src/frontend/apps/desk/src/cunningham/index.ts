@@ -1,7 +1,4 @@
 import { tokens } from './cunningham-tokens';
+import useCunninghamTheme from './useCunninghamTheme';
 
-const themeTokens = tokens.themes.default.theme;
-const colorsTokens = tokens.themes.default.theme.colors;
-const componentTokens = tokens.themes.default.components;
-
-export { tokens, themeTokens, componentTokens, colorsTokens };
+export { tokens, useCunninghamTheme };
