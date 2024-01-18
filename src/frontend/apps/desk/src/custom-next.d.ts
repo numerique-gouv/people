@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+declare module '*.svg' {
+  const content: string;
+  export default content;
+}
 
 namespace NodeJS {
   interface ProcessEnv {

@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import fetchMock from 'fetch-mock';
 
-import { WrapperReactQuery } from '@/tests/utils';
+import { AppWrapper } from '@/tests/utils';
 
 import { Teams } from '..';
 
@@ -25,7 +25,7 @@ describe('Teams', () => {
       ],
     });
 
-    render(<Teams />, { wrapper: WrapperReactQuery });
+    render(<Teams />, { wrapper: AppWrapper });
 
     expect(screen.getByRole('status')).toBeInTheDocument();
 

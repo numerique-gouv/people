@@ -9,12 +9,13 @@ export const Teams = () => {
   const { mutate: createTeam } = useCreateTeam();
   const [teamName, setTeamName] = useState('');
 
-  if (isPending)
+  if (isPending) {
     return (
       <div>
         <Loader />
       </div>
     );
+  }
 
   return (
     <>

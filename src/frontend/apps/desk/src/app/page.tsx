@@ -5,8 +5,8 @@ import { useEffect } from 'react';
 
 import useAuthStore from '@/auth/useAuthStore';
 
+import Header from './Header/Header';
 import { Teams } from './Teams';
-import styles from './page.module.css';
 
 export default function Home() {
   const { initAuth, authenticated, initialized } = useAuthStore();
@@ -24,8 +24,8 @@ export default function Home() {
   }
 
   return (
-    <main className={styles.main}>
-      <h2>Hello world!</h2>
+    <main>
+      <Header />
       <Teams />
     </main>
   );
