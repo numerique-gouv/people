@@ -16,6 +16,7 @@ module.exports = {
   },
   rules: {
     'block-scoped-var': 'error',
+    curly: ['error', 'all'],
     'import/no-duplicates': ['error', { considerQueryString: false }],
     'import/order': [
       'error',
@@ -48,6 +49,10 @@ module.exports = {
     ],
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'error',
+    'react/jsx-curly-brace-presence': [
+      'error',
+      { props: 'never', children: 'never', propElementValues: 'always' },
+    ],
     'sort-imports': [
       'error',
       {

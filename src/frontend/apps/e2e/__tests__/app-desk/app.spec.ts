@@ -7,9 +7,10 @@ test.beforeEach(async ({ page }) => {
   await keyCloakSignIn(page);
 });
 
-test.describe('App', () => {
-  test('should display the homepage after keycloak login', async ({ page }) => {
-    await expect(page.locator('h2')).toContainText('Hello world!');
+test.describe("App", () => {
+  test("should display the main elements", async ({ page }) => {
+    await expect(page.locator('header').first()).toContainText('Desk');
+    await expect(page.getByLabel('Team name')).toBeVisible();
   });
 
   test('creates 2 teams and displayed them', async ({ page }) => {
