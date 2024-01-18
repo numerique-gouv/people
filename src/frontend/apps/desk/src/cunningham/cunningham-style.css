@@ -3,12 +3,12 @@
 @import url('@openfun/cunningham-react/fonts');
 @import url('./cunningham-tokens.css');
 @import url('./cunningham-custom-tokens.css');
+@import url('../assets/fonts/Marianne/Marianne-font.css');
 
 .c__input,
 .c__field,
 .c__select,
-.c__datagrid,
-.typo {
+.c__datagrid {
   font-family: var(--c--theme--font--families--base);
 }
 

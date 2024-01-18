@@ -171,14 +171,9 @@
     --c--components--forms-select--border-radius
   );
   --c--components--forms-select--font-size: var(--c--theme--font--sizes--ml);
+  --c--components--forms-select--menu-background-color: #fff;
   --c--components--forms-select--item-background-color--hover: var(
-    --c--theme--colors--primary-100
-  );
-  --c--components--forms-select--item-color: var(
-    --c--theme--colors--primary-500
-  );
-  --c--components--forms-select--value-color: var(
-    --c--theme--colors--primary-500
+    --c--theme--colors--primary-300
   );
   --c--components--forms-switch--accent-color: var(
     --c--theme--colors--primary-400
@@ -253,7 +248,7 @@
     --c--theme--colors--primary-200
   );
   --c--components--button--tertiary--color: var(
-    --c--theme--colors--primary-500
+    --c--theme--colors--primary-text
   );
   --c--components--button--tertiary--color-disabled: var(
     --c--theme--colors--greyscale-600
@@ -315,6 +310,91 @@
   --c--theme--colors--danger-700: #c36666;
   --c--theme--colors--danger-800: #ae6666;
   --c--theme--colors--danger-900: #9d6666;
+}
+
+.cunningham-theme--dsfr {
+  --c--theme--colors--primary-text: #000091;
+  --c--theme--colors--primary-100: #f5f5fe;
+  --c--theme--colors--primary-200: #ececfe;
+  --c--theme--colors--primary-300: #e3e3fd;
+  --c--theme--colors--primary-400: #cacafb;
+  --c--theme--colors--primary-500: #6a6af4;
+  --c--theme--colors--primary-600: #000091;
+  --c--theme--colors--primary-700: #272747;
+  --c--theme--colors--primary-800: #21213f;
+  --c--theme--colors--primary-900: #1c1a36;
+  --c--theme--colors--secondary-text: #fff;
+  --c--theme--colors--secondary-100: #fee9ea;
+  --c--theme--colors--secondary-200: #fedfdf;
+  --c--theme--colors--secondary-300: #fdbfbf;
+  --c--theme--colors--secondary-400: #e1020f;
+  --c--theme--colors--secondary-500: #c91a1f;
+  --c--theme--colors--secondary-600: #5e2b2b;
+  --c--theme--colors--secondary-700: #3b2424;
+  --c--theme--colors--secondary-800: #341f1f;
+  --c--theme--colors--secondary-900: #2b1919;
+  --c--theme--colors--greyscale-000: #cecece;
+  --c--theme--colors--greyscale-100: #f6f6f6;
+  --c--theme--colors--greyscale-200: #eee;
+  --c--theme--colors--greyscale-300: #e5e5e5;
+  --c--theme--colors--greyscale-400: #ddd;
+  --c--theme--colors--greyscale-500: #cecece;
+  --c--theme--colors--greyscale-600: #7b7b7b;
+  --c--theme--colors--greyscale-700: #666;
+  --c--theme--colors--greyscale-800: #2a2a2a;
+  --c--theme--colors--greyscale-900: #1e1e1e;
+  --c--theme--colors--success-text: #1f8d49;
+  --c--theme--colors--success-100: #dffee6;
+  --c--theme--colors--success-200: #b8fec9;
+  --c--theme--colors--success-300: #88fdaa;
+  --c--theme--colors--success-400: #3bea7e;
+  --c--theme--colors--success-500: #1f8d49;
+  --c--theme--colors--success-600: #18753c;
+  --c--theme--colors--success-700: #204129;
+  --c--theme--colors--success-800: #1e2e22;
+  --c--theme--colors--success-900: #19281d;
+  --c--theme--colors--info-text: #0078f3;
+  --c--theme--colors--info-100: #f4f6ff;
+  --c--theme--colors--info-200: #e8edff;
+  --c--theme--colors--info-300: #dde5ff;
+  --c--theme--colors--info-400: #bdcdff;
+  --c--theme--colors--info-500: #0078f3;
+  --c--theme--colors--info-600: #0063cb;
+  --c--theme--colors--info-700: #f4f6ff;
+  --c--theme--colors--info-800: #222a3f;
+  --c--theme--colors--info-900: #1d2437;
+  --c--theme--colors--warning-text: #d64d00;
+  --c--theme--colors--warning-100: #fff4f3;
+  --c--theme--colors--warning-200: #ffe9e6;
+  --c--theme--colors--warning-300: #ffded9;
+  --c--theme--colors--warning-400: #ffbeb4;
+  --c--theme--colors--warning-500: #d64d00;
+  --c--theme--colors--warning-600: #b34000;
+  --c--theme--colors--warning-700: #5e2c21;
+  --c--theme--colors--warning-800: #3e241e;
+  --c--theme--colors--warning-900: #361e19;
+  --c--theme--colors--danger-text: #e1000f;
+  --c--theme--colors--danger-100: #fef4f4;
+  --c--theme--colors--danger-200: #fee9e9;
+  --c--theme--colors--danger-300: #fddede;
+  --c--theme--colors--danger-400: #fcbfbf;
+  --c--theme--colors--danger-500: #e1000f;
+  --c--theme--colors--danger-600: #c9191e;
+  --c--theme--colors--danger-700: #642727;
+  --c--theme--colors--danger-800: #412121;
+  --c--theme--colors--danger-900: #3a1c1c;
+  --c--theme--font--families--accent: marianne;
+  --c--theme--font--families--base: marianne;
+  --c--components--alert--border-radius: 0;
+  --c--components--button--border-radius: 2px;
+  --c--components--forms-checkbox--border-radius: 0;
+  --c--components--forms-switch--handle-border-radius: 2px;
+  --c--components--forms-switch--rail-border-radius: 4px;
+  --c--components--forms-input--border-radius: 0;
+  --c--components--forms-select--border-radius: 0;
+  --c--components--forms-datepicker--border-radius: 0;
+  --c--components--forms-textarea--border-radius: 0;
+  --c--components--forms-fileuploader--border-radius: 0;
 }
 
 .clr-secondary-text {
