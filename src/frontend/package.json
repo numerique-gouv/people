@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "apps/*"
+      "apps/*",
+      "packages/*"
     ]
   },
   "scripts": {
@@ -15,7 +16,8 @@
     "app:build": "yarn APP_DESK run build",
     "app:test": "yarn APP_DESK run test",
     "ci:build": "yarn APP_DESK run build:ci",
-    "e2e:test": "yarn APP_E2E run test"
+    "e2e:test": "yarn APP_E2E run test",
+    "lint": "yarn APP_DESK run lint && yarn APP_E2E run lint"
   },
   "resolutions": {
     "@types/node": "20.10.8",
