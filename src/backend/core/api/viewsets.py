@@ -116,9 +116,6 @@ class ContactViewSet(
         user = self.request.user
         queryset = self.filter_queryset(self.get_queryset())
 
-        if not user.is_authenticated:
-            return queryset.none()
-
         # Exclude contacts that:
         queryset = queryset.filter(
             # - belong to another user (keep public and owned contacts)
@@ -240,7 +237,6 @@ class UserViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
         methods=["get"],
         url_name="me",
         url_path="me",
-        permission_classes=[permissions.IsAuthenticated],
     )
     def get_me(self, request):
         """
