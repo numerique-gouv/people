@@ -174,15 +174,14 @@ class ContactViewSet(
         return super().perform_create(serializer)
 
 
-class UserViewSet(
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-):
+class UserViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
     """
-    User ViewSet for all interactions with user infos and teams.
+    User viewset for all interactions with user infos and teams.
 
     GET /api/users/&q=query
-        Return a list of all users whose email matches the query, completely or partially
+        Return a list of users whose email matches the query. Similarity is
+        calculated using trigram similarity, allowing for partial, case
+        insensitive matches and accentuated queries.
     """
 
     permission_classes = [permissions.IsSelf]
@@ -194,27 +193,22 @@ class UserViewSet(
         user = self.request.user
         queryset = self.filter_queryset(self.get_queryset())
 
-        if not user.is_authenticated:
-            return queryset.none()
-
-        # Exclude contacts that:
+        # Exclude inactive contacts
         queryset = queryset.filter(
-            # - inactive users
             is_active=True,
         )
 
         # Search by case-insensitive and accent-insensitive trigram similarity
         if query := self.request.GET.get("q", ""):
-            query = Func(Value(query), function="unaccent")
             similarity = TrigramSimilarity(
                 Func("email", function="unaccent"),
-                query,
+                Func(Value(query), function="unaccent"),
             )
             queryset = (
                 queryset.annotate(similarity=similarity)
                 .filter(
                     similarity__gte=0.01
-                )  # Value lowered to match every email containing the queries
+                )  # Lower value than in contacts viewset, to improve matching
                 .order_by("-similarity")
             )
 

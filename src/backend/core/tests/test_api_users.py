@@ -109,7 +109,7 @@ def test_api_users_authenticated_list_uppercase_content():
     user_ids = [user["id"] for user in response.json()]
     assert user_ids == [str(dave.id)]
 
-    # Unaccented partial query
+    # Partial query
     response = APIClient().get(
         "/api/v1.0/users/?q=david", HTTP_AUTHORIZATION=f"Bearer {jwt_token}"
     )
@@ -127,7 +127,7 @@ def test_api_users_list_authenticated_capital_query():
 
     dave = factories.UserFactory(email="david.bowman@work.com")
 
-    # Unaccented full query
+    # Full uppercase query
     response = APIClient().get(
         "/api/v1.0/users/?q=DAVID.BOWMAN@WORK.COM",
         HTTP_AUTHORIZATION=f"Bearer {jwt_token}",
@@ -137,7 +137,7 @@ def test_api_users_list_authenticated_capital_query():
     user_ids = [user["id"] for user in response.json()]
     assert user_ids == [str(dave.id)]
 
-    # Unaccented partial email
+    # Partial uppercase email
     response = APIClient().get(
         "/api/v1.0/users/?q=DAVID", HTTP_AUTHORIZATION=f"Bearer {jwt_token}"
     )
@@ -155,7 +155,7 @@ def test_api_contacts_list_authenticated_accented_query():
 
     helene = factories.UserFactory(email="helene.bowman@work.com")
 
-    # Unaccented full email
+    # Accented full query
     response = APIClient().get(
         "/api/v1.0/users/?q=hélène.bowman@work.com",
         HTTP_AUTHORIZATION=f"Bearer {jwt_token}",
