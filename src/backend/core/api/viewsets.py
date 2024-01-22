@@ -1,6 +1,5 @@
 """API endpoints"""
 from django.contrib.postgres.search import TrigramSimilarity
-from django.core.cache import cache
 from django.db.models import Func, OuterRef, Q, Subquery, Value
 
 from rest_framework import (
@@ -11,6 +10,7 @@ from rest_framework import (
     response,
     viewsets,
 )
+from rest_framework.throttling import UserRateThrottle
 
 from core import models
 
@@ -97,6 +97,22 @@ class Pagination(pagination.PageNumberPagination):
     page_size_query_param = "page_size"
 
 
+class BurstRateThrottle(UserRateThrottle):
+    """
+    Throttle rate for minutes. See DRF section in settings for default value.
+    """
+
+    scope = "burst"
+
+
+class SustainedRateThrottle(UserRateThrottle):
+    """
+    Throttle rate for hours. See DRF section in settings for default value.
+    """
+
+    scope = "sustained"
+
+
 # pylint: disable=too-many-ancestors
 class ContactViewSet(
     mixins.CreateModelMixin,
@@ -110,6 +126,7 @@ class ContactViewSet(
     permission_classes = [permissions.IsOwnedOrPublic]
     queryset = models.Contact.objects.all()
     serializer_class = serializers.ContactSerializer
+    throttle_classes = [BurstRateThrottle, SustainedRateThrottle]
 
     def list(self, request, *args, **kwargs):
         """Limit listed users by a query with throttle protection."""
@@ -141,26 +158,6 @@ class ContactViewSet(
                 .order_by("-similarity")
             )
 
-        # Throttle protection
-        key_base = f"throttle-contact-list-{user.id!s}"
-        key_minute = f"{key_base:s}-minute"
-        key_hour = f"{key_base:s}-hour"
-
-        try:
-            count_minute = cache.incr(key_minute)
-        except ValueError:
-            cache.set(key_minute, 1, 60)
-            count_minute = 1
-
-        try:
-            count_hour = cache.incr(key_hour)
-        except ValueError:
-            cache.set(key_hour, 1, 3600)
-            count_hour = 1
-
-        if count_minute > 20 or count_hour > 150:
-            raise exceptions.Throttled()
-
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
 
@@ -184,10 +181,10 @@ class UserViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
     permission_classes = [permissions.IsSelf]
     queryset = models.User.objects.all().select_related("profile_contact")
     serializer_class = serializers.UserSerializer
+    throttle_classes = [BurstRateThrottle, SustainedRateThrottle]
 
     def list(self, request, *args, **kwargs):
         """Limit listed users by a query with throttle protection."""
-        user = self.request.user
         queryset = self.filter_queryset(self.get_queryset())
 
         # Exclude inactive contacts
@@ -208,26 +205,6 @@ class UserViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
                 )  # Lower value than in contacts viewset, to improve matching
                 .order_by("-similarity")
             )
-
-        # Throttle protection
-        key_base = f"throttle-user-list-{user.id!s}"
-        key_minute = f"{key_base:s}-minute"
-        key_hour = f"{key_base:s}-hour"
-
-        try:
-            count_minute = cache.incr(key_minute)
-        except ValueError:
-            cache.set(key_minute, 1, 60)
-            count_minute = 1
-
-        try:
-            count_hour = cache.incr(key_hour)
-        except ValueError:
-            cache.set(key_hour, 1, 3600)
-            count_hour = 1
-
-        if count_minute > 20 or count_hour > 150:
-            raise exceptions.Throttled()
 
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
