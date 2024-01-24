@@ -16,6 +16,10 @@ from core import models
 
 from . import permissions, serializers
 
+EMAIL_SIMILARITY_THRESHOLD = 0.01
+# TrigramSimilarity threshold is lower for searching email than for names,
+# to improve matching results
+
 
 class NestedGenericViewSet(viewsets.GenericViewSet):
     """
@@ -200,9 +204,7 @@ class UserViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
             )
             queryset = (
                 queryset.annotate(similarity=similarity)
-                .filter(
-                    similarity__gte=0.01
-                )  # Lower value than in contacts viewset, to improve matching
+                .filter(similarity__gte=EMAIL_SIMILARITY_THRESHOLD)
                 .order_by("-similarity")
             )
 

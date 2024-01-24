@@ -205,6 +205,7 @@ def test_api_users_retrieve_me_authenticated():
     assert response.status_code == 200
     assert response.json() == {
         "id": str(user.id),
+        "email": str(user.email),
         "language": user.language,
         "timezone": str(user.timezone),
         "is_device": False,
