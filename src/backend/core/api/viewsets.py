@@ -172,7 +172,9 @@ class ContactViewSet(
         return super().perform_create(serializer)
 
 
-class UserViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class UserViewSet(
+    mixins.UpdateModelMixin, viewsets.GenericViewSet, mixins.ListModelMixin
+):
     """
     User viewset for all interactions with user infos and teams.
 
@@ -186,30 +188,31 @@ class UserViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
     queryset = models.User.objects.all().select_related("profile_contact")
     serializer_class = serializers.UserSerializer
     throttle_classes = [BurstRateThrottle, SustainedRateThrottle]
+    pagination_class = Pagination
 
-    def list(self, request, *args, **kwargs):
-        """Limit listed users by a query with throttle protection."""
-        queryset = self.filter_queryset(self.get_queryset())
+    def get_queryset(self):
+        """Limit listed users by a query. Pagination and throttle protection apply."""
+        queryset = self.queryset
 
-        # Exclude inactive contacts
-        queryset = queryset.filter(
-            is_active=True,
-        )
-
-        # Search by case-insensitive and accent-insensitive trigram similarity
-        if query := self.request.GET.get("q", ""):
-            similarity = TrigramSimilarity(
-                Func("email", function="unaccent"),
-                Func(Value(query), function="unaccent"),
-            )
-            queryset = (
-                queryset.annotate(similarity=similarity)
-                .filter(similarity__gte=EMAIL_SIMILARITY_THRESHOLD)
-                .order_by("-similarity")
+        if self.action == "list":
+            # Exclude inactive contacts
+            queryset = queryset.filter(
+                is_active=True,
             )
 
-        serializer = self.get_serializer(queryset, many=True)
-        return response.Response(serializer.data)
+            # Search by case-insensitive and accent-insensitive trigram similarity
+            if query := self.request.GET.get("q", ""):
+                similarity = TrigramSimilarity(
+                    Func("email", function="unaccent"),
+                    Func(Value(query), function="unaccent"),
+                )
+                queryset = (
+                    queryset.annotate(similarity=similarity)
+                    .filter(similarity__gte=EMAIL_SIMILARITY_THRESHOLD)
+                    .order_by("-similarity")
+                )
+
+        return queryset
 
     @decorators.action(
         detail=False,

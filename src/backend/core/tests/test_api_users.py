@@ -1,11 +1,15 @@
 """
 Test users API endpoints in the People core app.
 """
+from unittest import mock
+
 import pytest
+from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APIClient
 
 from core import factories, models
 from core.api import serializers
+from core.api.viewsets import Pagination
 
 from .utils import OIDCToken
 
@@ -35,7 +39,7 @@ def test_api_users_list_authenticated():
         "/api/v1.0/users/", HTTP_AUTHORIZATION=f"Bearer {jwt_token}"
     )
     assert response.status_code == 200
-    assert len(response.json()) == 3
+    assert len(response.json()["results"]) == 3
 
 
 def test_api_users_authenticated_list_by_email():
@@ -58,8 +62,8 @@ def test_api_users_authenticated_list_by_email():
         HTTP_AUTHORIZATION=f"Bearer {jwt_token}",
     )
 
-    assert response.status_code == 200
-    user_ids = [user["id"] for user in response.json()]
+    assert response.status_code == HTTP_200_OK
+    user_ids = [user["id"] for user in response.json()["results"]]
     assert user_ids[0] == str(dave.id)
 
     # Partial query should work
@@ -68,7 +72,7 @@ def test_api_users_authenticated_list_by_email():
     )
 
     assert response.status_code == 200
-    user_ids = [user["id"] for user in response.json()]
+    user_ids = [user["id"] for user in response.json()["results"]]
     assert user_ids[0] == str(frank.id)
 
     # Result that matches a trigram twice ranks better than result that matches once
@@ -77,7 +81,7 @@ def test_api_users_authenticated_list_by_email():
     )
 
     assert response.status_code == 200
-    user_ids = [user["id"] for user in response.json()]
+    user_ids = [user["id"] for user in response.json()["results"]]
     # "Nicole Foole" matches twice on "ole"
     assert user_ids == [str(nicole.id), str(frank.id)]
 
@@ -87,7 +91,7 @@ def test_api_users_authenticated_list_by_email():
     )
 
     assert response.status_code == 200
-    user_ids = [user["id"] for user in response.json()]
+    user_ids = [user["id"] for user in response.json()["results"]]
     assert user_ids == [str(nicole.id), str(frank.id)]
 
 
@@ -106,7 +110,7 @@ def test_api_users_authenticated_list_uppercase_content():
     )
 
     assert response.status_code == 200
-    user_ids = [user["id"] for user in response.json()]
+    user_ids = [user["id"] for user in response.json()["results"]]
     assert user_ids == [str(dave.id)]
 
     # Partial query
@@ -115,7 +119,7 @@ def test_api_users_authenticated_list_uppercase_content():
     )
 
     assert response.status_code == 200
-    user_ids = [user["id"] for user in response.json()]
+    user_ids = [user["id"] for user in response.json()["results"]]
     assert user_ids == [str(dave.id)]
 
 
@@ -134,7 +138,7 @@ def test_api_users_list_authenticated_capital_query():
     )
 
     assert response.status_code == 200
-    user_ids = [user["id"] for user in response.json()]
+    user_ids = [user["id"] for user in response.json()["results"]]
     assert user_ids == [str(dave.id)]
 
     # Partial uppercase email
@@ -143,7 +147,7 @@ def test_api_users_list_authenticated_capital_query():
     )
 
     assert response.status_code == 200
-    user_ids = [user["id"] for user in response.json()]
+    user_ids = [user["id"] for user in response.json()["results"]]
     assert user_ids == [str(dave.id)]
 
 
@@ -162,7 +166,7 @@ def test_api_contacts_list_authenticated_accented_query():
     )
 
     assert response.status_code == 200
-    user_ids = [user["id"] for user in response.json()]
+    user_ids = [user["id"] for user in response.json()["results"]]
     assert user_ids == [str(helene.id)]
 
     # Unaccented partial email
@@ -171,8 +175,47 @@ def test_api_contacts_list_authenticated_accented_query():
     )
 
     assert response.status_code == 200
-    user_ids = [user["id"] for user in response.json()]
+    user_ids = [user["id"] for user in response.json()["results"]]
     assert user_ids == [str(helene.id)]
+
+
+@mock.patch.object(Pagination, "get_page_size", return_value=3)
+def test_api_users_list_pagination(
+    _mock_page_size,
+):
+    """Pagination should work as expected."""
+    identity = factories.IdentityFactory()
+    user = identity.user
+    jwt_token = OIDCToken.for_user(user)
+
+    factories.UserFactory.create_batch(4)
+
+    # Get page 1
+    response = APIClient().get(
+        "/api/v1.0/users/", HTTP_AUTHORIZATION=f"Bearer {jwt_token}"
+    )
+
+    assert response.status_code == HTTP_200_OK
+    content = response.json()
+
+    assert content["count"] == 5
+    assert len(content["results"]) == 3
+    assert content["next"] == "http://testserver/api/v1.0/users/?page=2"
+    assert content["previous"] is None
+
+    # Get page 2
+    response = APIClient().get(
+        "/api/v1.0/users/?page=2", HTTP_AUTHORIZATION=f"Bearer {jwt_token}"
+    )
+
+    assert response.status_code == HTTP_200_OK
+    content = response.json()
+
+    assert content["count"] == 5
+    assert content["next"] is None
+    assert content["previous"] == "http://testserver/api/v1.0/users/"
+
+    assert len(content["results"]) == 2
 
 
 def test_api_users_retrieve_me_anonymous():
