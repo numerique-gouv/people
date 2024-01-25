@@ -11,6 +11,40 @@ RUN apt-get update && \
   apt-get -y upgrade && \
   rm -rf /var/lib/apt/lists/*
 
+
+### ---- Front-end builder image ----
+FROM node:20 as front-builder
+
+# Copy frontend app sources
+COPY ./src/frontend /builder
+
+WORKDIR /builder/apps/desk
+
+RUN yarn install --frozen-lockfile && \
+    yarn build
+
+
+# ---- Front-end image ----
+FROM nginxinc/nginx-unprivileged:1.25 as frontend
+
+# Un-privileged user running the application
+ARG DOCKER_USER
+USER ${DOCKER_USER}
+
+COPY --from=front-builder \
+    /builder/apps/desk/out \
+    /usr/share/nginx/html
+
+COPY ./docker/files/etc/nginx/conf.d /etc/nginx/conf.d:ro
+
+# Copy entrypoint
+COPY ./docker/files/usr/local/bin/entrypoint /usr/local/bin/entrypoint
+
+ENTRYPOINT [ "/usr/local/bin/entrypoint" ]
+
+CMD ["nginx", "-g", "daemon off;"]
+
+
 # ---- Back-end builder image ----
 FROM base as back-builder
 

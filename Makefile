@@ -92,8 +92,10 @@ bootstrap: \
 .PHONY: bootstrap
 
 # -- Docker/compose
-build: ## build the app-dev container
+build: ## build the dev and demo containers
 	@$(COMPOSE) build app-dev
+	@$(COMPOSE) build nginx
+	@$(COMPOSE) build app
 .PHONY: build
 
 down: ## stop and remove containers, networks, images, and volumes

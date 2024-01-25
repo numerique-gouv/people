@@ -260,7 +260,7 @@ class Base(Configuration):
     # CORS
     CORS_ALLOW_CREDENTIALS = True
     CORS_ALLOW_ALL_ORIGINS = values.BooleanValue(False)
-    CORS_ALLOWED_ORIGINS = values.ListValue([])
+    CORS_ALLOWED_ORIGINS = values.ListValue([], environ_name="CORS_ALLOWED_ORIGINS")
     CORS_ALLOWED_ORIGIN_REGEXES = values.ListValue([])
 
     # Sentry
@@ -556,8 +556,6 @@ class Demo(Production):
 
     nota bene: it should inherit from the Production environment.
     """
-
-    CSRF_TRUSTED_ORIGINS = ["http://localhost:8082"]
 
     STORAGES = {
         "default": {

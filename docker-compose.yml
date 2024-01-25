@@ -67,9 +67,12 @@ services:
     image: people:production
     environment:
       - DJANGO_CONFIGURATION=Demo
+      - DJANGO_CORS_ALLOWED_ORIGINS=http://localhost:8088
     env_file:
       - env.d/development/common
       - env.d/development/postgresql
+    ports:
+      - "8082:8000"
     volumes:
       - ./data/media:/data/media
     depends_on:
@@ -89,15 +92,15 @@ services:
       - app
 
   nginx:
-    image: nginx:1.25
+    build:
+      context: .
+      target: frontend
+    image: people:frontend
     ports:
-      - "8082:8082"
       - "8088:8088"
       - "8083:8083"
     volumes:
       - ./docker/files/etc/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./src/frontend/apps/desk/out:/home/desk
-      - ./data/media:/data/media:ro
     depends_on:
       - app
       - keycloak
