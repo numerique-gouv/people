@@ -44,7 +44,7 @@ def test_api_users_list_authenticated():
 
 def test_api_users_authenticated_list_by_email():
     """
-    Authenticated users should be able to search users with a case insensitive and
+    Authenticated users should be able to search users with a case-insensitive and
     partial query on the email.
     """
     user = factories.UserFactory(email="tester@ministry.fr")
@@ -103,7 +103,7 @@ def test_api_users_authenticated_list_uppercase_content():
 
     dave = factories.UserFactory(email="DAVID.BOWMAN@INTENSEWORK.COM")
 
-    # Unaccented full adress
+    # Unaccented full address
     response = APIClient().get(
         "/api/v1.0/users/?q=david.bowman@intensework.com",
         HTTP_AUTHORIZATION=f"Bearer {jwt_token}",
