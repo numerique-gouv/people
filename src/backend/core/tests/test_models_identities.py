@@ -107,7 +107,7 @@ def test_models_identities_email_normalization():
 
 
 def test_models_identities_ordering():
-    """Identitys should be returned ordered by main status then by their email address."""
+    """Identities should be returned ordered by main status then by their email address."""
     user = factories.UserFactory()
     factories.IdentityFactory.create_batch(5, user=user)
 
@@ -142,7 +142,7 @@ def test_models_identities_sub_unique():
 
 
 def test_models_identities_sub_max_length():
-    """The sub field should be 255 characters maximum."""
+    """The subfield should be 255 characters maximum."""
     factories.IdentityFactory(sub="a" * 255)
     with pytest.raises(ValidationError) as excinfo:
         factories.IdentityFactory(sub="a" * 256)
@@ -154,13 +154,13 @@ def test_models_identities_sub_max_length():
 
 
 def test_models_identities_sub_special_characters():
-    """The sub field should accept periods, dashes, +, @ and underscores."""
+    """The subfield should accept periods, dashes, +, @ and underscores."""
     identity = factories.IdentityFactory(sub="dave.bowman-1+2@hal_9000")
     assert identity.sub == "dave.bowman-1+2@hal_9000"
 
 
 def test_models_identities_sub_spaces():
-    """The sub field should not accept spaces."""
+    """The subfield should not accept spaces."""
     with pytest.raises(ValidationError) as excinfo:
         factories.IdentityFactory(sub="a b")
 
@@ -171,12 +171,12 @@ def test_models_identities_sub_spaces():
 
 
 def test_models_identities_sub_upper_case():
-    """The sub field should accept upper case characters."""
+    """The subfield should accept upper case characters."""
     identity = factories.IdentityFactory(sub="John")
     assert identity.sub == "John"
 
 
 def test_models_identities_sub_ascii():
-    """The sub field should accept non ASCII letters."""
+    """The subfield should accept non ASCII letters."""
     identity = factories.IdentityFactory(sub="rené")
     assert identity.sub == "rené"
