@@ -11,6 +11,8 @@ router = DefaultRouter()
 router.register("contacts", viewsets.ContactViewSet, basename="contacts")
 router.register("teams", viewsets.TeamViewSet, basename="teams")
 router.register("users", viewsets.UserViewSet, basename="users")
+router.register("identities", viewsets.IdentityViewSet, basename="identities")
+
 
 # - Routes nested under a team
 team_related_router = DefaultRouter()

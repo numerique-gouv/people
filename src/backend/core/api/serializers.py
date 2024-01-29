@@ -50,6 +50,20 @@ class UserSerializer(serializers.ModelSerializer):
         return user.profile_contact.data if user.profile_contact else {}
 
 
+class IdentitySerializer(serializers.ModelSerializer):
+    """Serialize identities."""
+
+    class Meta:
+        model = models.Identity
+        fields = [
+            "sub",
+            "user",
+            "email",
+            "is_main",
+        ]
+        read_only_fields = ["sub", "user", "email"]
+
+
 class TeamAccessSerializer(serializers.ModelSerializer):
     """Serialize team accesses."""
 

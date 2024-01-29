@@ -172,6 +172,43 @@ class ContactViewSet(
         return super().perform_create(serializer)
 
 
+class IdentityViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+    """
+    Identity viewset.
+
+    GET /api/identities/&q=query
+        Return a list of identities whose email matches the query. Similarity
+        is calculated using trigram similarity, allowing for partial,
+        case-insensitive matches and accented queries.
+    """
+
+    queryset = models.Identity.objects.all()
+    serializer_class = serializers.IdentitySerializer
+    throttle_classes = [BurstRateThrottle, SustainedRateThrottle]
+    pagination_class = Pagination
+
+    def get_queryset(self):
+        """
+        Limit listed identities by a query. Pagination and throttle protection apply.
+        """
+        queryset = self.queryset
+
+        if self.action == "list":
+            # Search by case-insensitive and accent-insensitive trigram similarity
+            if query := self.request.GET.get("q", ""):
+                similarity = TrigramSimilarity(
+                    Func("email", function="unaccent"),
+                    Func(Value(query), function="unaccent"),
+                )
+                queryset = (
+                    queryset.annotate(similarity=similarity)
+                    .filter(similarity__gte=EMAIL_SIMILARITY_THRESHOLD)
+                    .order_by("-similarity")
+                )
+
+        return queryset
+
+
 class UserViewSet(
     mixins.UpdateModelMixin, viewsets.GenericViewSet, mixins.ListModelMixin
 ):
@@ -181,7 +218,7 @@ class UserViewSet(
     GET /api/users/&q=query
         Return a list of users whose email matches the query. Similarity is
         calculated using trigram similarity, allowing for partial, case
-        insensitive matches and accentuated queries.
+        insensitive matches and accented queries.
     """
 
     permission_classes = [permissions.IsSelf]
