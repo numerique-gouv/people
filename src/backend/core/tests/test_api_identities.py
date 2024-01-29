@@ -1,11 +1,14 @@
 """
 Test users API endpoints in the People core app.
 """
+from unittest import mock
+
 import pytest
 from rest_framework.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from rest_framework.test import APIClient
 
 from core import factories
+from core.api.viewsets import Pagination
 
 from .utils import OIDCToken
 
@@ -14,7 +17,7 @@ pytestmark = pytest.mark.django_db
 
 def test_api_identities_list_anonymous():
     """Anonymous users should not be allowed to list identities."""
-    response = APIClient().get("/api/v1.0/users/")
+    response = APIClient().get("/api/v1.0/identities/")
     assert response.status_code == HTTP_401_UNAUTHORIZED
     assert "Authentication credentials were not provided." in response.content.decode(
         "utf-8"
@@ -172,3 +175,42 @@ def test_api_identities_list_authenticated_accented_query():
     assert response.status_code == HTTP_200_OK
     identities = [identity["sub"] for identity in response.json()["results"]]
     assert identities[0] == str(helene.sub)
+
+
+@mock.patch.object(Pagination, "get_page_size", return_value=3)
+def test_api_users_list_pagination(
+    _mock_page_size,
+):
+    """Pagination should work as expected."""
+    identity = factories.IdentityFactory()
+    user = identity.user
+    jwt_token = OIDCToken.for_user(user)
+
+    factories.IdentityFactory.create_batch(4)
+
+    # Get page 1
+    response = APIClient().get(
+        "/api/v1.0/identities/", HTTP_AUTHORIZATION=f"Bearer {jwt_token}"
+    )
+
+    assert response.status_code == HTTP_200_OK
+    content = response.json()
+
+    assert content["count"] == 5
+    assert len(content["results"]) == 3
+    assert content["next"] == "http://testserver/api/v1.0/identities/?page=2"
+    assert content["previous"] is None
+
+    # Get page 2
+    response = APIClient().get(
+        "/api/v1.0/identities/?page=2", HTTP_AUTHORIZATION=f"Bearer {jwt_token}"
+    )
+
+    assert response.status_code == HTTP_200_OK
+    content = response.json()
+
+    assert content["count"] == 5
+    assert content["next"] is None
+    assert content["previous"] == "http://testserver/api/v1.0/identities/"
+
+    assert len(content["results"]) == 2

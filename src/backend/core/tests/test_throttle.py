@@ -22,7 +22,7 @@ def test_throttle():
     jwt_token = OIDCToken.for_user(user)
 
     client = APIClient()
-    endpoint = "/api/v1.0/users/"
+    endpoint = "/api/v1.0/identities/"
 
     # loop to activate throttle protection
     throttle_limit = int(

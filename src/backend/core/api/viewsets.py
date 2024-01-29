@@ -210,52 +210,21 @@ class IdentityViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
 
 
 class UserViewSet(
-    mixins.UpdateModelMixin, viewsets.GenericViewSet, mixins.ListModelMixin
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
 ):
-    """
-    User viewset for all interactions with user infos and teams.
-
-    GET /api/users/&q=query
-        Return a list of users whose email matches the query. Similarity is
-        calculated using trigram similarity, allowing for partial, case
-        insensitive matches and accented queries.
-    """
+    """User ViewSet"""
 
     permission_classes = [permissions.IsSelf]
     queryset = models.User.objects.all().select_related("profile_contact")
     serializer_class = serializers.UserSerializer
-    throttle_classes = [BurstRateThrottle, SustainedRateThrottle]
-    pagination_class = Pagination
-
-    def get_queryset(self):
-        """Limit listed users by a query. Pagination and throttle protection apply."""
-        queryset = self.queryset
-
-        if self.action == "list":
-            # Exclude inactive contacts
-            queryset = queryset.filter(
-                is_active=True,
-            )
-
-            # Search by case-insensitive and accent-insensitive trigram similarity
-            if query := self.request.GET.get("q", ""):
-                similarity = TrigramSimilarity(
-                    Func("email", function="unaccent"),
-                    Func(Value(query), function="unaccent"),
-                )
-                queryset = (
-                    queryset.annotate(similarity=similarity)
-                    .filter(similarity__gte=EMAIL_SIMILARITY_THRESHOLD)
-                    .order_by("-similarity")
-                )
-
-        return queryset
 
     @decorators.action(
         detail=False,
         methods=["get"],
         url_name="me",
         url_path="me",
+        permission_classes=[permissions.IsAuthenticated],
     )
     def get_me(self, request):
         """
