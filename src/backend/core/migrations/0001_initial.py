@@ -155,6 +155,10 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(fields=('user', 'email'), name='unique_user_email', violation_error_message='This email address is already declared for this user.'),
         ),
         migrations.AddConstraint(
+            model_name='invitation',
+            constraint=models.UniqueConstraint(fields=('email', 'team'), name='email_and_team_unique_together'),
+        ),
+        migrations.AddConstraint(
             model_name='teamaccess',
             constraint=models.UniqueConstraint(fields=('user', 'team'), name='unique_team_user', violation_error_message='This user is already in this team.'),
         ),

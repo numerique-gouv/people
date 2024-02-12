@@ -179,6 +179,6 @@ class InvitationFactory(factory.django.DjangoModelFactory):
         model = models.Invitation
 
     email = factory.Faker("email")
-    team = factory.SubFactory(TeamFactory)
     role = factory.fuzzy.FuzzyChoice([role[0] for role in models.RoleChoices.choices])
+    team = factory.SubFactory(TeamFactory)
     issuer = factory.SubFactory(UserFactory)

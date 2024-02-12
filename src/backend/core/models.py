@@ -461,6 +461,13 @@ class Invitation(BaseModel):
         related_name="invitations",
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["email", "team"], name="email_and_team_unique_together"
+            )
+        ]
+
     def __str__(self):
         return f"{self.email} invited to {self.team}"
 

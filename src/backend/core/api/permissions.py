@@ -3,6 +3,8 @@ from django.core import exceptions
 
 from rest_framework import permissions
 
+from core import models
+
 
 class IsAuthenticated(permissions.BasePermission):
     """
@@ -52,3 +54,23 @@ class AccessPermission(IsAuthenticated):
         """Check permission for a given object."""
         abilities = obj.get_abilities(request.user)
         return abilities.get(request.method.lower(), False)
+
+
+class RelatedTeamAccessPermission(IsAuthenticated):
+    """Permission class for team and related invitations."""
+
+    message = "Only administrators can invite members."
+
+    def has_permission(self, request, view):
+        team = models.Team.objects.get(id=view.kwargs["team_id"])
+        is_in_team = models.TeamAccess.objects.filter(
+            team=team, user=request.user
+        ).exists()
+
+        if not is_in_team:
+            return False
+
+        if view.action != "list":
+            return team.get_abilities(request.user)["manage_accesses"]
+
+        return True

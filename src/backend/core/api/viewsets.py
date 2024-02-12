@@ -1,6 +1,7 @@
 """API endpoints"""
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Func, Max, OuterRef, Q, Subquery, Value
+from django.shortcuts import get_object_or_404
 
 from rest_framework import (
     decorators,
@@ -9,9 +10,9 @@ from rest_framework import (
     mixins,
     pagination,
     response,
+    throttling,
     viewsets,
 )
-from rest_framework.throttling import UserRateThrottle
 
 from core import models
 
@@ -102,7 +103,7 @@ class Pagination(pagination.PageNumberPagination):
     page_size_query_param = "page_size"
 
 
-class BurstRateThrottle(UserRateThrottle):
+class BurstRateThrottle(throttling.UserRateThrottle):
     """
     Throttle rate for minutes. See DRF section in settings for default value.
     """
@@ -110,7 +111,7 @@ class BurstRateThrottle(UserRateThrottle):
     scope = "burst"
 
 
-class SustainedRateThrottle(UserRateThrottle):
+class SustainedRateThrottle(throttling.UserRateThrottle):
     """
     Throttle rate for hours. See DRF section in settings for default value.
     """
@@ -376,3 +377,35 @@ class TeamAccessViewSet(
                 raise exceptions.ValidationError({"role": message})
 
         serializer.save()
+
+
+class InvitationViewset(
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """API ViewSet for user invitations to team.
+
+    POST /api/v1.0/teams/<team_id>/invitations/ with expected data:
+        - email: str
+        - role: str [owner|admin|member]
+        - issuer : User, automatically added from user making query, if allowed
+        - team : Team, automatically added from requested URI
+        Return newly created invitation
+    """
+
+    lookup_field = "id"
+    pagination_class = Pagination
+    permission_classes = [
+        permissions.AccessPermission,
+        permissions.RelatedTeamAccessPermission,
+    ]
+    queryset = models.Invitation.objects.all().select_related("team")
+    serializer_class = serializers.InvitationSerializer
+
+    def perform_create(self, serializer, *args, **kwargs):
+        """Verify the issuer is allowed to send invitations to this team."""
+        user = self.request.user
+        team = get_object_or_404(models.Team, pk=self.kwargs["team_id"])
+
+        serializer.save(issuer=user, team=team)
+        return super().perform_create(serializer)

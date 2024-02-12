@@ -21,6 +21,11 @@ team_related_router.register(
     basename="team_accesses",
 )
 
+invitation_router = DefaultRouter()
+invitation_router.register(
+    "invitations", viewsets.InvitationViewset, basename="invitations"
+)
+
 urlpatterns = [
     path(
         f"api/{settings.API_VERSION}/",
@@ -31,6 +36,10 @@ urlpatterns = [
                 re_path(
                     r"^teams/(?P<team_id>[0-9a-z-]*)/",
                     include(team_related_router.urls),
+                ),
+                re_path(
+                    r"^teams/(?P<team_id>[0-9a-z-]*)/",
+                    include(invitation_router.urls),
                 ),
             ]
         ),
