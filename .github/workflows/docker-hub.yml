@@ -35,10 +35,20 @@ jobs:
         if: github.event_name != 'pull_request'
         run: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USER" --password-stdin
       -
-        name: Build and push
+        name: Build and push backend
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          target: production
+          push: true
+          tags: app-${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      -
+        name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: frontend
+          push: true
+          tags: frontend-${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
