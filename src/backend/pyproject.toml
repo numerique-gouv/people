@@ -50,6 +50,7 @@ dependencies = [
     "sentry-sdk==1.40.3",
     "url-normalize==1.4.3",
     "whitenoise==6.6.0",
+    "mozilla-django-oidc==4.0.0",
 ]
 
 [project.urls]
