@@ -381,6 +381,7 @@ class TeamAccessViewSet(
 
 class InvitationViewset(
     mixins.CreateModelMixin,
+    mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
     """API ViewSet for user invitations to team.
@@ -391,15 +392,17 @@ class InvitationViewset(
         - issuer : User, automatically added from user making query, if allowed
         - team : Team, automatically added from requested URI
         Return newly created invitation
+
+    GET /api/v1.0/teams/<team_id>/invitations/
+        Return list of invitations related to that team.
     """
 
     lookup_field = "id"
     pagination_class = Pagination
-    permission_classes = [
-        permissions.AccessPermission,
-        permissions.RelatedTeamAccessPermission,
-    ]
-    queryset = models.Invitation.objects.all().select_related("team")
+    permission_classes = [permissions.AccessPermission]
+    queryset = (
+        models.Invitation.objects.all().select_related("team").order_by("-created_at")
+    )
     serializer_class = serializers.InvitationSerializer
 
     def perform_create(self, serializer, *args, **kwargs):

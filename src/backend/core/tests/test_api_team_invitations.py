@@ -123,3 +123,27 @@ def test_api_team_invitations_cannot_duplicate_invitation():
     assert response.json()["__all__"] == [
         "Invitation with this Email address and Team already exists."
     ]
+
+
+def test_api_team_invitations_list_anonymous():
+    """Anonymous users should not be able to list invitations."""
+    team = factories.TeamFactory()
+    response = APIClient().get(f"/api/v1.0/teams/{team.id}/invitations/")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_api_team_invitations_list_authenticated():
+    """Authenticated user should be able to list only team they belong to."""
+    identity = factories.IdentityFactory()
+    jwt_token = OIDCToken.for_user(identity.user)
+
+    team = factories.TeamFactory(users=[(identity.user, "member")])
+    factories.InvitationFactory.create_batch(1, team=team, role="administrator")
+    factories.InvitationFactory.create_batch(3, team=team, role="member")
+
+    response = APIClient().get(
+        f"/api/v1.0/teams/{team.id}/invitations/",
+        HTTP_AUTHORIZATION=f"Bearer {jwt_token}",
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 4
