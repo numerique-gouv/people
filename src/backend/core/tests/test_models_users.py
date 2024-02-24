@@ -13,13 +13,11 @@ pytestmark = pytest.mark.django_db
 
 
 def test_models_users_str():
-    """The str representation should be the full name."""
-    user = factories.UserFactory()
-    contact = factories.ContactFactory(full_name="david bowman", owner=user)
-    user.profile_contact = contact
+    """The str representation should be the email."""
+    user = factories.UserFactory(email="david.bowman@gmail.com")
     user.save()
 
-    assert str(user) == "david bowman"
+    assert str(user) == "david.bowman@gmail.com"
 
 
 def test_models_users_id_unique():
@@ -45,35 +43,6 @@ def test_models_users_email_several_null():
 
     assert models.User.objects.filter(email__isnull=True).count() == 2
 
-
-def test_models_users_profile_not_owned():
-    """A user cannot declare as profile a contact that not is owned."""
-    user = factories.UserFactory()
-    contact = factories.ContactFactory(base=None, owner=None)
-
-    user.profile_contact = contact
-    with pytest.raises(ValidationError) as excinfo:
-        user.save()
-
-    assert (
-        str(excinfo.value)
-        == "{'__all__': ['Users can only declare as profile a contact they own.']}"
-    )
-
-
-def test_models_users_profile_owned_by_other():
-    """A user cannot declare as profile a contact that is owned by another user."""
-    user = factories.UserFactory()
-    contact = factories.ContactFactory()
-
-    user.profile_contact = contact
-    with pytest.raises(ValidationError) as excinfo:
-        user.save()
-
-    assert (
-        str(excinfo.value)
-        == "{'__all__': ['Users can only declare as profile a contact they own.']}"
-    )
 
 
 def test_models_users_send_mail_main_existing():

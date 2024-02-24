@@ -15,16 +15,14 @@ def test_models_team_accesses_str():
     """
     The str representation should include user name, team full name and role.
     """
-    contact = factories.ContactFactory(full_name="David Bowman")
-    user = contact.owner
-    user.profile_contact = contact
+    user = factories.UserFactory(email="david.bowman@example.org")
     user.save()
     access = factories.TeamAccessFactory(
         role="member",
         user=user,
         team__name="admins",
     )
-    assert str(access) == "David Bowman is member in team admins"
+    assert str(access) == "david.bowman@example.org is member in team admins"
 
 
 def test_models_team_accesses_unique():

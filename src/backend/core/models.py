@@ -151,13 +151,6 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
     """User model to work with OIDC only authentication."""
 
     email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
-    profile_contact = models.OneToOneField(
-        Contact,
-        on_delete=models.SET_NULL,
-        related_name="user",
-        blank=True,
-        null=True,
-    )
     language = models.CharField(
         max_length=10,
         choices=lazy(lambda: settings.LANGUAGES, tuple)(),
@@ -201,20 +194,7 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
         verbose_name_plural = _("users")
 
     def __str__(self):
-        return (
-            str(self.profile_contact)
-            if self.profile_contact
-            else self.email or str(self.id)
-        )
-
-    def clean(self):
-        """Validate fields."""
-        super().clean()
-
-        if self.profile_contact_id and not self.profile_contact.owner == self:
-            raise exceptions.ValidationError(
-                "Users can only declare as profile a contact they own."
-            )
+        return self.email or str(self.id)
 
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Email this user."""

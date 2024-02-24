@@ -75,32 +75,6 @@ def test_models_contacts_base_not_owned():
     )
 
 
-def test_models_contacts_profile_not_owned():
-    """A contact cannot be defined as profile for a user if is not owned."""
-    base_contact = factories.ContactFactory(owner=None, base=None)
-
-    with pytest.raises(ValidationError) as excinfo:
-        factories.UserFactory(profile_contact=base_contact)
-
-    assert (
-        str(excinfo.value)
-        == "{'__all__': ['Users can only declare as profile a contact they own.']}"
-    )
-
-
-def test_models_contacts_profile_owned_by_other():
-    """A contact cannot be defined as profile for a user if is owned by another user."""
-    contact = factories.ContactFactory()
-
-    with pytest.raises(ValidationError) as excinfo:
-        factories.UserFactory(profile_contact=contact)
-
-    assert (
-        str(excinfo.value)
-        == "{'__all__': ['Users can only declare as profile a contact they own.']}"
-    )
-
-
 def test_models_contacts_data_valid():
     """Contact information matching the jsonschema definition should be valid"""
     factories.ContactFactory(

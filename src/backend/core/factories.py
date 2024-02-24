@@ -115,7 +115,7 @@ class ContactFactory(BaseContactFactory):
         model = models.Contact
 
     base = factory.SubFactory("core.factories.ContactFactory", base=None, owner=None)
-    owner = factory.SubFactory("core.factories.UserFactory", profile_contact=None)
+    owner = factory.SubFactory("core.factories.UserFactory")
 
 
 class UserFactory(factory.django.DjangoModelFactory):

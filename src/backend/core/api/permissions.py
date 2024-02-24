@@ -39,10 +39,7 @@ class IsOwnedOrPublic(IsAuthenticated):
         if request.method in permissions.SAFE_METHODS and obj.owner is None:
             return True
 
-        try:
-            return obj.user == request.user
-        except exceptions.ObjectDoesNotExist:
-            return False
+        return False
 
 
 class AccessPermission(IsAuthenticated):

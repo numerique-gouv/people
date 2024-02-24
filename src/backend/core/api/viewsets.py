@@ -142,8 +142,6 @@ class ContactViewSet(
         queryset = queryset.filter(
             # - belong to another user (keep public and owned contacts)
             Q(owner__isnull=True) | Q(owner=user),
-            # - are profile contacts for a user
-            user__isnull=True,
             # - are overriden base contacts
             overriding_contacts__isnull=True,
         )
