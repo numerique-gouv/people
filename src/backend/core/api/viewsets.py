@@ -136,14 +136,11 @@ class ContactViewSet(
     def list(self, request, *args, **kwargs):
         """Limit listed users by a query with throttle protection."""
         user = self.request.user
-        queryset = self.filter_queryset(self.get_queryset())
-
-        # Exclude contacts that:
-        queryset = queryset.filter(
-            # - belong to another user (keep public and owned contacts)
-            Q(owner__isnull=True) | Q(owner=user),
-            # - are overriden base contacts
-            overriding_contacts__isnull=True,
+        queryset = (
+            self.filter_queryset(self.get_queryset())
+            .filter(
+                Q(owner=user),
+            )
         )
 
         # Search by case-insensitive and accent-insensitive trigram similarity

@@ -72,20 +72,15 @@ class BaseModel(models.Model):
 
 class Contact(BaseModel):
     """User contacts"""
-
-    base = models.ForeignKey(
-        "self",
-        on_delete=models.SET_NULL,
-        related_name="overriding_contacts",
-        null=True,
+    bases = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='related_contact',
         blank=True,
     )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="contacts",
-        null=True,
-        blank=True,
     )
     full_name = models.CharField(_("full name"), max_length=150, null=True, blank=True)
     short_name = models.CharField(_("short name"), max_length=30, null=True, blank=True)
@@ -110,31 +105,28 @@ class Contact(BaseModel):
         ordering = ("full_name", "short_name")
         verbose_name = _("contact")
         verbose_name_plural = _("contacts")
-        unique_together = ("owner", "base")
-        constraints = [
-            models.CheckConstraint(
-                check=~models.Q(base__isnull=False, owner__isnull=True),
-                name="base_owner_constraint",
-                violation_error_message="A contact overriding a base contact must be owned.",
-            ),
-            models.CheckConstraint(
-                check=~models.Q(base=models.F("id")),
-                name="base_not_self",
-                violation_error_message="A contact cannot be based on itself.",
-            ),
-        ]
 
     def __str__(self):
         return self.full_name or self.short_name
 
     def clean(self):
         """Validate fields."""
-        super().clean()
 
-        # Check if the contact points to a base contact that itself points to another base contact
-        if self.base_id and self.base.base_id:
+        if self.bases.all().contains(self.owner):
             raise exceptions.ValidationError(
-                "A contact cannot point to a base contact that itself points to a base contact."
+                {"bases": "A contact should not point to its owner."}
+            )
+
+        owner_bases_duplication = (
+            Contact.objects
+            .filter(owner=self.owner, bases__in=self.bases.all())
+            .exclude(id=self.id)
+            .exists()
+        )
+
+        if owner_bases_duplication:
+            raise exceptions.ValidationError(
+                {"bases": "Contacts with this Owner and Bases already exist."}
             )
 
         # Validate the content of the "data" field against our jsonschema definition
@@ -145,6 +137,8 @@ class Contact(BaseModel):
             field_path = ".".join(map(str, e.path))
             error_message = f"Validation error in '{field_path:s}': {e.message}"
             raise exceptions.ValidationError({"data": [error_message]}) from e
+
+        super().clean()
 
 
 class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):

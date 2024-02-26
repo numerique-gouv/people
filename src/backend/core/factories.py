@@ -13,8 +13,8 @@ from core import models
 fake = Faker()
 
 
-class BaseContactFactory(factory.django.DjangoModelFactory):
-    """A factory to create contacts for a user"""
+class ContactFactory(factory.django.DjangoModelFactory):
+    """Wip."""
 
     class Meta:
         model = models.Contact
@@ -107,15 +107,14 @@ class BaseContactFactory(factory.django.DjangoModelFactory):
         }
     )
 
-
-class ContactFactory(BaseContactFactory):
-    """A factory to create contacts for a user"""
-
-    class Meta:
-        model = models.Contact
-
-    base = factory.SubFactory("core.factories.ContactFactory", base=None, owner=None)
     owner = factory.SubFactory("core.factories.UserFactory")
+
+    @factory.post_generation
+    def bases(self, create, extracted, **kwargs):
+        """Wip."""
+
+        if create and extracted:
+            self.bases.set(extracted)
 
 
 class UserFactory(factory.django.DjangoModelFactory):

@@ -22,56 +22,31 @@ def test_models_contacts_str_short_name():
     assert str(contact) == "Dave"
 
 
-def test_models_contacts_base_self():
+def test_models_contacts_bases_self():
     """A contact should not point to itself as a base contact."""
     contact = factories.ContactFactory()
-    contact.base = contact
+    contact.bases.add(contact.owner)
 
     with pytest.raises(ValidationError) as excinfo:
         contact.save()
 
     error_message = (
-        "{'__all__': ['A contact cannot point to a base contact that itself points to a "
-        "base contact.', 'A contact cannot be based on itself.']}"
+        "{'bases': ['A contact should not point to its owner.']}"
     )
     assert str(excinfo.value) == error_message
 
 
-def test_models_contacts_base_to_base():
-    """A contact should not point to a base contact that is itself derived from a base contact."""
-    contact = factories.ContactFactory()
+def test_models_contacts_owner_bases_unique():
+    """There should be only one contact deriving from a given base user for a given owner."""
+    users = factories.UserFactory.create_batch(3)
+    contact = factories.ContactFactory(bases=users)
 
     with pytest.raises(ValidationError) as excinfo:
-        factories.ContactFactory(base=contact)
-
-    error_message = (
-        "{'__all__': ['A contact cannot point to a base contact that itself points to a "
-        "base contact.']}"
-    )
-    assert str(excinfo.value) == error_message
-
-
-def test_models_contacts_owner_base_unique():
-    """There should be only one contact deriving from a given base contact for a given owner."""
-    contact = factories.ContactFactory()
-
-    with pytest.raises(ValidationError) as excinfo:
-        factories.ContactFactory(base=contact.base, owner=contact.owner)
+        factories.ContactFactory(bases=[contact.bases.first()], owner=contact.owner)
 
     assert (
         str(excinfo.value)
-        == "{'__all__': ['Contact with this Owner and Base already exists.']}"
-    )
-
-
-def test_models_contacts_base_not_owned():
-    """A contact cannot have a base and not be owned."""
-    with pytest.raises(ValidationError) as excinfo:
-        factories.ContactFactory(owner=None)
-
-    assert (
-        str(excinfo.value)
-        == "{'__all__': ['A contact overriding a base contact must be owned.']}"
+        == "{'bases': ['Contacts with this Owner and Bases already exist.']}"
     )
 
 

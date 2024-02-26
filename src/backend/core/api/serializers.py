@@ -12,7 +12,7 @@ class ContactSerializer(serializers.ModelSerializer):
         model = models.Contact
         fields = [
             "id",
-            "base",
+            "bases",
             "data",
             "full_name",
             "owner",
@@ -22,8 +22,35 @@ class ContactSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Make "base" field readonly but only for update/patch."""
-        validated_data.pop("base", None)
+        validated_data.pop("bases", None)
         return super().update(instance, validated_data)
+
+    def validate(self, attrs):
+        """Wip."""
+
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+
+        if 'bases' not in attrs:
+            return attrs
+
+        if user in attrs['bases']:
+            raise serializers.ValidationError(
+                {"bases": "A contact should not point to its owner."}
+            )
+
+        owner_bases_duplication = (
+            models.Contact.objects
+            .filter(owner=user, bases__in=attrs['bases'])
+            .exists()
+        )
+
+        if owner_bases_duplication:
+            raise exceptions.ValidationError(
+                {"bases": "Contacts with this Owner and Bases already exist."}
+            )
+
+        return attrs
 
 
 class UserSerializer(serializers.ModelSerializer):
