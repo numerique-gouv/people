@@ -2,6 +2,7 @@
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Func, Max, OuterRef, Prefetch, Q, Subquery, Value
 
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (
     decorators,
     exceptions,
@@ -316,6 +317,15 @@ class TeamAccessViewSet(
     queryset = models.TeamAccess.objects.all().select_related("user")
     list_serializer_class = serializers.TeamAccessReadOnlySerializer
     detail_serializer_class = serializers.TeamAccessSerializer
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    ordering_fields = [
+        "role",
+        "user__email",
+        "user__name",
+        "user__main_identity__email",
+        "user__main_identity__name",
+    ]
+    ordering = ["role"]
 
     def get_permissions(self):
         """User only needs to be authenticated to list team accesses"""

@@ -105,6 +105,78 @@ def test_api_team_accesses_list_authenticated_related():
     )
 
 
+@pytest.mark.parametrize(
+    "ordering_param, sort_query",
+    [
+        ("role", lambda x: x["role"]),
+        ("user__email", lambda x: x["user"]["email"]),
+        ("user__name", lambda x: x["user"]["name"]),
+    ],
+)
+def test_api_team_accesses__list__results_should_be_ordered(ordering_param, sort_query):
+    """
+    Can order results by name, email and role.
+    """
+    identity = factories.IdentityFactory(is_main=True)
+    owner_identity = factories.IdentityFactory(is_main=True)
+    member_identity = factories.IdentityFactory(is_main=True)
+
+    team = factories.TeamFactory()
+    user_access = factories.TeamAccessFactory(
+        team=team, user=identity.user, role="member"
+    )
+    owner_access = factories.TeamAccessFactory(
+        team=team, user=owner_identity.user, role="owner"
+    )
+    member_access = factories.TeamAccessFactory(
+        team=team, user=member_identity.user, role="administrator"
+    )
+
+    client = APIClient()
+    client.force_login(identity.user)
+    response = client.get(
+        f"/api/v1.0/teams/{team.id!s}/accesses/?ordering={ordering_param}",
+        format="json",
+        follow_redirect=True,
+    )
+    assert response.status_code == 200
+    assert response.json()["results"] == sorted(
+        [
+            {
+                "id": str(user_access.id),
+                "user": {
+                    "id": str(user_access.user.id),
+                    "email": str(identity.email),
+                    "name": str(identity.name),
+                },
+                "role": str(user_access.role),
+                "abilities": user_access.get_abilities(identity.user),
+            },
+            {
+                "id": str(owner_access.id),
+                "user": {
+                    "id": str(owner_access.user.id),
+                    "email": str(owner_identity.email),
+                    "name": str(owner_identity.name),
+                },
+                "role": str(owner_access.role),
+                "abilities": owner_access.get_abilities(identity.user),
+            },
+            {
+                "id": str(member_access.id),
+                "user": {
+                    "id": str(member_access.user.id),
+                    "email": str(member_identity.email),
+                    "name": str(member_identity.name),
+                },
+                "role": str(member_access.role),
+                "abilities": member_access.get_abilities(identity.user),
+            },
+        ],
+        key=sort_query,
+    )
+
+
 def test_api_team_accesses_list_authenticated_main_identity():
     """
     Name and email should be returned from main identity only
