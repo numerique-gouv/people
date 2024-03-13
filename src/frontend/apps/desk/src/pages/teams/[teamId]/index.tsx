@@ -6,28 +6,46 @@ import { ReactElement } from 'react';
 import { Box } from '@/components';
 import { TextErrors } from '@/components/TextErrors';
 import { MemberGrid, Role } from '@/features/members';
-import { TeamInfo, useTeam } from '@/features/teams/';
+import { Team as ITeam, TeamInfo, useTeam } from '@/features/teams/';
 import { NextPageWithLayout } from '@/types/next';
 
-import TeamLayout from './TeamLayout';
+import TeamLayout from '../TeamLayout';
 
-const Page: NextPageWithLayout = () => {
+type PropsWithTeamChildren<P = unknown> = P & {
+  children?: (team: ITeam, currentRole: Role) => ReactElement;
+};
+
+export function TeamDetailLayout({ children }: PropsWithTeamChildren) {
   const {
-    query: { id },
+    query: { teamId },
   } = useRouter();
 
-  if (typeof id !== 'string') {
+  if (typeof teamId !== 'string') {
     throw new Error('Invalid team id');
   }
 
-  return <Team id={id} />;
-};
+  return (
+    <TeamLayout>
+      <Team id={teamId}>
+        {(team, currentRole) => {
+          return (
+            <>
+              <TeamInfo team={team} />
+              <MemberGrid teamId={team.id} currentRole={currentRole} />
+              {children && children(team, currentRole)}
+            </>
+          );
+        }}
+      </Team>
+    </TeamLayout>
+  );
+}
 
 interface TeamProps {
   id: string;
 }
 
-const Team = ({ id }: TeamProps) => {
+const Team = ({ id, children }: PropsWithTeamChildren<TeamProps>) => {
   const { data: team, isLoading, isError, error } = useTeam({ id });
   const navigate = useNavigate();
 
@@ -54,16 +72,15 @@ const Team = ({ id }: TeamProps) => {
       ? Role.ADMIN
       : Role.MEMBER;
 
-  return (
-    <>
-      <TeamInfo team={team} />
-      <MemberGrid teamId={team.id} currentRole={currentRole} />
-    </>
-  );
+  return children && children(team, currentRole);
 };
 
-Page.getLayout = function getLayout(page: ReactElement) {
-  return <TeamLayout>{page}</TeamLayout>;
+const Page: NextPageWithLayout = () => {
+  return null;
+};
+
+Page.getLayout = function getLayout() {
+  return <TeamDetailLayout />;
 };
 
 export default Page;

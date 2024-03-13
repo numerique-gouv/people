@@ -1,9 +1,9 @@
-import { DataGrid, usePagination } from '@openfun/cunningham-react';
+import { Button, DataGrid, usePagination } from '@openfun/cunningham-react';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import IconUser from '@/assets/icons/icon-user.svg';
-import { Box, Card, TextErrors } from '@/components';
+import { Box, Card, StyledLink, TextErrors } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
 
 import { useTeamAccesses } from '../api/useTeamsAccesses';
@@ -42,73 +42,88 @@ export const MemberGrid = ({ teamId, currentRole }: MemberGridProps) => {
   };
 
   return (
-    <Card
-      className="m-b pb-s"
-      $overflow="auto"
-      $css={`
-        margin-top:0;
-        & .c__pagination__goto {
-          display: none;
-        }
-        & table th:first-child, 
-        & table td:first-child {
-          padding-right: 0;
-          width: 0;
-        }
+    <>
+      <Box className="m-b mb-s" $align="flex-end">
+        <StyledLink href={`/teams/${teamId}/members/add`}>
+          <Button
+            style={{
+              width: 'fit-content',
+              minWidth: '8rem',
+              justifyContent: 'center',
+            }}
+          >
+            {t('Add')}
+          </Button>
+        </StyledLink>
+      </Box>
+      <Card
+        className="m-b pb-s"
+        $overflow="auto"
+        $css={`
+          margin-top:0;
+          & .c__pagination__goto {
+            display: none;
+          }
+          & table th:first-child, 
+          & table td:first-child {
+            padding-right: 0;
+            width: 0;
+          }
       `}
-      aria-label={t('List members card')}
-    >
-      {error && <TextErrors causes={error.cause} />}
+        aria-label={t('List members card')}
+      >
+        {error && <TextErrors causes={error.cause} />}
 
-      <DataGrid
-        columns={[
-          {
-            id: 'icon-user',
-            renderCell() {
-              return (
-                <Box $direction="row" $align="center">
-                  <IconUser
-                    aria-label={t('Member icon')}
-                    width={20}
-                    height={20}
-                    color={colorsTokens()['primary-600']}
+        <DataGrid
+          columns={[
+            {
+              id: 'icon-user',
+              renderCell() {
+                return (
+                  <Box $direction="row" $align="center">
+                    <IconUser
+                      aria-label={t('Member icon')}
+                      width={20}
+                      height={20}
+                      color={colorsTokens()['primary-600']}
+                    />
+                  </Box>
+                );
+              },
+            },
+            {
+              headerName: t('Names'),
+              field: 'user.name',
+            },
+            {
+              field: 'user.email',
+              headerName: t('Emails'),
+            },
+            {
+              id: 'role',
+              headerName: t('Roles'),
+              renderCell({ row }) {
+                return dictRole[row.role];
+              },
+            },
+            {
+              id: 'column-actions',
+              renderCell: ({ row }) => {
+                return (
+                  <MemberAction
+                    teamId={teamId}
+                    access={row}
+                    currentRole={currentRole}
                   />
-                </Box>
-              );
+                );
+              },
             },
-          },
-          {
-            headerName: t('Names'),
-            field: 'user.name',
-          },
-          {
-            field: 'user.email',
-            headerName: t('Emails'),
-          },
-          {
-            id: 'role',
-            headerName: t('Roles'),
-            renderCell({ row }) {
-              return dictRole[row.role];
-            },
-          },
-          {
-            id: 'column-actions',
-            renderCell: ({ row }) => {
-              return (
-                <MemberAction
-                  teamId={teamId}
-                  access={row}
-                  currentRole={currentRole}
-                />
-              );
-            },
-          },
-        ]}
-        rows={accesses || []}
-        isLoading={isLoading}
-        pagination={pagination}
-      />
-    </Card>
+          ]}
+          rows={accesses || []}
+          isLoading={isLoading}
+          pagination={pagination}
+        />
+      </Card>
+    </>
   );
 };
