@@ -6,7 +6,7 @@ import IconUser from '@/assets/icons/icon-user.svg';
 import { Box, Card, StyledLink, TextErrors } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
 
-import { useTeamAccesses } from '../api/useTeamsAccesses';
+import { useTeamAccesses } from '../api/';
 import { PAGE_SIZE } from '../conf';
 import { Role } from '../types';
 
@@ -43,19 +43,21 @@ export const MemberGrid = ({ teamId, currentRole }: MemberGridProps) => {
 
   return (
     <>
-      <Box className="m-b mb-s" $align="flex-end">
-        <StyledLink href={`/teams/${teamId}/members/add`}>
-          <Button
-            style={{
-              width: 'fit-content',
-              minWidth: '8rem',
-              justifyContent: 'center',
-            }}
-          >
-            {t('Add')}
-          </Button>
-        </StyledLink>
-      </Box>
+      {currentRole !== Role.MEMBER && (
+        <Box className="m-b mb-s" $align="flex-end">
+          <StyledLink href={`/teams/${teamId}/members/add`}>
+            <Button
+              style={{
+                width: 'fit-content',
+                minWidth: '8rem',
+                justifyContent: 'center',
+              }}
+            >
+              {t('Add')}
+            </Button>
+          </StyledLink>
+        </Box>
+      )}
       <Card
         className="m-b pb-s"
         $overflow="auto"

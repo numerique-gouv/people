@@ -12,7 +12,9 @@ const Page: NextPageWithLayout = () => {
 Page.getLayout = function getLayout() {
   return (
     <TeamDetailLayout>
-      {(team) => <ModalAddMembers teamId={team.id} />}
+      {(team, currentRole) => (
+        <ModalAddMembers team={team} currentRole={currentRole} />
+      )}
     </TeamDetailLayout>
   );
 };
