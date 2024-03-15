@@ -14,10 +14,19 @@ const isValidEmail = (email: string) => {
   );
 };
 
-export type OptionSelect = Options<{
-  value: Partial<User> & { email: User['email'] };
+export interface OptionInvitation {
+  value: { email: string };
   label: string;
-}>;
+  type: 'invitation';
+}
+
+export interface OptionNewMember {
+  value: User;
+  label: string;
+  type: 'new_member';
+}
+
+export type OptionSelect = Options<OptionNewMember | OptionInvitation>;
 
 interface SearchMembersProps {
   team: Team;
@@ -49,6 +58,7 @@ export const SearchMembers = ({
       let users: OptionSelect = options.map((user) => ({
         value: user,
         label: user.name || '',
+        type: 'new_member',
       }));
 
       if (userQuery && isValidEmail(userQuery)) {
@@ -61,6 +71,7 @@ export const SearchMembers = ({
             {
               value: { email: userQuery },
               label: userQuery,
+              type: 'invitation',
             },
           ];
         }

@@ -14,11 +14,16 @@ import { APIError } from '@/api';
 import { Box, StyledLink, Text } from '@/components';
 import { Team } from '@/features/teams';
 
-import { useCreateInvitation } from '../api';
-import { Invitation, Role } from '../types';
+import { useCreateInvitation, useCreateTeamAccess } from '../api';
+import { Role } from '../types';
 
 import { ChooseRole } from './ChooseRole';
-import { OptionSelect, SearchMembers } from './SearchMembers';
+import {
+  OptionInvitation,
+  OptionNewMember,
+  OptionSelect,
+  SearchMembers,
+} from './SearchMembers';
 
 const GlobalStyle = createGlobalStyle`
   .c__modal {
@@ -41,20 +46,37 @@ export const ModalAddMembers = ({
   const [selectedRole, setSelectedRole] = useState<Role>(Role.MEMBER);
   const { toast } = useToastProvider();
   const { mutateAsync: createInvitation } = useCreateInvitation();
+  const { mutateAsync: createTeamAccess } = useCreateTeamAccess();
 
   const handleValidate = useCallback(
     () =>
-      void Promise.allSettled<Invitation>(
+      void Promise.allSettled<OptionInvitation | OptionNewMember>(
         selectedMembers.map((selectedMember) => {
-          return new Promise<Invitation>((resolve, reject) => {
-            createInvitation({
-              email: selectedMember.value.email,
+          if (selectedMember.type === 'invitation') {
+            return new Promise<OptionInvitation>((resolve, reject) => {
+              createInvitation({
+                email: selectedMember.value.email,
+                role: selectedRole,
+                teamId: team.id,
+              })
+                .then(() => {
+                  resolve(selectedMember);
+                })
+                .catch((error) => {
+                  reject(error);
+                });
+            });
+          }
+
+          return new Promise<OptionNewMember>((resolve, reject) => {
+            createTeamAccess({
               name: selectedMember.value.name,
               role: selectedRole,
               teamId: team.id,
+              userId: selectedMember.value.id,
             })
-              .then((data) => {
-                resolve(data);
+              .then(() => {
+                resolve(selectedMember);
               })
               .catch((error) => {
                 reject(error);
@@ -64,28 +86,32 @@ export const ModalAddMembers = ({
       ).then((results) => {
         void router.push(`/teams/${team.id}/`);
         results.forEach((result) => {
+          const toastOptions = {
+            duration: 4000,
+          };
+
           if (result.status === 'rejected') {
             const apiError = result.reason as APIError;
-            toast(apiError.message, VariantType.ERROR, {
-              duration: 4000,
-            });
+            toast(apiError.message, VariantType.ERROR, toastOptions);
           }
 
           if (result.status === 'fulfilled') {
-            toast(
-              t('Invitations sent to {{email}}', {
-                email: result.value.email,
-              }),
-              VariantType.SUCCESS,
-              {
-                duration: 4000,
-              },
-            );
+            const message =
+              result.value.type === 'invitation'
+                ? t('Invitations sent to {{email}}', {
+                    email: result.value.value.email,
+                  })
+                : t('Member {{name}} added to the team', {
+                    name: result.value.value.name,
+                  });
+
+            toast(message, VariantType.SUCCESS, toastOptions);
           }
         });
       }),
     [
       createInvitation,
+      createTeamAccess,
       router,
       selectedMembers,
       selectedRole,
