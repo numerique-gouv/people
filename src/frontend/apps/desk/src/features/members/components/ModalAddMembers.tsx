@@ -1,13 +1,21 @@
-import { Button, Modal, ModalSize } from '@openfun/cunningham-react';
+import {
+  Button,
+  Modal,
+  ModalSize,
+  VariantType,
+  useToastProvider,
+} from '@openfun/cunningham-react';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createGlobalStyle } from 'styled-components';
 
+import { APIError } from '@/api';
 import { Box, StyledLink, Text } from '@/components';
 import { Team } from '@/features/teams';
 
-import { Role } from '../types';
+import { useCreateInvitation } from '../api';
+import { Invitation, Role } from '../types';
 
 import { ChooseRole } from './ChooseRole';
 import { OptionSelect, SearchMembers } from './SearchMembers';
@@ -30,7 +38,62 @@ export const ModalAddMembers = ({
   const { t } = useTranslation();
   const router = useRouter();
   const [selectedMembers, setSelectedMembers] = useState<OptionSelect>([]);
-  const [, setSelectedRole] = useState<Role>(Role.MEMBER);
+  const [selectedRole, setSelectedRole] = useState<Role>(Role.MEMBER);
+  const { toast } = useToastProvider();
+  const { mutateAsync: createInvitation } = useCreateInvitation();
+
+  const handleValidate = useCallback(
+    () =>
+      void Promise.allSettled<Invitation>(
+        selectedMembers.map((selectedMember) => {
+          return new Promise<Invitation>((resolve, reject) => {
+            createInvitation({
+              email: selectedMember.value.email,
+              name: selectedMember.value.name,
+              role: selectedRole,
+              teamId: team.id,
+            })
+              .then((data) => {
+                resolve(data);
+              })
+              .catch((error) => {
+                reject(error);
+              });
+          });
+        }),
+      ).then((results) => {
+        void router.push(`/teams/${team.id}/`);
+        results.forEach((result) => {
+          if (result.status === 'rejected') {
+            const apiError = result.reason as APIError;
+            toast(apiError.message, VariantType.ERROR, {
+              duration: 4000,
+            });
+          }
+
+          if (result.status === 'fulfilled') {
+            toast(
+              t('Invitations sent to {{email}}', {
+                email: result.value.email,
+              }),
+              VariantType.SUCCESS,
+              {
+                duration: 4000,
+              },
+            );
+          }
+        });
+      }),
+    [
+      createInvitation,
+      router,
+      selectedMembers,
+      selectedRole,
+      t,
+      team.id,
+      toast,
+    ],
+  );
 
   return (
     <Modal
@@ -48,7 +111,7 @@ export const ModalAddMembers = ({
           color="primary"
           fullWidth
           disabled={!selectedMembers.length}
-          onClick={() => {}}
+          onClick={handleValidate}
         >
           {t('Validate')}
         </Button>
