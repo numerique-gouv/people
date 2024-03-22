@@ -19,6 +19,8 @@ import sentry_sdk
 from configurations import Configuration, values
 from sentry_sdk.integrations.django import DjangoIntegration
 
+from core.utils import JSONValue
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join("/", "data")
@@ -279,6 +281,13 @@ class Base(Configuration):
 
     # Sentry
     SENTRY_DSN = values.Value(None, environ_name="SENTRY_DSN")
+
+    # Synchronisation to Outline
+    # TEAM_WEBHOOKS environment variable should be a stringified JSON array of
+    # objects with the following structure:
+    # e.g:
+    # TEAM_WEBHOOKS=[{"url": "http://example.com", "secret": "secret", "verify": true}]
+    TEAM_WEBHOOKS = JSONValue([])
 
     # Easy thumbnails
     THUMBNAIL_EXTENSION = "webp"
