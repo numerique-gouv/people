@@ -203,7 +203,7 @@ class UserViewSet(
                 Prefetch(
                     "identities",
                     queryset=models.Identity.objects.filter(is_main=True),
-                    to_attr="main_identity",
+                    to_attr="_identities_main",
                 )
             )
 
@@ -242,9 +242,6 @@ class UserViewSet(
         Return information on currently logged user
         """
         user = request.user
-        user.main_identity = models.Identity.objects.filter(
-            user=user, is_main=True
-        ).first()
         return response.Response(
             self.serializer_class(user, context={"request": request}).data
         )
@@ -367,7 +364,7 @@ class TeamAccessViewSet(
                     Prefetch(
                         "user__identities",
                         queryset=models.Identity.objects.filter(is_main=True),
-                        to_attr="main_identity",
+                        to_attr="_identities_main",
                     )
                 )
                 # Abilities are computed based on logged-in user's role and
