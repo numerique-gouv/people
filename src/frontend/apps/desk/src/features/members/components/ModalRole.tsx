@@ -9,9 +9,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, Text, TextErrors } from '@/components';
-import { useAuthStore } from '@/features/auth';
 
 import { useUpdateTeamAccess } from '../api/useUpdateTeamAccess';
+import { useWhoAmI } from '../hooks/useWhoAmI';
 import { Access, Role } from '../types';
 
 import { ChooseRole } from './ChooseRole';
@@ -31,7 +31,6 @@ export const ModalRole = ({
 }: ModalRoleProps) => {
   const { t } = useTranslation();
   const [localRole, setLocalRole] = useState(access.role);
-  const { userData } = useAuthStore();
   const { toast } = useToastProvider();
   const {
     mutate: updateTeamAccess,
@@ -45,17 +44,7 @@ export const ModalRole = ({
       onClose();
     },
   });
-
-  const rolesAllowed = access.abilities.set_role_to;
-  const isLastOwner =
-    !rolesAllowed.length &&
-    access.role === Role.OWNER &&
-    userData?.id === access.user.id;
-
-  const isOtherOwner =
-    access.role === Role.OWNER &&
-    userData?.id &&
-    userData.id !== access.user.id;
+  const { isLastOwner, isOtherOwner } = useWhoAmI(access);
 
   const isNotAllowed = isOtherOwner || isLastOwner;
 
