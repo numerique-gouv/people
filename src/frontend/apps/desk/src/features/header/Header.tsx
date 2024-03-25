@@ -3,15 +3,16 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Box, Text } from '@/components/';
 import { ApplicationsMenu } from '@/features/header/ApplicationsMenu';
+import { Box, BoxButton, Text } from '@/components/';
+import { AccountDropdown } from '@/features/header/AccountDropdown';
 
 import { LanguagePicker } from '../language/';
 
 import { default as IconApplication } from './assets/icon-application.svg?url';
+import { default as IconCells } from './assets/icon-cells.svg?url';
 import { default as IconGouv } from './assets/icon-gouv.svg?url';
 import { default as IconMarianne } from './assets/icon-marianne.svg?url';
-import IconMyAccount from './assets/icon-my-account.png';
 
 export const HEADER_HEIGHT = '100px';
 
@@ -69,28 +70,13 @@ export const Header = () => {
               padding: 0;
             }
           `}
-          $gap="5rem"
+          $gap="1rem"
           $justify="flex-end"
           $direction="row"
         >
-          <Box $align="center" $direction="row">
-            <LanguagePicker />
-          </Box>
-          <Box $direction="row" $align="center">
-            <Box $direction="row" $align="center" $gap="1rem">
-              <Text $weight="bold" $theme="primary">
-                John Doe
-              </Text>
-              <Image
-                width={58}
-                height={58}
-                priority
-                src={IconMyAccount}
-                alt={t(`Profile picture`)}
-              />
-            </Box>
-            <ApplicationsMenu />
-          </Box>
+          <AccountDropdown />
+          <LanguagePicker />
+          <ApplicationsMenu />
         </Box>
       </Box>
     </StyledHeader>

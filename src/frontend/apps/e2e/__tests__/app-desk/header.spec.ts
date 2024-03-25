@@ -33,11 +33,29 @@ test.describe('Header', () => {
 
     await expect(header.getByAltText('Language Icon')).toBeVisible();
 
-    await expect(header.getByText('John Doe')).toBeVisible();
+    await expect(header.getByText('My account')).toBeVisible();
     await expect(
       header.getByRole('img', {
         name: 'profile picture',
       }),
     ).toBeVisible();
+  });
+
+  test('checks logout button', async ({ page }) => {
+    await page
+      .getByRole('button', {
+        name: 'My account',
+      })
+      .click();
+
+    await page
+      .getByRole('button', {
+        name: 'Logout',
+      })
+      .click();
+
+    // FIXME - assert the session has been killed in Keycloak
+
+    await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
   });
 });
