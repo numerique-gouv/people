@@ -105,7 +105,7 @@ jobs:
   test-e2e:
     runs-on: ubuntu-latest
     needs: build-mails
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -152,6 +152,10 @@ jobs:
 
       - name: Build CI App
         run: cd src/frontend/ && yarn ci:build
+
+      - name: Launch ngnix ci container
+        run: |
+          make run-ngnix-ci
 
       - name: Run e2e tests
         run: cd src/frontend/ && yarn e2e:test
