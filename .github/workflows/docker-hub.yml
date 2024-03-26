@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'main'
+      - 'jr-test-push-tag'
     tags:
       - 'v*'
   pull_request:
