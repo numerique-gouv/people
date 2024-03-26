@@ -95,7 +95,18 @@ services:
     volumes:
       - ./docker/files/etc/nginx/conf.d:/etc/nginx/conf.d:ro
     depends_on:
-      - app
+      - app-dev
+      - keycloak
+
+  nginx-ci:
+    image: nginx:1.25
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src/frontend/apps/desk/conf/default.conf:/etc/nginx/conf.d/default.conf
+      - ./src/frontend/apps/desk/out:/usr/share/nginx/html
+    depends_on:
+      - app-dev
       - keycloak
 
   dockerize:
