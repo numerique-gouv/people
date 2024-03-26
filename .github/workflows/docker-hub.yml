@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'main'
+      - 'al-demo-devops'
     tags:
       - 'v*'
   pull_request:
@@ -35,7 +35,6 @@ jobs:
           age-key: ${{ secrets.SOPS_PRIVATE }}
       -
         name: Login to DockerHub
-        if: github.event_name != 'pull_request'
         run: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USER" --password-stdin
       -
         name: Build and push
@@ -44,7 +43,7 @@ jobs:
           context: .
           target: backend-production
           build-args: DOCKER_USER=${{ env.DOCKER_USER }}:-1000
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -68,7 +67,6 @@ jobs:
           age-key: ${{ secrets.SOPS_PRIVATE }}
       -
         name: Login to DockerHub
-        if: github.event_name != 'pull_request'
         run: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USER" --password-stdin
       -
         name: Build and push
@@ -77,7 +75,7 @@ jobs:
           context: .
           target: frontend-production
           build-args: DOCKER_USER=${{ env.DOCKER_USER }}:-1000
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 

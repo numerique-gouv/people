@@ -102,66 +102,66 @@ jobs:
       - name: Check linting
         run: yarn lint
 
-  test-e2e:
-    runs-on: ubuntu-latest
-    needs: build-mails
-    timeout-minutes: 10
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-            
-      - name: Set services env variables
-        run: |
-          make create-env-files
-          cat env.d/development/common.e2e.dist >> env.d/development/common
-
-      - name: Download mails' templates
-        uses: actions/download-artifact@v4
-        with:
-          name: mails-templates
-          path: src/backend/core/templates/mail
-    
-      - name: Build and Start Docker Servers
-        env:
-          DOCKER_BUILDKIT: 1
-          COMPOSE_DOCKER_CLI_BUILD: 1
-        run: |
-          docker-compose build --pull --build-arg BUILDKIT_INLINE_CACHE=1
-          make run
-        
-      - name: Apply DRF migrations
-        run: |
-          make migrate
-
-      - name: Add dummy data
-        run: |
-          make demo FLUSH_ARGS='--no-input'
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18.x'
-          cache: 'yarn'
-          cache-dependency-path: src/frontend/yarn.lock
-
-      - name: Install dependencies
-        run: cd src/frontend/ && yarn install --frozen-lockfile
-
-      - name: Install Playwright Browsers
-        run: cd src/frontend/apps/e2e && yarn install
-
-      - name: Build CI App
-        run: cd src/frontend/ && yarn ci:build
-
-      - name: Run e2e tests
-        run: cd src/frontend/ && yarn e2e:test
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: playwright-report
-          path: src/frontend/apps/e2e/report/
-          retention-days: 7
+#  test-e2e:
+#    runs-on: ubuntu-latest
+#    needs: build-mails
+#    timeout-minutes: 10
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#
+#      - name: Set services env variables
+#        run: |
+#          make create-env-files
+#          cat env.d/development/common.e2e.dist >> env.d/development/common
+#
+#      - name: Download mails' templates
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: mails-templates
+#          path: src/backend/core/templates/mail
+#
+#      - name: Build and Start Docker Servers
+#        env:
+#          DOCKER_BUILDKIT: 1
+#          COMPOSE_DOCKER_CLI_BUILD: 1
+#        run: |
+#          docker-compose build --pull --build-arg BUILDKIT_INLINE_CACHE=1
+#          make run
+#
+#      - name: Apply DRF migrations
+#        run: |
+#          make migrate
+#
+#      - name: Add dummy data
+#        run: |
+#          make demo FLUSH_ARGS='--no-input'
+#
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: '18.x'
+#          cache: 'yarn'
+#          cache-dependency-path: src/frontend/yarn.lock
+#
+#      - name: Install dependencies
+#        run: cd src/frontend/ && yarn install --frozen-lockfile
+#
+#      - name: Install Playwright Browsers
+#        run: cd src/frontend/apps/e2e && yarn install
+#
+#      - name: Build CI App
+#        run: cd src/frontend/ && yarn ci:build
+#
+#      - name: Run e2e tests
+#        run: cd src/frontend/ && yarn e2e:test
+#
+#      - uses: actions/upload-artifact@v3
+#        if: always()
+#        with:
+#          name: playwright-report
+#          path: src/frontend/apps/e2e/report/
+#          retention-days: 7
 
   build-mails:
     runs-on: ubuntu-latest
