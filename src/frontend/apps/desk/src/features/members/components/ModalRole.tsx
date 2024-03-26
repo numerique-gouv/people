@@ -38,6 +38,7 @@ export const ModalRole = ({
     mutate: updateTeamAccess,
     error: errorUpdate,
     isError: isErrorUpdate,
+    isPending,
   } = useUpdateTeamAccess({
     onSuccess: () => {
       toast(t('The role has been updated'), VariantType.SUCCESS, {
@@ -64,7 +65,12 @@ export const ModalRole = ({
     <Modal
       isOpen
       leftActions={
-        <Button color="secondary" fullWidth onClick={() => onClose()}>
+        <Button
+          color="secondary"
+          fullWidth
+          onClick={() => onClose()}
+          disabled={isPending}
+        >
           {t('Cancel')}
         </Button>
       }
@@ -82,7 +88,7 @@ export const ModalRole = ({
               accessId: access.id,
             });
           }}
-          disabled={isNotAllowed}
+          disabled={isNotAllowed || isPending}
         >
           {t('Validate')}
         </Button>

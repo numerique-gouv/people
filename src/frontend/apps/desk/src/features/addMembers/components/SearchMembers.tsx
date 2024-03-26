@@ -14,11 +14,13 @@ export type OptionsSelect = Options<OptionSelect>;
 interface SearchMembersProps {
   team: Team;
   setSelectedMembers: (value: OptionsSelect) => void;
+  disabled?: boolean;
 }
 
 export const SearchMembers = ({
   team,
   setSelectedMembers,
+  disabled,
 }: SearchMembersProps) => {
   const { t } = useTranslation();
   const [input, setInput] = useState('');
@@ -86,6 +88,7 @@ export const SearchMembers = ({
 
   return (
     <AsyncSelect
+      isDisabled={disabled}
       aria-label={t('Find a member to add to the team')}
       isMulti
       loadOptions={loadOptions}
