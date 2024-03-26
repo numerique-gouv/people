@@ -92,7 +92,7 @@ test.describe('Teams Create', () => {
 
     await page.goto('/teams');
     await expect(buttonCreateHomepage).toBeVisible();
-    await expect(page).toHaveURL(/\/teams$/);
+    await expect(page).toHaveURL(/\/teams\/$/);
   });
 
   test('checks error when duplicate team', async ({ page, browserName }) => {

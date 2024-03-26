@@ -25,10 +25,10 @@ export const Menu = () => {
     >
       <Box className="pt-b" $direction="column" $gap="0.8rem">
         <MenuItem Icon={IconSearch} label={t('Search')} href="/" />
-        <MenuItem Icon={IconFavorite} label={t('Favorite')} href="/favorite" />
-        <MenuItem Icon={IconRecent} label={t('Recent')} href="/recent" />
-        <MenuItem Icon={IconContacts} label={t('Contacts')} href="/contacts" />
-        <MenuItem Icon={IconGroup} label={t('Groups')} href="/groups" />
+        <MenuItem Icon={IconFavorite} label={t('Favorite')} href="/favorite/" />
+        <MenuItem Icon={IconRecent} label={t('Recent')} href="/recent/" />
+        <MenuItem Icon={IconContacts} label={t('Contacts')} href="/contacts/" />
+        <MenuItem Icon={IconGroup} label={t('Groups')} href="/groups/" />
       </Box>
     </Box>
   );
