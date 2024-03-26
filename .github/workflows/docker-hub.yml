@@ -27,6 +27,10 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: lasuite/people-backend
+          tags: |
+            type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
+            type=sha,enable=true,priority=100,prefix=sha-,suffix=,format=short
+
       -
         name: Load sops secrets
         uses: rouja/actions-sops@main
@@ -60,6 +64,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: lasuite/people-frontend
+          tags: |
+            type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
+            type=sha,enable=true,priority=100,prefix=sha-,suffix=,format=short
       -
         name: Load sops secrets
         uses: rouja/actions-sops@main
