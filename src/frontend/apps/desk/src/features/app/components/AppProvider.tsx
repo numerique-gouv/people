@@ -21,11 +21,7 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function AppProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function AppProvider({ children }: { children: React.ReactNode }) {
   const { theme } = useCunninghamTheme();
 
   return (

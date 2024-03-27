@@ -2,9 +2,8 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Text } from '@/components';
+import { MainLayout } from '@/features/app/';
 import { NextPageWithLayout } from '@/types/next';
-
-import MainLayout from './MainLayout';
 
 const Page: NextPageWithLayout = () => {
   const { t } = useTranslation();
