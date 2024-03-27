@@ -104,6 +104,10 @@ logs: ## display app-dev logs (follow mode)
 	@$(COMPOSE) logs -f app-dev
 .PHONY: logs
 
+run-ngnix-ci: ## start the wsgi (production) and development server
+	@$(COMPOSE) up --force-recreate -d nginx-ci
+.PHONY: run-ngnix-ci
+
 run: ## start the wsgi (production) and development server
 	@$(COMPOSE) up --force-recreate -d nginx
 	@$(COMPOSE) up --force-recreate -d app-dev

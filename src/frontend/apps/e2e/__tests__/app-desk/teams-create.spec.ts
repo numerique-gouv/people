@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { keyCloakSignIn } from './common';
+import { createTeam, keyCloakSignIn } from './common';
 
 test.beforeEach(async ({ page, browserName }) => {
   await page.goto('/');
@@ -81,6 +81,34 @@ test.describe('Teams Create', () => {
     await expect(elTeam).toBeVisible();
   });
 
+  test('it checks the url with teams/[id]', async ({ page, browserName }) => {
+    const responsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('/teams/') && response.status() === 201,
+    );
+
+    const teamName = await createTeam(page, 'team-checks-url', browserName, 1);
+
+    const response = await responsePromise;
+    const teamId = (await response.json()).id;
+
+    await page.goto(`/`);
+
+    await expect(
+      page.getByRole('button', {
+        name: 'Create a new team',
+      }),
+    ).toBeVisible({
+      timeout: 15000,
+    });
+
+    await page.goto(`/teams/${teamId}/`);
+
+    await expect(page.getByText(`Members of “${teamName[0]}“`)).toBeVisible({
+      timeout: 15000,
+    });
+  });
+
   test('checks alias teams url with homepage', async ({ page }) => {
     await expect(page).toHaveURL('/');
 
@@ -92,7 +120,7 @@ test.describe('Teams Create', () => {
 
     await page.goto('/teams');
     await expect(buttonCreateHomepage).toBeVisible();
-    await expect(page).toHaveURL(/\/teams$/);
+    await expect(page).toHaveURL(/\/teams\/$/);
   });
 
   test('checks error when duplicate team', async ({ page, browserName }) => {
