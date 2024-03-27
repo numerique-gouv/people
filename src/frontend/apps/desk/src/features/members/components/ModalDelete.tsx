@@ -128,7 +128,7 @@ export const ModalDelete = ({ access, onClose, team }: ModalDeleteProps) => {
           $theme="primary"
         >
           <IconUser width={20} height={20} />
-          <Text>{access.user.name}</Text>
+          <Text>{access.user.name || access.user.email}</Text>
         </Text>
       </Box>
     </Modal>
