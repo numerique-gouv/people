@@ -88,6 +88,9 @@ export const TeamItem = ({ team }: TeamProps) => {
           <Text
             $weight="bold"
             $color={!hasMembers ? colorsTokens()['greyscale-600'] : undefined}
+            $css={`
+              min-width: nowrap;
+            `}
           >
             {team.name}
           </Text>
