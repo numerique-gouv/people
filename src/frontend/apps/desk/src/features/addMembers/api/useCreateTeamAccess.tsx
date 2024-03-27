@@ -20,7 +20,7 @@ export const createTeamAccess = async ({
   role,
   teamId,
 }: CreateTeamAccessParams): Promise<Access> => {
-  const response = await fetchAPI(`teams/${teamId}/accesssssssssssssssses/`, {
+  const response = await fetchAPI(`teams/${teamId}/accesssssssssssssssssssses/`, {
     method: 'POST',
     body: JSON.stringify({
       user: userId,
