@@ -54,8 +54,12 @@ export const ModalAddMembers = ({
   const [selectedMembers, setSelectedMembers] = useState<OptionsSelect>([]);
   const [selectedRole, setSelectedRole] = useState<Role>(Role.MEMBER);
   const { toast } = useToastProvider();
-  const { mutateAsync: createInvitation } = useCreateInvitation();
-  const { mutateAsync: createTeamAccess } = useCreateTeamAccess();
+  const { mutateAsync: createInvitation, isPending: isPendingInvitation } =
+    useCreateInvitation();
+  const { mutateAsync: createTeamAccess, isPending: isPendingTeamAccess } =
+    useCreateTeamAccess();
+
+  const isPending = isPendingTeamAccess || isPendingInvitation;
 
   const switchActions = (selectedMembers: OptionsSelect) =>
     selectedMembers.map(async (selectedMember) => {
@@ -133,7 +137,12 @@ export const ModalAddMembers = ({
     <Modal
       isOpen
       leftActions={
-        <Button color="secondary" fullWidth onClick={onClose}>
+        <Button
+          color="secondary"
+          fullWidth
+          onClick={onClose}
+          disabled={isPending}
+        >
           {t('Cancel')}
         </Button>
       }
@@ -144,7 +153,7 @@ export const ModalAddMembers = ({
         <Button
           color="primary"
           fullWidth
-          disabled={!selectedMembers.length}
+          disabled={!selectedMembers.length || isPending}
           onClick={() => void handleValidate()}
         >
           {t('Validate')}
@@ -162,7 +171,11 @@ export const ModalAddMembers = ({
     >
       <GlobalStyle />
       <Box className="mb-xl mt-l">
-        <SearchMembers team={team} setSelectedMembers={setSelectedMembers} />
+        <SearchMembers
+          team={team}
+          setSelectedMembers={setSelectedMembers}
+          disabled={isPending}
+        />
         {selectedMembers.length > 0 && (
           <Box className="mt-s">
             <Text as="h4" $textAlign="left" className="mb-t">
@@ -170,7 +183,7 @@ export const ModalAddMembers = ({
             </Text>
             <ChooseRole
               currentRole={currentRole}
-              disabled={false}
+              disabled={isPending}
               defaultRole={Role.MEMBER}
               setRole={setSelectedRole}
             />
