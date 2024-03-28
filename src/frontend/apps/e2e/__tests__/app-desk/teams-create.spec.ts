@@ -112,6 +112,12 @@ test.describe('Teams Create', () => {
     await expect(
       page.getByText('Team with this Slug already exists.'),
     ).toBeVisible();
+
+    await expect(
+      page.getByText('Team with this Slug already exists.'),
+    ).toBeHidden({
+      timeout: 15000,
+    });
   });
 
   test('checks 404 on teams/[id] page', async ({ page }) => {
