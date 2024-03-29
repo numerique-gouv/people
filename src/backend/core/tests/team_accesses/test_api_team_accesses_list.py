@@ -124,6 +124,146 @@ def test_api_team_accesses_list_authenticated_related():
     )
 
 
+def test_api_team_accesses_list_find_members(django_assert_num_queries):
+    """
+    Authenticated users should be able to search users access with a case-insensitive and
+    partial query on the name.
+    """
+    user = factories.UserFactory(admin_email="tester@ministry.fr")
+    factories.IdentityFactory(user=user, email=user.email, name="john doe")
+
+    dave = factories.IdentityFactory(name="dave bowman", email=None, is_main=True)
+    frank = factories.IdentityFactory(name="frank poole", email=None, is_main=True)
+    mary = factories.IdentityFactory(name="mary poole", email=None, is_main=True)
+    nicole = factories.IdentityFactory(name="nicole foole", email=None, is_main=True)
+    factories.IdentityFactory(name="heywood floyd", email=None, is_main=True)
+    factories.IdentityFactory(name="Andrei Smyslov", email=None, is_main=True)
+    factories.TeamFactory.create_batch(10)
+
+    # Add Mary, Nicole and Dave in the same team
+    team = factories.TeamFactory(
+        name="Odyssey",
+        users=[
+            (mary.user, models.RoleChoices.OWNER),
+            (nicole.user, models.RoleChoices.ADMIN),
+            (dave.user, models.RoleChoices.MEMBER),
+        ],
+    )
+    factories.TeamFactory(users=[(frank.user, models.RoleChoices.MEMBER)])
+
+    # Search users in the team Odyssey
+    client = APIClient()
+    client.force_login(mary.user)
+
+    # 6 queries are needed here:
+    # - user authenticated
+    # - search user query
+    # - TeamAccess
+    # - Identity
+    # - Team
+    # - Count TeamAccess current team with role owner
+    with django_assert_num_queries(6):
+        response = client.get(
+            f"/api/v1.0/teams/{team.id!s}/accesses/",
+        )
+    assert response.status_code == HTTP_200_OK
+    assert response.json()["count"] == 3
+
+    # We can find David Bowman
+    # 4 queries are needed here:
+    # - user authenticated
+    # - search user query
+    # - TeamAccess
+    # - Identity
+    with django_assert_num_queries(4):
+        response = client.get(
+            f"/api/v1.0/teams/{team.id!s}/accesses/?q=bowman",
+        )
+    assert response.status_code == HTTP_200_OK
+    assert response.json()["count"] == 1
+    dave_access = dave.user.accesses.get(team=team)
+    assert response.json()["results"][0]["id"] == str(dave_access.id)
+
+    # We can only find Nicole and Mary
+    # 6 queries are needed here:
+    # - user authenticated
+    # - search user query
+    # - TeamAccess
+    # - Identity
+    # - Team
+    # - Count TeamAccess current team with role owner
+    with django_assert_num_queries(6):
+        response = client.get(
+            f"/api/v1.0/teams/{team.id!s}/accesses/?q=ool",
+        )
+    assert response.status_code == HTTP_200_OK
+    assert response.json()["count"] == 2
+    user_access_ids = sorted([user["id"] for user in response.json()["results"]])
+    mary_access = mary.user.accesses.get(team=team)
+    nicole_access = nicole.user.accesses.get(team=team)
+    assert sorted([str(mary_access.id), str(nicole_access.id)]) == user_access_ids
+
+    # We can only find Nicole and Mary
+    # 6 queries are needed here:
+    # - user authenticated
+    # - search user query
+    # - TeamAccess
+    # - Identity
+    # - Team
+    # - Count TeamAccess current team with role owner
+    with django_assert_num_queries(6):
+        response = client.get(
+            f"/api/v1.0/teams/{team.id!s}/accesses/?q=ool",
+        )
+    assert response.status_code == HTTP_200_OK
+    assert response.json()["count"] == 2
+    user_access_ids = sorted([user["id"] for user in response.json()["results"]])
+    mary_access = mary.user.accesses.get(team=team)
+    nicole_access = nicole.user.accesses.get(team=team)
+    assert sorted([str(mary_access.id), str(nicole_access.id)]) == user_access_ids
+
+
+def test_api_team_accesses__list_find_members_by_email():
+    """
+    Authenticated users should be able to search users access with a case-insensitive and
+    partial query on the email.
+    """
+    user = factories.IdentityFactory(is_main=True, name=None).user
+
+    # set all names to None to match only on emails
+    colleague1 = factories.IdentityFactory(
+        is_main=True, name=None, email="prudence_crandall@edu.us"
+    ).user
+    colleague2 = factories.IdentityFactory(
+        is_main=True, name=None, email="reinebrunehaut@gouv.fr"
+    ).user
+    colleague3 = factories.IdentityFactory(
+        is_main=True, name=None, email="artemisia.gentileschi@arte.it"
+    ).user
+
+    # Add Mary, Nicole and Dave in the same team
+    team = factories.TeamFactory(
+        users=[
+            (user, models.RoleChoices.ADMIN),
+            (colleague1, models.RoleChoices.OWNER),
+            (colleague2, models.RoleChoices.ADMIN),
+            (colleague3, models.RoleChoices.MEMBER),
+        ],
+    )
+    factories.TeamAccessFactory.create_batch(4)
+
+    # Search users in the team Odyssey
+    client = APIClient()
+    client.force_login(user)
+
+    response = client.get(
+        f"/api/v1.0/teams/{team.id!s}/accesses/?q=BRUNE",
+    )
+    assert response.status_code == HTTP_200_OK
+    assert response.json()["count"] == 1
+    assert response.json()["results"][0]["user"]["email"] == "reinebrunehaut@gouv.fr"
+
+
 def test_api_team_accesses_list_authenticated_main_identity():
     """
     Name and email should be returned from main identity only
