@@ -60,11 +60,12 @@ export const Panel = () => {
         `}
       >
         <Box
-          className="pr-l pl-s pt-s pb-s"
+          className="pl-s pt-s pb-s"
           $direction="row"
           $align="center"
           $justify="space-between"
           $css={`
+            padding-right: 2.4rem;
             border-bottom: 1px solid ${colorsTokens()['primary-300']};
           `}
         >

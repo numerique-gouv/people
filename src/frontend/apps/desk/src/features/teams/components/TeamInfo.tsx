@@ -10,12 +10,78 @@ import { Role, Team } from '../types';
 
 import { ModalUpdateTeam } from './ModalUpdateTeam';
 import { TeamActions } from './TeamActions';
+import styled from 'styled-components';
 
 const format: DateTimeFormatOptions = {
   month: '2-digit',
   day: '2-digit',
   year: 'numeric',
 };
+
+const Wrapper = styled(Card)`
+  min-height: fit-content;
+
+  .actions-container {
+    align-self: flex-end;
+    position: absolute;
+    right: 0;
+  }
+
+  margin-bottom: 3rem;
+`;
+
+const Header = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  gap: 2rem;
+
+  margin: 3rem 1.25rem 2rem 3rem;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+
+    p,
+    h3 {
+      margin: 0;
+      display: inline-block;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    h3 {
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin-top: 0.625rem;
+      font-size: 0.81rem;
+      color: #303c4b;
+    }
+  }
+`;
+
+const SubHeader = styled.div`
+  gap: 1rem 2rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  border-top: 1px solid var(--border-color);
+  padding: 1rem 0 1.5rem 8rem;
+  flex-wrap: wrap;
+  overflow: hidden;
+
+  p {
+    display: inline;
+    font-size: 0.81rem;
+    margin: 0;
+  }
+`;
 
 interface TeamInfoProps {
   team: Team;
@@ -38,13 +104,13 @@ export const TeamInfo = ({ team, currentRole }: TeamInfoProps) => {
 
   return (
     <>
-      <Card className="m-b" style={{ paddingBottom: 0 }}>
-        <Box $css="align-self: flex-end;" className="m-t" $position="absolute">
+      <Wrapper>
+        <div className="actions-container m-t">
           <TeamActions currentRole={currentRole} team={team} />
-        </Box>
-        <Box className="m-b" $direction="row" $align="center" $gap="1.5rem">
+        </div>
+        <Header>
           <IconGroup
-            width={44}
+            width={48}
             color={colorsTokens()['primary-text']}
             aria-label={t('icon group')}
             style={{
@@ -52,46 +118,35 @@ export const TeamInfo = ({ team, currentRole }: TeamInfoProps) => {
               alignSelf: 'start',
             }}
           />
-          <Box>
-            <Text as="h3" $weight="bold" $size="1.25rem" className="mt-0">
+          <div>
+            <h3>
               {t('Members of “{{teamName}}“', {
                 teamName: team.name,
               })}
-            </Text>
-            <Text $size="m">
+            </h3>
+            <p>
               {t('Add people to the “{{teamName}}“ group.', {
                 teamName: team.name,
               })}
-            </Text>
-          </Box>
-        </Box>
-        <Box
-          className="p-s"
-          $gap="3rem"
-          $direction="row"
-          $justify="start"
-          $css={`
-            border-top: 1px solid ${colorsTokens()['card-border']};
-            padding-left: 1.5rem;
-          `}
+            </p>
+          </div>
+        </Header>
+        <SubHeader
+          style={{
+            '--border-color': colorsTokens()['card-border'],
+          }}
         >
-          <Text $size="s" as="p">
-            {t('{{count}} member', { count: team.accesses.length })}
-          </Text>
-          <Text $size="s" $display="inline" as="p">
+          <p>{t('{{count}} member', { count: team.accesses.length })}</p>
+          <p>
             {t('Created at')}&nbsp;
-            <Text $weight="bold" $display="inline">
-              {created_at}
-            </Text>
-          </Text>
-          <Text $size="s" $display="inline" as="p">
+            <strong>{created_at}</strong>
+          </p>
+          <p>
             {t('Last update at')}&nbsp;
-            <Text $weight="bold" $display="inline">
-              {updated_at}
-            </Text>
-          </Text>
-        </Box>
-      </Card>
+            <strong>{updated_at}</strong>
+          </p>
+        </SubHeader>
+      </Wrapper>
       {isModalUpdateOpen && (
         <ModalUpdateTeam
           onClose={() => setIsModalUpdateOpen(false)}

@@ -1,17 +1,31 @@
+import styled from 'styled-components';
+
 import { Box } from '@/components';
 import { HEADER_HEIGHT, Header } from '@/features/header';
-import { Menu } from '@/features/menu';
+import { MENU_WIDTH, Menu } from '@/features/menu';
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+`;
+
+const Main = styled.main`
+  display: flex;
+  flex-wrap: nowrap;
+  flex-basis: 100%;
+  height: calc(100vh - ${HEADER_HEIGHT});
+  max-width: calc(100% - ${MENU_WIDTH});
+`;
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Box $height="100vh" $css="overflow:hidden;">
+    <Box>
       <Header />
-      <Box $css="flex: 1;" $direction="row">
+      <Container>
         <Menu />
-        <Box as="main" $height={`calc(100vh - ${HEADER_HEIGHT})`} $width="100%">
-          {children}
-        </Box>
-      </Box>
+        <Main>{children}</Main>
+      </Container>
     </Box>
   );
 }

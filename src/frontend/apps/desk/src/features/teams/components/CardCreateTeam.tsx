@@ -2,6 +2,7 @@ import { Button } from '@openfun/cunningham-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import IconGroup from '@/assets/icons/icon-group2.svg';
 import { Box, Card, StyledLink, Text } from '@/components';
@@ -10,6 +11,18 @@ import { useCunninghamTheme } from '@/cunningham';
 import { useCreateTeam } from '../api';
 
 import { InputTeamName } from './InputTeamName';
+
+const Wrapper = styled(Card)`
+  height: 70%;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 24rem;
+  min-width: 22rem;
+  margin: auto;
+`;
 
 export const CardCreateTeam = () => {
   const { t } = useTranslation();
@@ -28,15 +41,7 @@ export const CardCreateTeam = () => {
   const { colorsTokens } = useCunninghamTheme();
 
   return (
-    <Card
-      className="p-b"
-      $height="70%"
-      $justify="space-between"
-      $width="100%"
-      $maxWidth="24rem"
-      $minWidth="22rem"
-      aria-label={t('Create new team card')}
-    >
+    <Wrapper aria-label={t('Create new team card')}>
       <Box $gap="1rem">
         <Box $align="center">
           <IconGroup
@@ -64,6 +69,6 @@ export const CardCreateTeam = () => {
           {t('Create the team')}
         </Button>
       </Box>
-    </Card>
+    </Wrapper>
   );
 };

@@ -1,6 +1,7 @@
 import {
   Button,
   DataGrid,
+  Input,
   SortModel,
   usePagination,
 } from '@openfun/cunningham-react';
@@ -17,6 +18,7 @@ import { useTeamAccesses } from '../api/';
 import { PAGE_SIZE } from '../conf';
 
 import { MemberAction } from './MemberAction';
+import styled from 'styled-components';
 
 interface MemberGridProps {
   team: Team;
@@ -49,6 +51,37 @@ function formatSortModel(
   const orderingField = mapping[field] || field;
   return sort === 'desc' ? `-${orderingField}` : orderingField;
 }
+
+const Wrapper = styled(Card)`
+  .c__pagination {
+    width: fit-content;
+    margin-bottom: 1rem;
+  }
+
+  .c__pagination__goto {
+    display: none;
+  }
+  table th:first-child,
+  table td:first-child {
+    padding-right: 0;
+    width: 3.5rem;
+  }
+  table td:last-child {
+    text-align: right;
+  }
+`;
+
+const Actions = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  margin-bottom: 1.25rem;
+
+  .filter-container {
+    width: 50%;
+  }
+`;
 
 export const MemberGrid = ({ team, currentRole }: MemberGridProps) => {
   const [isModalMemberOpen, setIsModalMemberOpen] = useState(false);
@@ -96,7 +129,14 @@ export const MemberGrid = ({ team, currentRole }: MemberGridProps) => {
   return (
     <>
       {currentRole !== Role.MEMBER && (
-        <Box className="m-b mb-s" $align="flex-end">
+        <Actions>
+          <div className="filter-container">
+            <Input
+              rightIcon={<span className="material-icons">search</span>}
+              label="Filtrer la liste des membres"
+              fullWidth
+            />
+          </div>
           <Button
             aria-label={t('Add members to the team')}
             style={{
@@ -108,29 +148,10 @@ export const MemberGrid = ({ team, currentRole }: MemberGridProps) => {
           >
             {t('Add')}
           </Button>
-        </Box>
+        </Actions>
       )}
-      <Card
-        className="m-b pb-s"
-        $overflow="auto"
-        $css={`
-          margin-top:0;
-          & .c__pagination__goto {
-            display: none;
-          }
-          & table th:first-child, 
-          & table td:first-child {
-            padding-right: 0;
-            width: 3.5rem;
-          }
-          & table td:last-child {
-            text-align: right;
-          }
-      `}
-        aria-label={t('List members card')}
-      >
+      <Wrapper aria-label={t('List members card')}>
         {error && <TextErrors causes={error.cause} />}
-
         <DataGrid
           columns={[
             {
@@ -179,7 +200,7 @@ export const MemberGrid = ({ team, currentRole }: MemberGridProps) => {
           onSortModelChange={setSortModel}
           sortModel={sortModel}
         />
-      </Card>
+      </Wrapper>
       {isModalMemberOpen && (
         <ModalAddMembers
           currentRole={currentRole}

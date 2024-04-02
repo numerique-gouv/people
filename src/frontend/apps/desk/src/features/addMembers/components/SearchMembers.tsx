@@ -110,9 +110,7 @@ export const SearchMembers = ({
       onInputChange={onInputChangeHandle}
       inputValue={input}
       placeholder={t('Search new members (name or email)')}
-      noOptionsMessage={() =>
-        t('Invite new members to {{teamName}}', { teamName: team.name })
-      }
+      noOptionsMessage={() => t('Invite new members to your team')}
       onChange={(value) => {
         setInput('');
         setUserQuery('');

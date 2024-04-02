@@ -63,7 +63,12 @@ export const TeamItem = ({ team }: TeamProps) => {
       `}
     >
       <StyledLink className="p-s pt-t pb-t" href={`/teams/${team.id}`}>
-        <Box $align="center" $direction="row" $gap="0.5rem">
+        <Box
+          $align="center"
+          $direction="row"
+          $gap="0.5rem"
+          $css="min-width: 0;"
+        >
           {hasMembers ? (
             <IconGroup
               aria-label={t(`Teams icon`)}
@@ -89,7 +94,10 @@ export const TeamItem = ({ team }: TeamProps) => {
             $weight="bold"
             $color={!hasMembers ? colorsTokens()['greyscale-600'] : undefined}
             $css={`
-              min-width: 14rem;
+              display: inline-block;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              white-space: nowrap;
             `}
           >
             {team.name}
