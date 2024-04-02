@@ -268,7 +268,7 @@ class Base(Configuration):
     EMAIL_PORT = values.PositiveIntegerValue(None)
     EMAIL_USE_TLS = values.BooleanValue(False)
     EMAIL_USE_SSL = values.BooleanValue(False)
-    EMAIL_FROM = values.Value("from@example.com")
+    EMAIL_FROM = values.Value("do-not-reply@desk.beta.numerique.gouv.fr")
 
     AUTH_USER_MODEL = "core.User"
     INVITATION_VALIDITY_DURATION = 604800  # 7 days, in seconds
