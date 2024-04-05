@@ -213,11 +213,10 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
         verbose_name_plural = _("users")
 
     def __str__(self):
-        return (
-            str(self.profile_contact)
-            if self.profile_contact
-            else self.admin_email or str(self.id)
-        )
+        if self._get_identities_main().count() != 0:
+            return f"{self.name} ({self.email})"
+
+        return self.admin_email or str(self.id)
 
     def _get_identities_main(self):
         """Return a list with the main identity or an empty list."""

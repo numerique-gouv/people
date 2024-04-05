@@ -14,13 +14,19 @@ pytestmark = pytest.mark.django_db
 
 
 def test_models_users_str():
-    """The str representation should be the full name."""
-    user = factories.UserFactory()
-    contact = factories.ContactFactory(full_name="david bowman", owner=user)
-    user.profile_contact = contact
-    user.save()
+    """
+    user str representation should return main name and main email when main identity exists.
+    Otherwise, it should return the admin_email or, as a last resort, uuid.
+    """
+    main_identity = factories.IdentityFactory(is_main=True)
+    user = main_identity.user
+    assert str(user) == f"{main_identity.name} ({main_identity.email})"
 
-    assert str(user) == "david bowman"
+    no_identity_user = factories.UserFactory()
+    assert str(no_identity_user) == no_identity_user.admin_email
+
+    no_identity_no_email_user = factories.UserFactory(admin_email=None)
+    assert str(no_identity_no_email_user) == str(no_identity_no_email_user.id)
 
 
 def test_models_users_id_unique():
