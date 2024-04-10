@@ -20,13 +20,16 @@ def test_models_users_str():
     """
     main_identity = factories.IdentityFactory(is_main=True)
     user = main_identity.user
-    assert str(user) == f"{main_identity.name} ({main_identity.email})"
+    assert str(user) == str(main_identity).replace("[main]", "")
 
     no_identity_user = factories.UserFactory()
-    assert str(no_identity_user) == no_identity_user.admin_email
+    assert str(no_identity_user) == f"AdminUser {no_identity_user.admin_email}"
 
-    no_identity_no_email_user = factories.UserFactory(admin_email=None)
-    assert str(no_identity_no_email_user) == str(no_identity_no_email_user.id)
+    no_identity_no_adminemail_user = factories.UserFactory(admin_email=None)
+    assert (
+        str(no_identity_no_adminemail_user)
+        == f"uuid:{str(no_identity_no_adminemail_user.id)}"
+    )
 
 
 def test_models_users_id_unique():

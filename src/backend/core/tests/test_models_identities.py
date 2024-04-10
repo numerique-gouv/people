@@ -12,18 +12,39 @@ pytestmark = pytest.mark.django_db
 
 
 def test_models_identities_str_main():
-    """The str representation should be the email address with indication that it is main."""
-    identity = factories.IdentityFactory(email="david@example.com")
-    assert str(identity) == "david@example.com[main]"
+    """
+    The str representation should be the name and email address
+    with indication that it is main.
+    """
+    identity = factories.IdentityFactory(
+        is_main=True, name="Dave Bowman", email="david@example.com"
+    )
+    assert str(identity) == "Dave Bowman david@example.com[main]"
 
 
 def test_models_identities_str_secondary():
-    """The str representation of a secondary email should be the email address."""
+    """The str representation of a secondary email should be the name and email address."""
     main_identity = factories.IdentityFactory()
     secondary_identity = factories.IdentityFactory(
-        user=main_identity.user, email="david@example.com"
+        user=main_identity.user, name="Dave Bowman", email="david@example.com"
     )
-    assert str(secondary_identity) == "david@example.com"
+    assert str(secondary_identity) == "Dave Bowman david@example.com"
+
+
+def test_models_identities_str_no_name():
+    """When no name is set, only the email is returned."""
+    identity = factories.IdentityFactory(
+        is_main=True, name=None, email="david@example.com"
+    )
+    assert str(identity) == "david@example.com[main]"
+
+
+def test_models_identities_str_sub():
+    """When neither email nor name is provided, the sub is returned."""
+    identity = factories.IdentityFactory(
+        is_main=True, name=None, email=None, sub="ThisSub"
+    )
+    assert str(identity) == "sub:ThisSub[main]"
 
 
 def test_models_identities_is_main_automatic():
