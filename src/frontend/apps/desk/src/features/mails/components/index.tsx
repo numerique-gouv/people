@@ -1,2 +1,2 @@
-export * from './MailContent';
-export * from './MailLayout';
+export * from './MailsContent';
+export * from './MailsLayout';
