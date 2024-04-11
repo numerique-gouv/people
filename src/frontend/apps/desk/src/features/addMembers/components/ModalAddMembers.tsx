@@ -10,13 +10,13 @@ import { useTranslation } from 'react-i18next';
 import { createGlobalStyle } from 'styled-components';
 
 import { APIError } from '@/api';
+import IconAddMember from '@/assets/icons/icon-add-member.svg';
 import { Box, Text } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
 import { ChooseRole } from '@/features/members';
 import { Role, Team } from '@/features/teams';
 
 import { useCreateInvitation, useCreateTeamAccess } from '../api';
-import IconAddMember from '../assets/add-member.svg';
 import {
   OptionInvitation,
   OptionNewMember,

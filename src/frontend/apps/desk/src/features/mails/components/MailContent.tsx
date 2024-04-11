@@ -2,13 +2,18 @@ import { Button, DataGrid, Select } from '@openfun/cunningham-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { create } from 'zustand';
 
 import { Box, Card, Text } from '@/components';
+import { ModalAddMailsUsers } from '@/features/mails/components/ModalAddMailsUsers';
 
 import { default as AccountCircleFilled } from '../assets/account-cirle-filled.svg';
 
-export function MailContent() {
+export function MailsContent() {
   const { t } = useTranslation();
+
+  const { modalAddMailsUsers, setIsModalAddMailsUsersOpen } =
+    useMailsContentStore((state) => state);
 
   const dataset = [
     {
@@ -28,32 +33,40 @@ export function MailContent() {
   ];
 
   return (
-    <Box $direction="column" className="m-l p-s">
-      <TopBanner />
-      <Card>
-        <DataGrid
-          columns={[
-            {
-              headerName: t('Names'),
-              field: 'name',
-            },
-            {
-              field: 'email',
-              headerName: t('Emails'),
-            },
-            {
-              field: 'state',
-              headerName: t('State'),
-            },
-            {
-              field: 'lastConnection',
-              headerName: t('Last Connection'),
-            },
-          ]}
-          rows={dataset}
-        />
-      </Card>
-    </Box>
+    <>
+      {modalAddMailsUsers.isOpen ? (
+        <ModalAddMailsUsers onClose={() => setIsModalAddMailsUsersOpen(false)}>
+          <p>form</p>
+        </ModalAddMailsUsers>
+      ) : null}
+
+      <Box $direction="column" className="m-l p-s">
+        <TopBanner />
+        <Card>
+          <DataGrid
+            columns={[
+              {
+                headerName: t('Names'),
+                field: 'name',
+              },
+              {
+                field: 'email',
+                headerName: t('Emails'),
+              },
+              {
+                field: 'state',
+                headerName: t('State'),
+              },
+              {
+                field: 'lastConnection',
+                headerName: t('Last Connection'),
+              },
+            ]}
+            rows={dataset}
+          />
+        </Card>
+      </Box>
+    </>
   );
 }
 
@@ -88,6 +101,10 @@ const TitleGroup = () => {
 
 const InputsGroup = () => {
   const { t } = useTranslation();
+  const { setIsModalAddMailsUsersOpen } = useMailsContentStore(
+    (state) => state,
+  );
+
   const StyledButton = styled(Button)`
     width: fit-content;
     padding: 1.67rem 2rem;
@@ -95,7 +112,9 @@ const InputsGroup = () => {
 
   return (
     <Box $direction="row" $gap="2.5rem">
-      <StyledButton>{t('Ajouter un utilisateur')}</StyledButton>
+      <StyledButton onClick={() => setIsModalAddMailsUsersOpen(true)}>
+        {t('Ajouter un utilisateur')}
+      </StyledButton>
 
       <Select
         multi
@@ -105,3 +124,22 @@ const InputsGroup = () => {
     </Box>
   );
 };
+
+interface MailsContentStore {
+  modalAddMailsUsers: {
+    isOpen: boolean;
+  };
+  setIsModalAddMailsUsersOpen: (booleanValue: boolean) => void;
+}
+
+const useMailsContentStore = create<MailsContentStore>((set) => ({
+  modalAddMailsUsers: {
+    isOpen: false,
+  },
+  setIsModalAddMailsUsersOpen: (booleanValue) =>
+    set(() => ({
+      modalAddMailsUsers: {
+        isOpen: booleanValue,
+      },
+    })),
+}));
