@@ -1,10 +1,11 @@
 import { Button, DataGrid, Select } from '@openfun/cunningham-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { create } from 'zustand';
 
 import { Box, Card, Text } from '@/components';
+import { AddMailsUsersForm } from '@/features/mails/components/Forms/AddMailsUsersForm';
 import { ModalAddMailsUsers } from '@/features/mails/components/ModalAddMailsUsers';
 
 import { default as AccountCircleFilled } from '../assets/account-cirle-filled.svg';
@@ -14,6 +15,9 @@ export function MailsContent() {
 
   const { modalAddMailsUsers, setIsModalAddMailsUsersOpen } =
     useMailsContentStore((state) => state);
+
+  const [isAddMailsUsersFormToSubmit, setIsAddMailsUsersFormToSubmit] =
+    useState(false);
 
   const dataset = [
     {
@@ -32,11 +36,23 @@ export function MailsContent() {
     },
   ];
 
+  useEffect(() => {
+    if (!isAddMailsUsersFormToSubmit) {
+      setIsModalAddMailsUsersOpen(false);
+    }
+  }, [isAddMailsUsersFormToSubmit, setIsModalAddMailsUsersOpen]);
+
   return (
     <>
       {modalAddMailsUsers.isOpen ? (
-        <ModalAddMailsUsers onClose={() => setIsModalAddMailsUsersOpen(false)}>
-          <p>form</p>
+        <ModalAddMailsUsers
+          onClose={() => setIsModalAddMailsUsersOpen(false)}
+          setIsAddMailsUsersFormToSubmit={setIsAddMailsUsersFormToSubmit}
+        >
+          <AddMailsUsersForm
+            isFormToSubmit={isAddMailsUsersFormToSubmit}
+            setIsFormToSubmit={setIsAddMailsUsersFormToSubmit}
+          />
         </ModalAddMailsUsers>
       ) : null}
 
