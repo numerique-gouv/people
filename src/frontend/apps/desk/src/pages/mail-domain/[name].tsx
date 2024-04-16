@@ -1,14 +1,18 @@
 import { ReactElement } from 'react';
 
-import { MailsContent, MailsLayout } from '@/features/mails';
 import { NextPageWithLayout } from '@/types/next';
 
+import {
+  MailDomainContent,
+  MailDomainLayout,
+} from '@/features/mail-domain';
+
 const Page: NextPageWithLayout = () => {
-  return <MailsContent />;
+  return <MailDomainContent />;
 };
 
 Page.getLayout = function getLayout(page: ReactElement) {
-  return <MailsLayout>{page}</MailsLayout>;
+  return <MailDomainLayout>{page}</MailDomainLayout>;
 };
 
 export default Page;

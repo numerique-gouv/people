@@ -11,7 +11,7 @@ type TypeModalAddMailsUsersProps = {
   setIsAddMailsUsersFormToSubmit: (booleanValue: boolean) => void;
 } & PropsWithChildren;
 
-export const ModalAddMailsUsers = ({
+export const ModalAddMailDomainUsers = ({
   children,
   onClose,
   setIsAddMailsUsersFormToSubmit,

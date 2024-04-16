@@ -5,12 +5,14 @@ import styled from 'styled-components';
 import { create } from 'zustand';
 
 import { Box, Card, Text } from '@/components';
-import { AddMailsUsersForm } from '@/features/mails/components/Forms/AddMailsUsersForm';
-import { ModalAddMailsUsers } from '@/features/mails/components/ModalAddMailsUsers';
+import { AddMailDomainUsersForm } from '@/features/mail-domain/components/Forms/AddMailDomainUsersForm';
+import { ModalAddMailDomainUsers } from '@/features/mail-domain/components/ModalAddMailDomainUsers';
 
 import { default as AccountCircleFilled } from '../assets/account-cirle-filled.svg';
 
-export function MailsContent() {
+export function MailsContent({ id }: { id?: string }) {
+  console.log('id : ', id);
+
   const { t } = useTranslation();
 
   const { modalAddMailsUsers, setIsModalAddMailsUsersOpen } =
@@ -45,15 +47,15 @@ export function MailsContent() {
   return (
     <>
       {modalAddMailsUsers.isOpen ? (
-        <ModalAddMailsUsers
+        <ModalAddMailDomainUsers
           onClose={() => setIsModalAddMailsUsersOpen(false)}
           setIsAddMailsUsersFormToSubmit={setIsAddMailsUsersFormToSubmit}
         >
-          <AddMailsUsersForm
+          <AddMailDomainUsersForm
             isFormToSubmit={isAddMailsUsersFormToSubmit}
             setIsFormToSubmit={setIsAddMailsUsersFormToSubmit}
           />
-        </ModalAddMailsUsers>
+        </ModalAddMailDomainUsers>
       ) : null}
 
       <Box $direction="column" className="m-l p-s">

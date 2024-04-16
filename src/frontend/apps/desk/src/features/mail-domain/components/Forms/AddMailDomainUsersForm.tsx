@@ -23,7 +23,7 @@ const addMailsUsersSchema = z.object({
   phoneNumber: z.string().min(1),
 });
 
-export const AddMailsUsersForm = ({
+export const AddMailDomainUsersForm = ({
   isFormToSubmit,
   setIsFormToSubmit,
 }: {

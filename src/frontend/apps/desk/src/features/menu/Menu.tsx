@@ -26,7 +26,7 @@ export const Menu = () => {
     >
       <Box className="pt-l" $direction="column" $gap="0.8rem">
         <MenuItem Icon={IconSearch} label={t('Search')} href="/" />
-        <MenuItem Icon={IconMail} label={t('Mails')} href="/mails" />
+        <MenuItem Icon={IconMail} label={t('Mail Domain')} href="/mail-domain" />
         <MenuItem Icon={IconFavorite} label={t('Favorite')} href="/favorite" />
         <MenuItem Icon={IconRecent} label={t('Recent')} href="/recent" />
         <MenuItem Icon={IconContacts} label={t('Contacts')} href="/contacts" />

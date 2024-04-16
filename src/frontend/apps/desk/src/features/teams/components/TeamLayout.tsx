@@ -3,6 +3,9 @@ import { PropsWithChildren } from 'react';
 import { Box } from '@/components';
 import { MainLayout } from '@/core';
 import { useCunninghamTheme } from '@/cunningham';
+import ApplicationContext, {
+  ApplicationName,
+} from '@/features/application/ApplicationContext';
 import { Panel } from '@/features/teams';
 
 export function TeamLayout({ children }: PropsWithChildren) {
