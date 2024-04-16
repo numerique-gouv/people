@@ -1,11 +1,7 @@
 import { ReactElement } from 'react';
 
+import { MailDomainContent, MailDomainLayout } from '@/features/mail-domain';
 import { NextPageWithLayout } from '@/types/next';
-
-import {
-  MailDomainContent,
-  MailDomainLayout,
-} from '@/features/mail-domain';
 
 const Page: NextPageWithLayout = () => {
   return <MailDomainContent />;

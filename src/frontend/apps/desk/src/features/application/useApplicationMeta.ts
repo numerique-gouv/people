@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 
-import {ApplicationName, useApplicationContext} from '@/features/application/ApplicationContext';
+import {
+  ApplicationName,
+  useApplicationContext,
+} from '@/features/application/ApplicationContext';
 import { default as IconApplicationTeamsUrl } from '@/features/header/assets/icon-application.svg?url';
 import { default as IconApplicationMailUrl } from '@/features/mail-domain/assets/icon-application-mail.svg?url';
 

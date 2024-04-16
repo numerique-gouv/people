@@ -6,7 +6,7 @@ import IconAddMember from '@/assets/icons/icon-add-member.svg';
 import { Box, Text } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
 
-type TypeModalAddMailsUsersProps = {
+type TypeModalAddMailUsersProps = {
   onClose: () => void;
   setIsAddMailsUsersFormToSubmit: (booleanValue: boolean) => void;
 } & PropsWithChildren;
@@ -15,7 +15,7 @@ export const ModalAddMailDomainUsers = ({
   children,
   onClose,
   setIsAddMailsUsersFormToSubmit,
-}: TypeModalAddMailsUsersProps) => {
+}: TypeModalAddMailUsersProps) => {
   const { colorsTokens } = useCunninghamTheme();
   const { t } = useTranslation();
 

@@ -10,7 +10,7 @@ import { ModalAddMailDomainUsers } from '@/features/mail-domain/components/Modal
 
 import { default as AccountCircleFilled } from '../assets/account-cirle-filled.svg';
 
-export function MailsContent({ id }: { id?: string }) {
+export function MailDomainContent({ id }: { id?: string }) {
   console.log('id : ', id);
 
   const { t } = useTranslation();
