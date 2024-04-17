@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, BoxButton, StyledLink } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
 import {
-  ApplicationName,
+  EnumApplicationName,
   useApplicationContext,
 } from '@/features/application/ApplicationContext';
 import { TeamsOrdering } from '@/features/teams/api';
@@ -19,7 +19,7 @@ export const PanelActions = () => {
     useState<React.ReactElement | null>(null);
 
   const findPanelActionByApplicationName = (
-    applicationName: ApplicationName,
+    applicationName: EnumApplicationName,
   ) => {
     const ERROR_MESSAGE_NULLISH_ELEMENT =
       'No child element to display. Verify that PanelActions component is given an application ' +
@@ -27,11 +27,11 @@ export const PanelActions = () => {
     let element = null;
 
     switch (applicationName) {
-      case ApplicationName.TEAM:
+      case EnumApplicationName.TEAM:
         element = <PanelActions.Teams />;
         break;
 
-      case ApplicationName.MAIL_DOMAIN:
+      case EnumApplicationName.MAIL_DOMAIN:
         element = <PanelActions.Mails />;
         break;
     }
