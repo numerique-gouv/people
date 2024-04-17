@@ -12,9 +12,7 @@ export function TeamLayout({ children }: PropsWithChildren) {
   const { colorsTokens } = useCunninghamTheme();
 
   return (
-    <ApplicationContext.Provider
-      value={{ name: EnumApplicationName.MAIL_DOMAINS }}
-    >
+    <ApplicationContext.Provider value={{ name: EnumApplicationName.TEAM }}>
       <MainLayout>
         <Box $height="inherit" $direction="row">
           <Panel />
