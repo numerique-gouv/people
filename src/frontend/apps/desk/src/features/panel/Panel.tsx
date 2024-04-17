@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Box, BoxButton, Text } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
-import { useApplicationContext } from '@/features/application/ApplicationContext';
+import { useApplicationMeta } from '@/features/application/useApplicationMeta';
 import IconOpenClose from '@/features/teams/assets/icon-open-close.svg';
 
 import { ItemList } from './ItemList';
@@ -12,7 +12,7 @@ import { PanelActions } from './PanelActions';
 export const Panel = () => {
   const { t } = useTranslation();
   const { colorsTokens } = useCunninghamTheme();
-  const applicationContext = useApplicationContext();
+  const applicationMeta = useApplicationMeta();
 
   const [isOpen, setIsOpen] = useState(true);
 
@@ -23,9 +23,7 @@ export const Panel = () => {
   };
 
   const transition = 'all 0.5s ease-in-out';
-  const applicationName = applicationContext?.name
-    ? applicationContext.name
-    : null;
+  const applicationName = applicationMeta?.name ? applicationMeta.name : null;
 
   return (
     <Box
