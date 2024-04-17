@@ -4,11 +4,30 @@ import { useTranslation } from 'react-i18next';
 
 import { Box, Text } from '@/components';
 import { InfiniteScroll } from '@/components/InfiniteScroll';
+import { EnumApplicationName } from '@/features/application/ApplicationContext';
 import { MailDomain } from '@/features/mail-domains';
 import { useMailDomains } from '@/features/mail-domains/api/useMailDomains';
 import { Team, useTeamStore, useTeams } from '@/features/teams';
 
 import { PanelMailDomain, PanelTeam } from './PanelItem';
+
+export const ItemList = ({
+  applicationName,
+}: {
+  applicationName: EnumApplicationName;
+}) => {
+  let ItemList = null;
+  switch (applicationName) {
+    case EnumApplicationName.MAIL_DOMAINS:
+      ItemList = <MailDomainList />;
+      break;
+    case EnumApplicationName.TEAM:
+      ItemList = <TeamList />;
+      break;
+  }
+
+  return ItemList;
+};
 
 interface PanelTeamsStateProps {
   isLoading: boolean;
@@ -153,7 +172,6 @@ export const MailDomainList = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useMailDomains();
-  debugger;
   const containerRef = useRef<HTMLDivElement>(null);
   const mailDomains = useMemo(() => {
     return data?.pages.reduce((acc, page) => {

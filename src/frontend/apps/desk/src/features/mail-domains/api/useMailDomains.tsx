@@ -27,8 +27,6 @@ export const getMailDomains = async ({
     );
   }
 
-  debugger;
-
   return response.json() as Promise<MailDomainsResponse>;
 };
 

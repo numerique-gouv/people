@@ -1,16 +1,13 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, BoxButton, Text } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
-import {
-  EnumApplicationName,
-  useApplicationContext,
-} from '@/features/application/ApplicationContext';
+import { useApplicationContext } from '@/features/application/ApplicationContext';
 import { useApplicationMeta } from '@/features/application/useApplicationMeta';
 import IconOpenClose from '@/features/teams/assets/icon-open-close.svg';
 
-import { MailDomainList, TeamList } from './ItemList';
+import { ItemList } from './ItemList';
 import { PanelActions } from './PanelActions';
 
 export const Panel = () => {
@@ -20,9 +17,6 @@ export const Panel = () => {
   const applicationMeta = useApplicationMeta();
 
   const [isOpen, setIsOpen] = useState(true);
-  const [itemListComponents, setItemListComponents] = useState<
-    ReactElement | undefined
-  >(undefined);
 
   const closedOverridingStyles = !isOpen && {
     $width: '0',
@@ -32,18 +26,6 @@ export const Panel = () => {
 
   const transition = 'all 0.5s ease-in-out';
   const applicationName = applicationMeta?.name ? applicationMeta.name : null;
-
-  useEffect(() => {
-    switch (applicationContext?.name) {
-      case EnumApplicationName.TEAM:
-        setItemListComponents(<TeamList />);
-        break;
-
-      case EnumApplicationName.MAIL_DOMAINS:
-        setItemListComponents(<MailDomainList />);
-        break;
-    }
-  }, [applicationContext]);
 
   return (
     <Box
@@ -98,7 +80,9 @@ export const Panel = () => {
           </Text>
           <PanelActions />
         </Box>
-        {itemListComponents}
+        {applicationContext?.name ? (
+          <ItemList applicationName={applicationContext.name} />
+        ) : null}
       </Box>
     </Box>
   );
