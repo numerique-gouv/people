@@ -12,17 +12,19 @@ export function TeamLayout({ children }: PropsWithChildren) {
   const { colorsTokens } = useCunninghamTheme();
 
   return (
-    <MainLayout>
-      <Box $height="inherit" $direction="row">
-        <Panel />
-        <Box
-          $background={colorsTokens()['primary-bg']}
-          $width="100%"
-          $height="inherit"
-        >
-          {children}
+    <ApplicationContext.Provider value={{ name: ApplicationName.MAIL_DOMAIN }}>
+      <MainLayout>
+        <Box $height="inherit" $direction="row">
+          <Panel />
+          <Box
+            $background={colorsTokens()['primary-bg']}
+            $width="100%"
+            $height="inherit"
+          >
+            {children}
+          </Box>
         </Box>
-      </Box>
-    </MainLayout>
+      </MainLayout>
+    </ApplicationContext.Provider>
   );
 }

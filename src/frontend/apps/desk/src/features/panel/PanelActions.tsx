@@ -18,21 +18,40 @@ export const PanelActions = () => {
   const [panelActionApplication, setPanelActionApplication] =
     useState<React.ReactElement | null>(null);
 
+  const findPanelActionByApplicationName = (
+    applicationName: ApplicationName,
+  ) => {
+    const ERROR_MESSAGE_NULLISH_ELEMENT =
+      'No child element to display. Verify that PanelActions component is given an application ' +
+      'through useApplicationContext hook';
+    let element = null;
+
+    switch (applicationName) {
+      case ApplicationName.TEAM:
+        element = <PanelActions.Teams />;
+        break;
+
+      case ApplicationName.MAIL_DOMAIN:
+        element = <PanelActions.Mails />;
+        break;
+    }
+
+    if (!element) {
+      throw Error(ERROR_MESSAGE_NULLISH_ELEMENT);
+    }
+
+    return element;
+  };
+
   useEffect(() => {
     return () => setPanelActionApplication(null);
   }, []);
 
   useEffect(() => {
-    if (applicationContext) {
-      switch (applicationContext?.name) {
-        case ApplicationName.TEAM:
-          setPanelActionApplication(<PanelActions.Teams />);
-          break;
-
-        case ApplicationName.MAIL_DOMAIN:
-          setPanelActionApplication(<PanelActions.Mails />);
-          break;
-      }
+    if (applicationContext?.name) {
+      setPanelActionApplication(
+        findPanelActionByApplicationName(applicationContext.name),
+      );
     }
   }, [applicationContext]);
 
