@@ -8,12 +8,12 @@ import ApplicationContext, {
 } from '@/features/application/ApplicationContext';
 import { Panel } from '@/features/panel';
 
-export function MailDomainLayout({ children }: PropsWithChildren) {
+export function MailDomainsLayout({ children }: PropsWithChildren) {
   const { colorsTokens } = useCunninghamTheme();
 
   return (
     <ApplicationContext.Provider
-      value={{ name: EnumApplicationName.MAIL_DOMAIN }}
+      value={{ name: EnumApplicationName.MAIL_DOMAINS }}
     >
       <MainLayout>
         <Box $height="inherit" $direction="row">

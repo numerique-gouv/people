@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 
 export enum EnumApplicationName {
   TEAM = 'team',
-  MAIL_DOMAIN = 'mail-domain',
+  MAIL_DOMAINS = 'mail-domains',
 }
 
 type ApplicationContextValue = {

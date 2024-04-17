@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 import { Box, BoxProps, Text } from '@/components';
 
-interface AddMailsUsersSchema {
+interface AddMailDomainUserSchema {
   firstName: string;
   lastName: string;
   mainEmailAddress: string;
@@ -15,7 +15,7 @@ interface AddMailsUsersSchema {
   phoneNumber: string;
 }
 
-const addMailsUsersSchema = z.object({
+const addMailDomainUserSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   mainEmailAddress: z.string().min(1),
@@ -23,7 +23,7 @@ const addMailsUsersSchema = z.object({
   phoneNumber: z.string().min(1),
 });
 
-export const AddMailDomainUsersForm = ({
+export const AddMailDomainUserForm = ({
   isFormToSubmit,
   setIsFormToSubmit,
 }: {
@@ -32,7 +32,7 @@ export const AddMailDomainUsersForm = ({
 }) => {
   const { t } = useTranslation();
 
-  const methods = useForm<AddMailsUsersSchema>({
+  const methods = useForm<AddMailDomainUserSchema>({
     delayError: 0,
     defaultValues: {
       firstName: '',
@@ -43,7 +43,7 @@ export const AddMailDomainUsersForm = ({
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
-    resolver: zodResolver(addMailsUsersSchema),
+    resolver: zodResolver(addMailDomainUserSchema),
   });
 
   useEffect(() => {

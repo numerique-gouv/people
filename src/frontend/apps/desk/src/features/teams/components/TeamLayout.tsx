@@ -13,7 +13,7 @@ export function TeamLayout({ children }: PropsWithChildren) {
 
   return (
     <ApplicationContext.Provider
-      value={{ name: EnumApplicationName.MAIL_DOMAIN }}
+      value={{ name: EnumApplicationName.MAIL_DOMAINS }}
     >
       <MainLayout>
         <Box $height="inherit" $direction="row">

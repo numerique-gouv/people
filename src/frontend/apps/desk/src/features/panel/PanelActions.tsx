@@ -31,7 +31,7 @@ export const PanelActions = () => {
         element = <PanelActions.Teams />;
         break;
 
-      case EnumApplicationName.MAIL_DOMAIN:
+      case EnumApplicationName.MAIL_DOMAINS:
         element = <PanelActions.Mails />;
         break;
     }

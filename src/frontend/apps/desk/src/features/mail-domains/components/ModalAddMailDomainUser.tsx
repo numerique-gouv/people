@@ -6,16 +6,16 @@ import IconAddMember from '@/assets/icons/icon-add-member.svg';
 import { Box, Text } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
 
-type TypeModalAddMailUsersProps = {
+type TypeModalAddMailDomainUserProps = {
   onClose: () => void;
-  setIsAddMailsUsersFormToSubmit: (booleanValue: boolean) => void;
+  setIsFormAddMailDomainUserToSubmit: (booleanValue: boolean) => void;
 } & PropsWithChildren;
 
-export const ModalAddMailDomainUsers = ({
+export const ModalAddMailDomainUser = ({
   children,
   onClose,
-  setIsAddMailsUsersFormToSubmit,
-}: TypeModalAddMailUsersProps) => {
+  setIsFormAddMailDomainUserToSubmit,
+}: TypeModalAddMailDomainUserProps) => {
   const { colorsTokens } = useCunninghamTheme();
   const { t } = useTranslation();
 
@@ -40,7 +40,7 @@ export const ModalAddMailDomainUsers = ({
           <Button
             color="primary"
             fullWidth
-            onClick={() => setIsAddMailsUsersFormToSubmit(true)}
+            onClick={() => setIsFormAddMailDomainUserToSubmit(true)}
           >
             {t('Validate')}
           </Button>

@@ -5,21 +5,23 @@ import styled from 'styled-components';
 import { create } from 'zustand';
 
 import { Box, Card, Text } from '@/components';
-import { AddMailDomainUsersForm } from '@/features/mail-domain/components/Forms/AddMailDomainUsersForm';
-import { ModalAddMailDomainUsers } from '@/features/mail-domain/components/ModalAddMailDomainUsers';
+import { AddMailDomainUserForm } from '@/features/mail-domains/components/Forms/AddMailDomainUserForm';
+import { ModalAddMailDomainUser } from '@/features/mail-domains/components/ModalAddMailDomainUser';
 
 import { default as AccountCircleFilled } from '../assets/account-cirle-filled.svg';
 
-export function MailDomainContent({ id }: { id?: string }) {
+export function MailDomainsContent({ id }: { id?: string }) {
   console.log('id : ', id);
 
   const { t } = useTranslation();
 
-  const { modalAddMailsUsers, setIsModalAddMailsUsersOpen } =
-    useMailsContentStore((state) => state);
+  const { addMailDomainUserModal, setIsAddMailDomainUserModalOpen } =
+    useMailDomainsContentStore((state) => state);
 
-  const [isAddMailsUsersFormToSubmit, setIsAddMailsUsersFormToSubmit] =
-    useState(false);
+  const [
+    isFormAddUserToMailDomainToSubmit,
+    setIsFormAddMailDomainUserToSubmit,
+  ] = useState(false);
 
   const dataset = [
     {
@@ -39,23 +41,25 @@ export function MailDomainContent({ id }: { id?: string }) {
   ];
 
   useEffect(() => {
-    if (!isAddMailsUsersFormToSubmit) {
-      setIsModalAddMailsUsersOpen(false);
+    if (!isFormAddUserToMailDomainToSubmit) {
+      setIsAddMailDomainUserModalOpen(false);
     }
-  }, [isAddMailsUsersFormToSubmit, setIsModalAddMailsUsersOpen]);
+  }, [isFormAddUserToMailDomainToSubmit, setIsAddMailDomainUserModalOpen]);
 
   return (
     <>
-      {modalAddMailsUsers.isOpen ? (
-        <ModalAddMailDomainUsers
-          onClose={() => setIsModalAddMailsUsersOpen(false)}
-          setIsAddMailsUsersFormToSubmit={setIsAddMailsUsersFormToSubmit}
+      {addMailDomainUserModal.isOpen ? (
+        <ModalAddMailDomainUser
+          onClose={() => setIsAddMailDomainUserModalOpen(false)}
+          setIsFormAddMailDomainUserToSubmit={
+            setIsFormAddMailDomainUserToSubmit
+          }
         >
-          <AddMailDomainUsersForm
-            isFormToSubmit={isAddMailsUsersFormToSubmit}
-            setIsFormToSubmit={setIsAddMailsUsersFormToSubmit}
+          <AddMailDomainUserForm
+            isFormToSubmit={isFormAddUserToMailDomainToSubmit}
+            setIsFormToSubmit={setIsFormAddMailDomainUserToSubmit}
           />
-        </ModalAddMailDomainUsers>
+        </ModalAddMailDomainUser>
       ) : null}
 
       <Box $direction="column" className="m-l p-s">
@@ -119,7 +123,7 @@ const TitleGroup = () => {
 
 const InputsGroup = () => {
   const { t } = useTranslation();
-  const { setIsModalAddMailsUsersOpen } = useMailsContentStore(
+  const { setIsAddMailDomainUserModalOpen } = useMailDomainsContentStore(
     (state) => state,
   );
 
@@ -130,7 +134,7 @@ const InputsGroup = () => {
 
   return (
     <Box $direction="row" $gap="2.5rem">
-      <StyledButton onClick={() => setIsModalAddMailsUsersOpen(true)}>
+      <StyledButton onClick={() => setIsAddMailDomainUserModalOpen(true)}>
         {t('Ajouter un utilisateur')}
       </StyledButton>
 
@@ -143,20 +147,20 @@ const InputsGroup = () => {
   );
 };
 
-interface MailsContentStore {
-  modalAddMailsUsers: {
+interface MailDomainsContentStore {
+  addMailDomainUserModal: {
     isOpen: boolean;
   };
-  setIsModalAddMailsUsersOpen: (booleanValue: boolean) => void;
+  setIsAddMailDomainUserModalOpen: (booleanValue: boolean) => void;
 }
 
-const useMailsContentStore = create<MailsContentStore>((set) => ({
-  modalAddMailsUsers: {
+const useMailDomainsContentStore = create<MailDomainsContentStore>((set) => ({
+  addMailDomainUserModal: {
     isOpen: false,
   },
-  setIsModalAddMailsUsersOpen: (booleanValue) =>
+  setIsAddMailDomainUserModalOpen: (booleanValue) =>
     set(() => ({
-      modalAddMailsUsers: {
+      addMailDomainUserModal: {
         isOpen: booleanValue,
       },
     })),

@@ -29,7 +29,7 @@ export const Menu = () => {
         <MenuItem
           Icon={IconMail}
           label={t('Mail Domain')}
-          href="/mail-domain"
+          href="/mail-domains"
         />
         <MenuItem Icon={IconFavorite} label={t('Favorite')} href="/favorite" />
         <MenuItem Icon={IconRecent} label={t('Recent')} href="/recent" />
