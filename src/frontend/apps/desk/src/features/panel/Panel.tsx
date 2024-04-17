@@ -1,20 +1,28 @@
-import React, { useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, BoxButton, Text } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
+import {
+  EnumApplicationName,
+  useApplicationContext,
+} from '@/features/application/ApplicationContext';
 import { useApplicationMeta } from '@/features/application/useApplicationMeta';
 import IconOpenClose from '@/features/teams/assets/icon-open-close.svg';
 
-import { ItemList } from './ItemList';
+import { MailDomainList, TeamList } from './ItemList';
 import { PanelActions } from './PanelActions';
 
 export const Panel = () => {
   const { t } = useTranslation();
   const { colorsTokens } = useCunninghamTheme();
+  const applicationContext = useApplicationContext();
   const applicationMeta = useApplicationMeta();
 
   const [isOpen, setIsOpen] = useState(true);
+  const [itemListComponents, setItemListComponents] = useState<
+    ReactElement | undefined
+  >(undefined);
 
   const closedOverridingStyles = !isOpen && {
     $width: '0',
@@ -24,6 +32,18 @@ export const Panel = () => {
 
   const transition = 'all 0.5s ease-in-out';
   const applicationName = applicationMeta?.name ? applicationMeta.name : null;
+
+  useEffect(() => {
+    switch (applicationContext?.name) {
+      case EnumApplicationName.TEAM:
+        setItemListComponents(<TeamList />);
+        break;
+
+      case EnumApplicationName.MAIL_DOMAINS:
+        setItemListComponents(<MailDomainList />);
+        break;
+    }
+  }, [applicationContext]);
 
   return (
     <Box
@@ -42,7 +62,7 @@ export const Panel = () => {
       <BoxButton
         aria-label={
           isOpen
-            ? t(`Close the ${applicationName} teams panel`)
+            ? t(`Close the ${applicationName} panel`)
             : t(`Open the ${applicationName} panel`)
         }
         $color={colorsTokens()['primary-600']}
@@ -78,7 +98,7 @@ export const Panel = () => {
           </Text>
           <PanelActions />
         </Box>
-        <ItemList />
+        {itemListComponents}
       </Box>
     </Box>
   );
