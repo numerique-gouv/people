@@ -6,7 +6,7 @@ import { create } from 'zustand';
 
 import { Box, Card, Text } from '@/components';
 import { MailDomain, MailDomainMailbox } from '@/features/mail-domains';
-import { AddMailDomainUserForm } from '@/features/mail-domains/components/Forms/AddMailDomainUserForm';
+import { AddMailDomainMailboxForm } from '@/features/mail-domains/components/Forms/AddMailDomainMailboxForm';
 import { ModalAddMailDomainUser } from '@/features/mail-domains/components/ModalAddMailDomainUser';
 
 import { default as MailDomainsLogo } from '../assets/mail-domains-logo.svg';
@@ -51,14 +51,15 @@ export function MailDomainsContent({
 
   return (
     <>
-      {addMailDomainUserModal.isOpen ? (
+      {addMailDomainUserModal.isOpen && mailDomain ? (
         <ModalAddMailDomainUser
           onClose={() => setIsAddMailDomainUserModalOpen(false)}
           setIsFormAddMailDomainUserToSubmit={
             setIsFormAddMailDomainUserToSubmit
           }
         >
-          <AddMailDomainUserForm
+          <AddMailDomainMailboxForm
+            mailDomain={mailDomain}
             isFormToSubmit={isFormAddUserToMailDomainToSubmit}
             setIsFormToSubmit={setIsFormAddMailDomainUserToSubmit}
           />

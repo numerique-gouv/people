@@ -1,61 +1,83 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Input } from '@openfun/cunningham-react';
+import {
+  Input,
+  VariantType,
+  useToastProvider,
+} from '@openfun/cunningham-react';
 import React, { useEffect } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { Box, BoxProps, Text } from '@/components';
+import { MailDomain } from '@/features/mail-domains';
+import {
+  AddMailDomainMailboxParams,
+  useAddMailDomainMailbox,
+} from '@/features/mail-domains/api/useAddMailDomainMailbox';
 
-interface AddMailDomainUserSchema {
-  firstName: string;
-  lastName: string;
-  mainEmailAddress: string;
-  secondaryEmailAddress: string;
-  phoneNumber: string;
-}
-
-const addMailDomainUserSchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-  mainEmailAddress: z.string().min(1),
-  secondaryEmailAddress: z.string().min(1),
-  phoneNumber: z.string().min(1),
+const addMailDomainMailboxSchema = z.object({
+  first_name: z.string().min(1),
+  last_name: z.string().min(1),
+  local_part: z.string().min(1),
+  secondary_email: z.string().min(1),
+  phone_number: z.string().min(1),
 });
 
-export const AddMailDomainUserForm = ({
+export const AddMailDomainMailboxForm = ({
   isFormToSubmit,
+  mailDomain,
   setIsFormToSubmit,
 }: {
   isFormToSubmit: boolean;
+  mailDomain: MailDomain;
   setIsFormToSubmit: (booleanValue: boolean) => void;
 }) => {
   const { t } = useTranslation();
+  const { toast } = useToastProvider();
 
-  const methods = useForm<AddMailDomainUserSchema>({
+  const methods = useForm<AddMailDomainMailboxParams>({
     delayError: 0,
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      mainEmailAddress: '',
-      secondaryEmailAddress: '',
-      phoneNumber: '',
+      first_name: '',
+      last_name: '',
+      local_part: '',
+      secondary_email: '',
+      phone_number: '',
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
-    resolver: zodResolver(addMailDomainUserSchema),
+    resolver: zodResolver(addMailDomainMailboxSchema),
+  });
+
+  const {
+    mutate: addMailDomainMailbox,
+    // isError,
+    // isPending,
+    // error,
+  } = useAddMailDomainMailbox({
+    domainId: mailDomain.id,
+    onSuccess: () => {
+      toast(t('The mailbox is created'), VariantType.SUCCESS, {
+        duration: 4000,
+      });
+
+      setIsFormToSubmit(true);
+    },
   });
 
   useEffect(() => {
-    if (isFormToSubmit) {
-      const handleFormSubmit = async () => {
-        await methods.handleSubmit((data) => console.log('data : ', data))();
-      };
-
-      void handleFormSubmit();
-      setIsFormToSubmit(false);
+    if (
+      isFormToSubmit &&
+      addMailDomainMailbox &&
+      methods.handleSubmit &&
+      mailDomain.id
+    ) {
+      void methods.handleSubmit((data) =>
+        addMailDomainMailbox({ ...data, mailDomainId: mailDomain.id }),
+      )();
     }
-  }, [isFormToSubmit, setIsFormToSubmit, methods]);
+  }, [isFormToSubmit, methods, addMailDomainMailbox, mailDomain.id]);
 
   return (
     <FormProvider {...methods}>
@@ -65,7 +87,7 @@ export const AddMailDomainUserForm = ({
             <StyledField>
               <Controller
                 control={methods.control}
-                name="firstName"
+                name="first_name"
                 render={({ field, fieldState }) => (
                   <Input
                     aria-invalid={!!fieldState.error}
@@ -85,7 +107,7 @@ export const AddMailDomainUserForm = ({
             <StyledField>
               <Controller
                 control={methods.control}
-                name="lastName"
+                name="last_name"
                 render={({ field, fieldState }) => (
                   <Input
                     aria-invalid={!!fieldState.error}
@@ -107,7 +129,7 @@ export const AddMailDomainUserForm = ({
             <StyledField>
               <Controller
                 control={methods.control}
-                name="mainEmailAddress"
+                name="local_part"
                 render={({ field, fieldState }) => (
                   <Input
                     aria-invalid={!!fieldState.error}
@@ -146,7 +168,7 @@ export const AddMailDomainUserForm = ({
             <StyledField>
               <Controller
                 control={methods.control}
-                name="secondaryEmailAddress"
+                name="secondary_email"
                 render={({ field, fieldState }) => (
                   <Input
                     aria-invalid={!!fieldState.error}
@@ -166,7 +188,7 @@ export const AddMailDomainUserForm = ({
             <StyledField>
               <Controller
                 control={methods.control}
-                name="phoneNumber"
+                name="phone_number"
                 render={({ field, fieldState }) => (
                   <Input
                     aria-invalid={!!fieldState.error}

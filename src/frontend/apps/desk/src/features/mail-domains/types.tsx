@@ -1,5 +1,7 @@
+import { UUID } from 'crypto';
+
 export interface MailDomain {
-  id: string;
+  id: UUID;
   name: string;
 }
 
