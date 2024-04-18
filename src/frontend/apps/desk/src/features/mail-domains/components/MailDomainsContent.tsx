@@ -1,4 +1,4 @@
-import { Button, DataGrid, Select } from '@openfun/cunningham-react';
+import { Button, DataGrid } from '@openfun/cunningham-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -9,7 +9,7 @@ import { MailDomain, MailDomainMailbox } from '@/features/mail-domains';
 import { AddMailDomainUserForm } from '@/features/mail-domains/components/Forms/AddMailDomainUserForm';
 import { ModalAddMailDomainUser } from '@/features/mail-domains/components/ModalAddMailDomainUser';
 
-import { default as AccountCircleFilled } from '../assets/account-cirle-filled.svg';
+import { default as MailDomainsLogo } from '../assets/mail-domains-logo.svg';
 
 export type ViewMailbox = { email: string; id: string };
 
@@ -96,18 +96,18 @@ const TitleGroup = ({ mailDomain }: { mailDomain: MailDomain | undefined }) => {
 
   return (
     <Box $direction="row" $gap="2.25rem">
-      <AccountCircleFilled />
+      <MailDomainsLogo aria-label={t('Mail Domains icon')} />
       <Text
         $css={`
           display: inline-block;
-          margin-top: 0.3rem;
+          margin-top: 0rem;
           font-size: 1.625rem;
         `}
         as="h3"
         $theme="primary"
         $variation="700"
       >
-        {`${t('Mail Domains')} : ${mailDomain?.name}`}
+        {mailDomain?.name}
       </Text>
     </Box>
   );
@@ -127,14 +127,8 @@ const InputsGroup = () => {
   return (
     <Box $direction="row" $gap="2.5rem">
       <StyledButton onClick={() => setIsAddMailDomainUserModalOpen(true)}>
-        {t('Ajouter un utilisateur')}
+        {t('Add mailbox')}
       </StyledButton>
-
-      <Select
-        multi
-        label={t("Plus d'options")}
-        options={[{ label: 'option', value: 'option' }]}
-      />
     </Box>
   );
 };
