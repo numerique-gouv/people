@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 import { Box, BoxButton, Text } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
-import { useApplicationContext } from '@/features/application/ApplicationContext';
+import {
+  EnumApplicationName,
+  useApplicationContext,
+} from '@/features/application/ApplicationContext';
 import { useApplicationMeta } from '@/features/application/useApplicationMeta';
 import IconOpenClose from '@/features/teams/assets/icon-open-close.svg';
 
@@ -76,7 +79,9 @@ export const Panel = () => {
           `}
         >
           <Text $weight="bold" $size="1.25rem">
-            {t('Recents')}
+            {applicationContext?.name === EnumApplicationName.TEAM
+              ? t('Recents')
+              : t('Mail Domains')}
           </Text>
           <PanelActions />
         </Box>
