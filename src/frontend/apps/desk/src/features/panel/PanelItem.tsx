@@ -158,27 +158,6 @@ export const PanelMailDomain = ({ mailDomain }: MailDomainProps) => {
         href={`/mail-domains/${mailDomain.id}`}
       >
         <Box $align="center" $direction="row" $gap="0.5rem">
-          {false ? (
-            <IconGroup
-              aria-label={t(`Teams icon`)}
-              color={colorsTokens()['primary-500']}
-              {...commonProps}
-              style={{
-                ...commonProps.style,
-                border: `1px solid ${colorsTokens()['primary-300']}`,
-              }}
-            />
-          ) : (
-            <IconNone
-              aria-label={t(`Empty teams icon`)}
-              color={colorsTokens()['greyscale-500']}
-              {...commonProps}
-              style={{
-                ...commonProps.style,
-                border: `1px solid ${colorsTokens()['greyscale-300']}`,
-              }}
-            />
-          )}
           <Text
             $weight="bold"
             $color={false ? colorsTokens()['greyscale-600'] : undefined}
