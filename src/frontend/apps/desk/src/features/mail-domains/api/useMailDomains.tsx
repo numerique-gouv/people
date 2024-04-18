@@ -30,7 +30,7 @@ export const getMailDomains = async ({
   return response.json() as Promise<MailDomainsResponse>;
 };
 
-export const KEY_LIST_MAIL_DOMAINS = EnumMetaItemsName.MAIL_DOMAINS;
+const KEY_LIST_MAIL_DOMAINS = EnumMetaItemsName.MAIL_DOMAINS;
 
 export function useMailDomains(
   queryConfig?: DefinedInitialDataInfiniteOptions<
@@ -49,7 +49,7 @@ export function useMailDomains(
     number
   >({
     initialPageParam: 1,
-    queryKey: [KEY_LIST_MAIL_DOMAINS, null],
+    queryKey: [KEY_LIST_MAIL_DOMAINS],
     queryFn: ({ pageParam }) => getMailDomains({ page: pageParam }),
     getNextPageParam(lastPage, allPages) {
       return lastPage.next ? allPages.length + 1 : undefined;

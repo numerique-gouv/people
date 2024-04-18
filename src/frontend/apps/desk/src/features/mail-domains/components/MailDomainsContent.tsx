@@ -1,18 +1,25 @@
 import { Button, DataGrid, Select } from '@openfun/cunningham-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { create } from 'zustand';
 
 import { Box, Card, Text } from '@/components';
+import { MailDomain, MailDomainMailbox } from '@/features/mail-domains';
 import { AddMailDomainUserForm } from '@/features/mail-domains/components/Forms/AddMailDomainUserForm';
 import { ModalAddMailDomainUser } from '@/features/mail-domains/components/ModalAddMailDomainUser';
 
 import { default as AccountCircleFilled } from '../assets/account-cirle-filled.svg';
 
-export function MailDomainsContent({ id }: { id?: string }) {
-  console.log('id : ', id);
+export type ViewMailbox = { email: string; id: string };
 
+export function MailDomainsContent({
+  mailDomain,
+  mailboxes,
+}: {
+  mailDomain?: MailDomain;
+  mailboxes?: MailDomainMailbox[];
+}) {
   const { t } = useTranslation();
 
   const { addMailDomainUserModal, setIsAddMailDomainUserModalOpen } =
@@ -23,22 +30,18 @@ export function MailDomainsContent({ id }: { id?: string }) {
     setIsFormAddMailDomainUserToSubmit,
   ] = useState(false);
 
-  const dataset = [
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@doe.com',
-      state: 'Active',
-      lastConnection: '2021-09-01',
-    },
-    {
-      id: '2',
-      name: 'Jane Doe',
-      email: 'jane@doe.com',
-      state: 'Inactive',
-      lastConnection: '2021-09-02',
-    },
-  ];
+  const viewMailboxes = useMemo(() => {
+    let viewMailboxes: ViewMailbox[] | [] = [];
+
+    if (mailDomain && mailboxes?.length) {
+      viewMailboxes = mailboxes.map((mailbox) => ({
+        email: `${mailbox.local_part}@${mailDomain.name}`,
+        id: mailbox.id,
+      }));
+    }
+
+    return viewMailboxes;
+  }, [mailDomain, mailboxes]);
 
   useEffect(() => {
     if (!isFormAddUserToMailDomainToSubmit) {
@@ -63,28 +66,17 @@ export function MailDomainsContent({ id }: { id?: string }) {
       ) : null}
 
       <Box $direction="column" className="m-l p-s">
-        <TopBanner />
+        <TopBanner mailDomain={mailDomain} />
+
         <Card>
           <DataGrid
             columns={[
               {
-                headerName: t('Names'),
-                field: 'name',
-              },
-              {
                 field: 'email',
                 headerName: t('Emails'),
               },
-              {
-                field: 'state',
-                headerName: t('State'),
-              },
-              {
-                field: 'lastConnection',
-                headerName: t('Last Connection'),
-              },
             ]}
-            rows={dataset}
+            rows={viewMailboxes}
           />
         </Card>
       </Box>
@@ -92,14 +84,14 @@ export function MailDomainsContent({ id }: { id?: string }) {
   );
 }
 
-const TopBanner = () => (
+const TopBanner = ({ mailDomain }: { mailDomain: MailDomain | undefined }) => (
   <Box $direction="row" $justify="space-between" $css="margin-bottom: 1.875rem">
-    <TitleGroup />
+    <TitleGroup mailDomain={mailDomain} />
     <InputsGroup />
   </Box>
 );
 
-const TitleGroup = () => {
+const TitleGroup = ({ mailDomain }: { mailDomain: MailDomain | undefined }) => {
   const { t } = useTranslation();
 
   return (
@@ -115,7 +107,7 @@ const TitleGroup = () => {
         $theme="primary"
         $variation="700"
       >
-        {t('Mail Domains')}
+        {`${t('Mail Domains')} : ${mailDomain?.name}`}
       </Text>
     </Box>
   );
