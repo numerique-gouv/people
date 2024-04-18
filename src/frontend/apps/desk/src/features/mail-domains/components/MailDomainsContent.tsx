@@ -115,7 +115,7 @@ const TitleGroup = () => {
         $theme="primary"
         $variation="700"
       >
-        {t('Utilisateurs')}
+        {t('Mail Domains')}
       </Text>
     </Box>
   );
