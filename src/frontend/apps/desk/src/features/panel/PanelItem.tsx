@@ -109,10 +109,10 @@ export const PanelMailDomain = ({ mailDomain }: MailDomainProps) => {
   const { t } = useTranslation();
   const { colorsTokens } = useCunninghamTheme();
   const {
-    query: { id },
+    query: { name },
   } = useRouter();
 
-  const isActive = mailDomain.id === id;
+  const isActive = mailDomain.id === name;
 
   const commonProps = {
     className: 'p-t',

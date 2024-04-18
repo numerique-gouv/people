@@ -149,11 +149,6 @@ export const MailDomainListState = ({
         <Text as="p" className="mb-0 mt-0" $theme="greyscale" $variation="500">
           {t('0 group to display.')}
         </Text>
-        {/*<Text as="p" $theme="greyscale" $variation="500">*/}
-        {/*  {t(*/}
-        {/*    'Create your first team by clicking on the "Create a new team" button.',*/}
-        {/*  )}*/}
-        {/*</Text>*/}
       </Box>
     );
   }
