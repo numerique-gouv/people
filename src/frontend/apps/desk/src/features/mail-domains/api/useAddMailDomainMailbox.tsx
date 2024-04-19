@@ -1,6 +1,10 @@
 import { UUID } from 'crypto';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  UseMutationOptions,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import { APIError, errorCauses, fetchAPI } from '@/api';
 
@@ -13,12 +17,6 @@ export interface AddMailDomainMailboxParams {
   mailDomainId: UUID;
 }
 
-type AddMailDomainMailboxResponse = {
-  id: UUID;
-  local_part: string;
-  secondary_email: string;
-};
-
 export const addMailDomainMailbox = async ({
   first_name,
   last_name,
@@ -26,8 +24,7 @@ export const addMailDomainMailbox = async ({
   secondary_email,
   phone_number,
   mailDomainId,
-}: AddMailDomainMailboxParams): Promise<AddMailDomainMailboxResponse> => {
-  // /api/v1.0/mail-domains/{domain_id}/mailboxes/
+}: AddMailDomainMailboxParams): Promise<void> => {
   const response = await fetchAPI(`mail-domains/${mailDomainId}/mailboxes/`, {
     method: 'POST',
     body: JSON.stringify({
@@ -39,38 +36,39 @@ export const addMailDomainMailbox = async ({
     }),
   });
 
-  debugger;
-
   if (!response.ok) {
     throw new APIError(
       'Failed to create the mailbox',
       await errorCauses(response),
     );
   }
-
-  return response.json() as Promise<AddMailDomainMailboxResponse>;
 };
 
-type UseAddMailDomainMailboxParams = {
-  domainId: UUID;
-  onSuccess: () => void;
-};
+type UseAddMailDomainMailboxParams = { domainId: UUID } & UseMutationOptions<
+  void,
+  APIError,
+  AddMailDomainMailboxParams
+>;
 const KEY_MAIL_DOMAIN = 'mail-domain';
 
-export function useAddMailDomainMailbox({
-  domainId,
-}: UseAddMailDomainMailboxParams) {
+export function useAddMailDomainMailbox(
+  options: UseAddMailDomainMailboxParams,
+) {
   const queryClient = useQueryClient();
-  return useMutation<
-    AddMailDomainMailboxResponse,
-    APIError,
-    AddMailDomainMailboxParams
-  >({
+  return useMutation<void, APIError, AddMailDomainMailboxParams>({
     mutationFn: addMailDomainMailbox,
-    onSuccess: () => {
+    onSuccess: (data, variables, context) => {
       void queryClient.invalidateQueries({
-        queryKey: [KEY_MAIL_DOMAIN, domainId, 'mailboxes'],
+        queryKey: [KEY_MAIL_DOMAIN, variables.mailDomainId, 'mailboxes'],
       });
+      if (options?.onSuccess) {
+        options.onSuccess(data, variables, context);
+      }
+    },
+    onError: (error, variables, context) => {
+      if (options?.onError) {
+        options.onError(error, variables, context);
+      }
     },
   });
 }

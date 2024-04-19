@@ -106,23 +106,12 @@ interface MailDomainProps {
 }
 
 export const PanelMailDomain = ({ mailDomain }: MailDomainProps) => {
-  const { t } = useTranslation();
   const { colorsTokens } = useCunninghamTheme();
   const {
     query: { name },
   } = useRouter();
 
   const isActive = mailDomain.id === name;
-
-  const commonProps = {
-    className: 'p-t',
-    width: 52,
-    style: {
-      borderRadius: '10px',
-      flexShrink: 0,
-      background: '#fff',
-    },
-  };
 
   const activeStyle = `
     border-right: 4px solid ${colorsTokens()['primary-600']};

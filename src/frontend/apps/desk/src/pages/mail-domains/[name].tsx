@@ -6,7 +6,7 @@ import { ReactElement, useMemo } from 'react';
 import { Box } from '@/components';
 import { TextErrors } from '@/components/TextErrors';
 import {
-  MailDomain,
+  MailDomain as MailDomainType,
   MailDomainsContent,
   MailDomainsLayout,
 } from '@/features/mail-domains';
@@ -29,7 +29,7 @@ const Page: NextPageWithLayout = () => {
   const mailDomains = useMemo(() => {
     return data?.pages.reduce((acc, page) => {
       return acc.concat(page.results);
-    }, [] as MailDomain[]);
+    }, [] as MailDomainType[]);
   }, [data?.pages]);
 
   const mailDomain = mailDomains?.find((mailDomain) => mailDomain.id === name);
@@ -57,7 +57,7 @@ const Page: NextPageWithLayout = () => {
 };
 
 interface MailDomainProps {
-  mailDomain: MailDomain;
+  mailDomain: MailDomainType;
 }
 const MailDomain = ({ mailDomain }: MailDomainProps) => {
   const {

@@ -9,8 +9,11 @@ import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { Box, BoxProps, Text } from '@/components';
-import { MailDomain } from '@/features/mail-domains';
+import { Box, BoxProps, Text, TextErrors } from '@/components';
+import {
+  MailDomain,
+  useMailDomainsContentStore,
+} from '@/features/mail-domains';
 import {
   AddMailDomainMailboxParams,
   useAddMailDomainMailbox,
@@ -35,6 +38,9 @@ export const AddMailDomainMailboxForm = ({
 }) => {
   const { t } = useTranslation();
   const { toast } = useToastProvider();
+  const { setIsAddMailDomainUserModalOpen } = useMailDomainsContentStore(
+    (state) => state,
+  );
 
   const methods = useForm<AddMailDomainMailboxParams>({
     delayError: 0,
@@ -50,164 +56,179 @@ export const AddMailDomainMailboxForm = ({
     resolver: zodResolver(addMailDomainMailboxSchema),
   });
 
-  const {
-    mutate: addMailDomainMailbox,
-    // isError,
-    // isPending,
-    // error,
-  } = useAddMailDomainMailbox({
-    domainId: mailDomain.id,
-    onSuccess: () => {
-      toast(t('The mailbox is created'), VariantType.SUCCESS, {
-        duration: 4000,
-      });
+  // const { mutate: getMailDomainMailboxes } = useMailDomainMailboxes({
+  //   id: mailDomain.id,
+  // });
 
-      setIsFormToSubmit(true);
-    },
-  });
+  const { mutate: addMailDomainMailbox, ...queryState } =
+    useAddMailDomainMailbox({
+      domainId: mailDomain.id,
+      onSuccess: () => {
+        toast(t('The mailbox is created'), VariantType.SUCCESS, {
+          duration: 4000,
+        });
+        setIsAddMailDomainUserModalOpen(false);
+      },
+    });
+
+  // useEffect(() => {
+  // }, [queryState]);
 
   useEffect(() => {
     if (
       isFormToSubmit &&
       addMailDomainMailbox &&
       methods.handleSubmit &&
-      mailDomain.id
+      mailDomain.id &&
+      setIsFormToSubmit
     ) {
       void methods.handleSubmit((data) =>
         addMailDomainMailbox({ ...data, mailDomainId: mailDomain.id }),
       )();
+      setIsFormToSubmit(false);
     }
-  }, [isFormToSubmit, methods, addMailDomainMailbox, mailDomain.id]);
+  }, [
+    isFormToSubmit,
+    methods,
+    addMailDomainMailbox,
+    mailDomain.id,
+    setIsFormToSubmit,
+  ]);
 
   return (
-    <FormProvider {...methods}>
-      <form>
-        <StyledForm>
-          <StyledFieldGroup>
-            <StyledField>
-              <Controller
-                control={methods.control}
-                name="first_name"
-                render={({ field, fieldState }) => (
-                  <Input
-                    aria-invalid={!!fieldState.error}
-                    label={t('First name')}
-                    state={fieldState.error ? 'error' : 'default'}
-                    text={fieldState.error?.message}
-                    onBlur={field.onBlur}
-                    onChange={(e) =>
-                      methods.setValue(field.name, e.target.value)
-                    }
-                    value={String(field.value)}
-                  />
-                )}
-              />
-            </StyledField>
+    <>
+      <FormProvider {...methods}>
+        {queryState.isError && (
+          <TextErrors className="mb-s" causes={queryState.error.cause} />
+        )}
+        <form>
+          <StyledForm>
+            <StyledFieldGroup>
+              <StyledField>
+                <Controller
+                  control={methods.control}
+                  name="first_name"
+                  render={({ field, fieldState }) => (
+                    <Input
+                      aria-invalid={!!fieldState.error}
+                      label={t('First name')}
+                      state={fieldState.error ? 'error' : 'default'}
+                      text={fieldState.error?.message}
+                      onBlur={field.onBlur}
+                      onChange={(e) =>
+                        methods.setValue(field.name, e.target.value)
+                      }
+                      value={String(field.value)}
+                    />
+                  )}
+                />
+              </StyledField>
 
-            <StyledField>
-              <Controller
-                control={methods.control}
-                name="last_name"
-                render={({ field, fieldState }) => (
-                  <Input
-                    aria-invalid={!!fieldState.error}
-                    label={t('Last name')}
-                    state={fieldState.error ? 'error' : 'default'}
-                    text={fieldState.error?.message}
-                    onBlur={field.onBlur}
-                    onChange={(e) =>
-                      methods.setValue(field.name, e.target.value)
-                    }
-                    value={String(field.value)}
-                  />
-                )}
-              />
-            </StyledField>
-          </StyledFieldGroup>
+              <StyledField>
+                <Controller
+                  control={methods.control}
+                  name="last_name"
+                  render={({ field, fieldState }) => (
+                    <Input
+                      aria-invalid={!!fieldState.error}
+                      label={t('Last name')}
+                      state={fieldState.error ? 'error' : 'default'}
+                      text={fieldState.error?.message}
+                      onBlur={field.onBlur}
+                      onChange={(e) =>
+                        methods.setValue(field.name, e.target.value)
+                      }
+                      value={String(field.value)}
+                    />
+                  )}
+                />
+              </StyledField>
+            </StyledFieldGroup>
 
-          <StyledFieldGroup>
-            <StyledField>
-              <Controller
-                control={methods.control}
-                name="local_part"
-                render={({ field, fieldState }) => (
-                  <Input
-                    aria-invalid={!!fieldState.error}
-                    label={t('Main email address')}
-                    state={fieldState.error ? 'error' : 'default'}
-                    text={fieldState.error?.message}
-                    onBlur={field.onBlur}
-                    onChange={(e) =>
-                      methods.setValue(field.name, e.target.value)
-                    }
-                    value={String(field.value)}
-                  />
-                )}
-              />
-            </StyledField>
+            <StyledFieldGroup>
+              <StyledField>
+                <Controller
+                  control={methods.control}
+                  name="local_part"
+                  render={({ field, fieldState }) => (
+                    <Input
+                      aria-invalid={!!fieldState.error}
+                      label={t('Main email address')}
+                      state={fieldState.error ? 'error' : 'default'}
+                      text={fieldState.error?.message}
+                      onBlur={field.onBlur}
+                      onChange={(e) =>
+                        methods.setValue(field.name, e.target.value)
+                      }
+                      value={String(field.value)}
+                    />
+                  )}
+                />
+              </StyledField>
 
-            <StyledField>
-              <Text
-                as="span"
-                $theme="primary"
-                $size="1rem"
-                $css={`
+              <StyledField>
+                <Text
+                  as="span"
+                  $theme="primary"
+                  $size="1rem"
+                  $css={`
                   position: relative; 
                   left: -1rem; 
                   text-align: left;
                   display: inline-block;
                   top: 1.6rem;
                 `}
-              >
-                @domaine.com
-              </Text>
-            </StyledField>
-          </StyledFieldGroup>
+                >
+                  @{mailDomain.name}
+                </Text>
+              </StyledField>
+            </StyledFieldGroup>
 
-          <StyledFieldGroup>
-            <StyledField>
-              <Controller
-                control={methods.control}
-                name="secondary_email"
-                render={({ field, fieldState }) => (
-                  <Input
-                    aria-invalid={!!fieldState.error}
-                    label={t('Secondary email address')}
-                    state={fieldState.error ? 'error' : 'default'}
-                    text={fieldState.error?.message}
-                    onBlur={field.onBlur}
-                    onChange={(e) =>
-                      methods.setValue(field.name, e.target.value)
-                    }
-                    value={String(field.value)}
-                  />
-                )}
-              />
-            </StyledField>
+            <StyledFieldGroup>
+              <StyledField>
+                <Controller
+                  control={methods.control}
+                  name="secondary_email"
+                  render={({ field, fieldState }) => (
+                    <Input
+                      aria-invalid={!!fieldState.error}
+                      label={t('Secondary email address')}
+                      state={fieldState.error ? 'error' : 'default'}
+                      text={fieldState.error?.message}
+                      onBlur={field.onBlur}
+                      onChange={(e) =>
+                        methods.setValue(field.name, e.target.value)
+                      }
+                      value={String(field.value)}
+                    />
+                  )}
+                />
+              </StyledField>
 
-            <StyledField>
-              <Controller
-                control={methods.control}
-                name="phone_number"
-                render={({ field, fieldState }) => (
-                  <Input
-                    aria-invalid={!!fieldState.error}
-                    label={t('Phone number')}
-                    state={fieldState.error ? 'error' : 'default'}
-                    text={fieldState.error?.message}
-                    onBlur={field.onBlur}
-                    onChange={(e) =>
-                      methods.setValue(field.name, e.target.value)
-                    }
-                    value={String(field.value)}
-                  />
-                )}
-              />
-            </StyledField>
-          </StyledFieldGroup>
-        </StyledForm>
-      </form>
-    </FormProvider>
+              <StyledField>
+                <Controller
+                  control={methods.control}
+                  name="phone_number"
+                  render={({ field, fieldState }) => (
+                    <Input
+                      aria-invalid={!!fieldState.error}
+                      label={t('Phone number')}
+                      state={fieldState.error ? 'error' : 'default'}
+                      text={fieldState.error?.message}
+                      onBlur={field.onBlur}
+                      onChange={(e) =>
+                        methods.setValue(field.name, e.target.value)
+                      }
+                      value={String(field.value)}
+                    />
+                  )}
+                />
+              </StyledField>
+            </StyledFieldGroup>
+          </StyledForm>
+        </form>
+      </FormProvider>
+    </>
   );
 };
 

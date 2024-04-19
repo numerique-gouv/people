@@ -1,13 +1,13 @@
 import { Button, DataGrid } from '@openfun/cunningham-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { create } from 'zustand';
 
 import { Box, Card, Text } from '@/components';
 import { MailDomain, MailDomainMailbox } from '@/features/mail-domains';
+import { AddMailDomainMailboxModal } from '@/features/mail-domains/components/AddMailDomainMailboxModal';
 import { AddMailDomainMailboxForm } from '@/features/mail-domains/components/Forms/AddMailDomainMailboxForm';
-import { ModalAddMailDomainUser } from '@/features/mail-domains/components/ModalAddMailDomainUser';
 
 import { default as MailDomainsLogo } from '../assets/mail-domains-logo.svg';
 
@@ -43,16 +43,10 @@ export function MailDomainsContent({
     return viewMailboxes;
   }, [mailDomain, mailboxes]);
 
-  useEffect(() => {
-    if (!isFormAddUserToMailDomainToSubmit) {
-      setIsAddMailDomainUserModalOpen(false);
-    }
-  }, [isFormAddUserToMailDomainToSubmit, setIsAddMailDomainUserModalOpen]);
-
   return (
     <>
       {addMailDomainUserModal.isOpen && mailDomain ? (
-        <ModalAddMailDomainUser
+        <AddMailDomainMailboxModal
           onClose={() => setIsAddMailDomainUserModalOpen(false)}
           setIsFormAddMailDomainUserToSubmit={
             setIsFormAddMailDomainUserToSubmit
@@ -63,7 +57,7 @@ export function MailDomainsContent({
             isFormToSubmit={isFormAddUserToMailDomainToSubmit}
             setIsFormToSubmit={setIsFormAddMailDomainUserToSubmit}
           />
-        </ModalAddMailDomainUser>
+        </AddMailDomainMailboxModal>
       ) : null}
 
       <Box $direction="column" className="m-l p-s">
@@ -141,14 +135,16 @@ interface MailDomainsContentStore {
   setIsAddMailDomainUserModalOpen: (booleanValue: boolean) => void;
 }
 
-const useMailDomainsContentStore = create<MailDomainsContentStore>((set) => ({
-  addMailDomainUserModal: {
-    isOpen: false,
-  },
-  setIsAddMailDomainUserModalOpen: (booleanValue) =>
-    set(() => ({
-      addMailDomainUserModal: {
-        isOpen: booleanValue,
-      },
-    })),
-}));
+export const useMailDomainsContentStore = create<MailDomainsContentStore>(
+  (set) => ({
+    addMailDomainUserModal: {
+      isOpen: false,
+    },
+    setIsAddMailDomainUserModalOpen: (booleanValue) =>
+      set(() => ({
+        addMailDomainUserModal: {
+          isOpen: booleanValue,
+        },
+      })),
+  }),
+);
