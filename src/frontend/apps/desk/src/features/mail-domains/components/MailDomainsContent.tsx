@@ -1,11 +1,13 @@
-import { Button, DataGrid } from '@openfun/cunningham-react';
+import { Button, DataGrid, Loader } from '@openfun/cunningham-react';
+import { useRouter as useNavigate } from 'next/dist/client/components/navigation';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { create } from 'zustand';
 
-import { Box, Card, Text } from '@/components';
-import { MailDomain, MailDomainMailbox } from '@/features/mail-domains';
+import { Box, Card, Text, TextErrors } from '@/components';
+import { MailDomain } from '@/features/mail-domains';
+import { useMailDomainMailboxes } from '@/features/mail-domains/api/useMailDomainMailboxes';
 import { AddMailDomainMailboxModal } from '@/features/mail-domains/components/AddMailDomainMailboxModal';
 import { AddMailDomainMailboxForm } from '@/features/mail-domains/components/Forms/AddMailDomainMailboxForm';
 
@@ -13,13 +15,7 @@ import { default as MailDomainsLogo } from '../assets/mail-domains-logo.svg';
 
 export type ViewMailbox = { email: string; id: string };
 
-export function MailDomainsContent({
-  mailDomain,
-  mailboxes,
-}: {
-  mailDomain?: MailDomain;
-  mailboxes?: MailDomainMailbox[];
-}) {
+export function MailDomainsContent({ mailDomain }: { mailDomain: MailDomain }) {
   const { t } = useTranslation();
 
   const { addMailDomainUserModal, setIsAddMailDomainUserModalOpen } =
@@ -30,18 +26,44 @@ export function MailDomainsContent({
     setIsFormAddMailDomainUserToSubmit,
   ] = useState(false);
 
+  const {
+    data: mailboxesData,
+    isLoading,
+    isError,
+    error,
+  } = useMailDomainMailboxes({ id: mailDomain.id });
+
+  const navigate = useNavigate();
+
   const viewMailboxes = useMemo(() => {
     let viewMailboxes: ViewMailbox[] | [] = [];
 
-    if (mailDomain && mailboxes?.length) {
-      viewMailboxes = mailboxes.map((mailbox) => ({
+    if (mailDomain && mailboxesData?.results?.length) {
+      viewMailboxes = mailboxesData.results.map((mailbox) => ({
         email: `${mailbox.local_part}@${mailDomain.name}`,
         id: mailbox.id,
       }));
     }
 
     return viewMailboxes;
-  }, [mailDomain, mailboxes]);
+  }, [mailDomain, mailboxesData?.results]);
+
+  if (isError && error) {
+    if (error.status === 404) {
+      navigate.replace(`/404`);
+      return null;
+    }
+
+    return <TextErrors causes={error.cause} />;
+  }
+
+  if (isLoading || !mailDomain) {
+    return (
+      <Box $align="center" $justify="center" $height="100%">
+        <Loader />
+      </Box>
+    );
+  }
 
   return (
     <>

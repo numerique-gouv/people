@@ -10,18 +10,17 @@ import {
   MailDomainsContent,
   MailDomainsLayout,
 } from '@/features/mail-domains';
-import { useMailDomainMailboxes } from '@/features/mail-domains/api/useMailDomainMailboxes';
 import { useMailDomains } from '@/features/mail-domains/api/useMailDomains';
 import { NextPageWithLayout } from '@/types/next';
 
 const Page: NextPageWithLayout = () => {
-  const {
-    query: { name },
-  } = useRouter();
+  const router = useRouter();
 
-  if (typeof name !== 'string') {
+  if (router?.query?.name && typeof router.query.name !== 'string') {
     throw new Error('Invalid mail domain name');
   }
+
+  const { name } = router.query;
 
   const { data, isLoading, isError, error } = useMailDomains();
   const navigate = useNavigate();
@@ -33,8 +32,6 @@ const Page: NextPageWithLayout = () => {
   }, [data?.pages]);
 
   const mailDomain = mailDomains?.find((mailDomain) => mailDomain.id === name);
-
-  console.log('mailDomain : ', mailDomain);
 
   if ((isError && error) || !mailDomain) {
     if (error?.status === 404) {
@@ -52,46 +49,8 @@ const Page: NextPageWithLayout = () => {
       </Box>
     );
   } else {
-    return <MailDomain mailDomain={mailDomain} />;
+    return mailDomain ? <MailDomainsContent mailDomain={mailDomain} /> : null;
   }
-};
-
-interface MailDomainProps {
-  mailDomain: MailDomainType;
-}
-const MailDomain = ({ mailDomain }: MailDomainProps) => {
-  const {
-    data: mailboxes,
-    isLoading,
-    isError,
-    error,
-  } = useMailDomainMailboxes({ id: mailDomain.id });
-
-  const navigate = useNavigate();
-
-  if (isError && error) {
-    if (error.status === 404) {
-      navigate.replace(`/404`);
-      return null;
-    }
-
-    return <TextErrors causes={error.cause} />;
-  }
-
-  if (isLoading || !mailDomain) {
-    return (
-      <Box $align="center" $justify="center" $height="100%">
-        <Loader />
-      </Box>
-    );
-  }
-
-  return mailDomain ? (
-    <MailDomainsContent
-      mailDomain={mailDomain}
-      mailboxes={mailboxes?.results}
-    />
-  ) : null;
 };
 
 Page.getLayout = function getLayout(page: ReactElement) {
