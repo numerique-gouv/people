@@ -4,6 +4,7 @@ import {
   VariantType,
   useToastProvider,
 } from '@openfun/cunningham-react';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +17,7 @@ import {
 } from '@/features/mail-domains';
 import {
   AddMailDomainMailboxParams,
+  KEY_MAIL_DOMAIN,
   useAddMailDomainMailbox,
 } from '@/features/mail-domains/api/useAddMailDomainMailbox';
 
@@ -36,6 +38,7 @@ export const AddMailDomainMailboxForm = ({
   mailDomain: MailDomain;
   setIsFormToSubmit: (booleanValue: boolean) => void;
 }) => {
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const { toast } = useToastProvider();
   const { setIsAddMailDomainUserModalOpen } = useMailDomainsContentStore(
@@ -56,23 +59,21 @@ export const AddMailDomainMailboxForm = ({
     resolver: zodResolver(addMailDomainMailboxSchema),
   });
 
-  // const { mutate: getMailDomainMailboxes } = useMailDomainMailboxes({
-  //   id: mailDomain.id,
-  // });
-
   const { mutate: addMailDomainMailbox, ...queryState } =
     useAddMailDomainMailbox({
       domainId: mailDomain.id,
       onSuccess: () => {
+        void queryClient.refetchQueries({
+          queryKey: [KEY_MAIL_DOMAIN, { id: mailDomain.id }, 'mailboxes'],
+        });
+
         toast(t('The mailbox is created'), VariantType.SUCCESS, {
           duration: 4000,
         });
+
         setIsAddMailDomainUserModalOpen(false);
       },
     });
-
-  // useEffect(() => {
-  // }, [queryState]);
 
   useEffect(() => {
     if (

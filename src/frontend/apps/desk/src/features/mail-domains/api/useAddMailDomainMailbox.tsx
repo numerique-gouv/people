@@ -49,7 +49,8 @@ type UseAddMailDomainMailboxParams = { domainId: UUID } & UseMutationOptions<
   APIError,
   AddMailDomainMailboxParams
 >;
-const KEY_MAIL_DOMAIN = 'mail-domain';
+
+export const KEY_MAIL_DOMAIN = 'mail-domain';
 
 export function useAddMailDomainMailbox(
   options: UseAddMailDomainMailboxParams,
@@ -59,7 +60,11 @@ export function useAddMailDomainMailbox(
     mutationFn: addMailDomainMailbox,
     onSuccess: (data, variables, context) => {
       void queryClient.invalidateQueries({
-        queryKey: [KEY_MAIL_DOMAIN, variables.mailDomainId, 'mailboxes'],
+        queryKey: [
+          KEY_MAIL_DOMAIN,
+          { id: variables.mailDomainId },
+          'mailboxes',
+        ],
       });
       if (options?.onSuccess) {
         options.onSuccess(data, variables, context);
