@@ -260,6 +260,23 @@ class Base(Configuration):
         "REDOC_DIST": "SIDECAR",
     }
 
+    # Resource Server
+    RESOURCE_SERVER_JWK_PRIVATE_KEY_STR = values.Value(
+        default=None,
+        environ_name="RESOURCE_SERVER_JWK_PRIVATE_KEY_STR",
+        environ_prefix=None,
+    )
+    RESOURCE_SERVER_JWK_ALG = values.Value(
+        default="RSA-OAEP",
+        environ_name="RESOURCE_SERVER_JWK_ALG",
+        environ_prefix=None,
+    )
+    RESOURCE_SERVER_JWK_KEY_TYPE = values.Value(
+        default="RSA",
+        environ_name="RESOURCE_SERVER_JWK_KEY_TYPE",
+        environ_prefix=None,
+    )
+
     # Mail
     EMAIL_BACKEND = values.Value("django.core.mail.backends.smtp.EmailBackend")
     EMAIL_HOST = values.Value(None)
