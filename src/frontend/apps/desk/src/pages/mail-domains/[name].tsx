@@ -33,9 +33,13 @@ const Page: NextPageWithLayout = () => {
 
   const mailDomain = mailDomains?.find((mailDomain) => mailDomain.id === name);
 
-  if (!mailDomain) {
+  if (error?.status === 404 || !mailDomain) {
     navigate.replace(`/404`);
     return null;
+  }
+
+  if (isError && error) {
+    return <TextErrors causes={error?.cause} />;
   }
 
   if (isLoading) {
