@@ -1,5 +1,4 @@
 import { Button, DataGrid, Loader } from '@openfun/cunningham-react';
-import { useRouter as useNavigate } from 'next/dist/client/components/navigation';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -33,8 +32,6 @@ export function MailDomainsContent({ mailDomain }: { mailDomain: MailDomain }) {
     error,
   } = useMailDomainMailboxes({ id: mailDomain.id });
 
-  const navigate = useNavigate();
-
   const viewMailboxes = useMemo(() => {
     let viewMailboxes: ViewMailbox[] | [] = [];
 
@@ -49,11 +46,6 @@ export function MailDomainsContent({ mailDomain }: { mailDomain: MailDomain }) {
   }, [mailDomain, mailboxesData?.results]);
 
   if (isError && error) {
-    if (error.status === 404) {
-      navigate.replace(`/404`);
-      return null;
-    }
-
     return <TextErrors causes={error.cause} />;
   }
 
