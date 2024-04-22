@@ -9,6 +9,7 @@ export type TypeApplicationMeta = {
   name: string;
   panel: {
     itemsName: EnumMetaItemsName;
+    itemName: string;
   };
 };
 
@@ -26,12 +27,14 @@ const applicationMetaMap: TypeApplicationMetaMap = {
     name: 'Team',
     panel: {
       itemsName: EnumMetaItemsName.TEAM,
+      itemName: 'group',
     },
   },
   [EnumApplicationName.MAIL_DOMAINS]: {
     name: 'Mail Domains',
     panel: {
       itemsName: EnumMetaItemsName.MAIL_DOMAINS,
+      itemName: 'domain',
     },
   },
 };

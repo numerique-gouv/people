@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, Text } from '@/components';
 import { InfiniteScroll } from '@/components/InfiniteScroll';
 import { EnumApplicationName } from '@/features/application/ApplicationContext';
+import { useApplicationMeta } from '@/features/application/useApplicationMeta';
 import { MailDomain } from '@/features/mail-domains';
 import { useMailDomains } from '@/features/mail-domains/api/useMailDomains';
 import { Team, useTeamStore, useTeams } from '@/features/teams';
@@ -37,6 +38,7 @@ interface PanelTeamsStateProps {
 
 const TeamListState = ({ isLoading, isError, teams }: PanelTeamsStateProps) => {
   const { t } = useTranslation();
+  const applicationMeta = useApplicationMeta();
 
   if (isError) {
     return (
@@ -60,11 +62,11 @@ const TeamListState = ({ isLoading, isError, teams }: PanelTeamsStateProps) => {
     return (
       <Box $justify="center" className="m-s">
         <Text as="p" className="mb-0 mt-0" $theme="greyscale" $variation="500">
-          {t('0 group to display.')}
+          {t(`0 ${applicationMeta?.panel.itemName} to display.`)}
         </Text>
         <Text as="p" $theme="greyscale" $variation="500">
           {t(
-            'Create your first team by clicking on the "Create a new team" button.',
+            `Create your first ${applicationMeta?.panel.itemName} by clicking on the "Create a new team" button.`,
           )}
         </Text>
       </Box>
@@ -124,6 +126,7 @@ export const MailDomainListState = ({
   mailDomains,
 }: PanelMailDomainsStateProps) => {
   const { t } = useTranslation();
+  const applicationMeta = useApplicationMeta();
 
   if (isError) {
     return (
@@ -147,7 +150,7 @@ export const MailDomainListState = ({
     return (
       <Box $justify="center" className="m-s">
         <Text as="p" className="mb-0 mt-0" $theme="greyscale" $variation="500">
-          {t('0 group to display.')}
+          {t(`0 ${applicationMeta?.panel?.itemName} to display.`)}
         </Text>
       </Box>
     );
