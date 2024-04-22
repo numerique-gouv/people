@@ -136,7 +136,7 @@ const InputsGroup = () => {
   return (
     <Box $direction="row" $gap="2.5rem">
       <StyledButton onClick={() => setIsAddMailDomainUserModalOpen(true)}>
-        {t('Add mailbox')}
+        {t('Add a mailbox')}
       </StyledButton>
     </Box>
   );
