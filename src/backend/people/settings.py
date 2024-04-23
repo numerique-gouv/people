@@ -368,19 +368,19 @@ class Base(Configuration):
         environ_name="OIDC_RS_CLIENT_SECRET",
         environ_prefix=None,
     )
-    RESOURCE_SERVER_JWK_PRIVATE_KEY_STR = values.Value(
+    OIDC_RS_PRIVATE_KEY_STR = values.Value(
         default=None,
-        environ_name="RESOURCE_SERVER_JWK_PRIVATE_KEY_STR",
+        environ_name="OIDC_RS_PRIVATE_KEY_STR",
         environ_prefix=None,
     )
-    RESOURCE_SERVER_JWK_ALG = values.Value(
+    OIDC_RS_ENCRYPTION_ALGO = values.Value(
         default="RSA-OAEP",
-        environ_name="RESOURCE_SERVER_JWK_ALG",
+        environ_name="OIDC_RS_ENCRYPTION_ALGO",
         environ_prefix=None,
     )
-    RESOURCE_SERVER_JWK_KEY_TYPE = values.Value(
+    OIDC_RS_ENCRYPTION_KEY_TYPE = values.Value(
         default="RSA",
-        environ_name="RESOURCE_SERVER_JWK_KEY_TYPE",
+        environ_name="OIDC_RS_ENCRYPTION_KEY_TYPE",
         environ_prefix=None,
     )
 
