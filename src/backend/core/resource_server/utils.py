@@ -17,8 +17,8 @@ def import_private_key_from_settings():
     known for its strong security features.
 
     Note:
-        - The function requires the 'RESOURCE_SERVER_JWK_PRIVATE_KEY_STR' setting to be configured.
-        - The 'RESOURCE_SERVER_JWK_KEY_TYPE' and 'RESOURCE_SERVER_JWK_ALG' settings can be customized
+        - The function requires the 'OIDC_RS_PRIVATE_KEY_STR' setting to be configured.
+        - The 'OIDC_RS_ENCRYPTION_KEY_TYPE' and 'OIDC_RS_ENCRYPTION_ALGO' settings can be customized
           based on the chosen key type.
 
     Raises:
@@ -28,11 +28,11 @@ def import_private_key_from_settings():
         joserfc.jwk.JWK: The imported private key as a JWK object.
     """
 
-    private_key_str = settings.RESOURCE_SERVER_JWK_PRIVATE_KEY_STR
+    private_key_str = settings.OIDC_RS_PRIVATE_KEY_STR
 
     if not private_key_str:
         raise ImproperlyConfigured(
-            "RESOURCE_SERVER_JWK_PRIVATE_KEY_STR setting is missing or empty."
+            "OIDC_RS_PRIVATE_KEY_STR setting is missing or empty."
         )
 
     private_key_pem = private_key_str.encode()
@@ -40,12 +40,10 @@ def import_private_key_from_settings():
     try:
         private_key = JWKRegistry.import_key(
             private_key_pem,
-            key_type=settings.RESOURCE_SERVER_JWK_KEY_TYPE,
-            parameters={"alg": settings.RESOURCE_SERVER_JWK_ALG, "use": "enc"},
+            key_type=settings.OIDC_RS_ENCRYPTION_KEY_TYPE,
+            parameters={"alg": settings.OIDC_RS_ENCRYPTION_ALGO, "use": "enc"},
         )
     except ValueError as err:
-        raise ImproperlyConfigured(
-            "RESOURCE_SERVER_JWK_PRIVATE_KEY_STR setting is wrong."
-        ) from err
+        raise ImproperlyConfigured("OIDC_RS_PRIVATE_KEY_STR setting is wrong.") from err
 
     return private_key
