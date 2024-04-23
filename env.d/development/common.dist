@@ -9,6 +9,31 @@ PYTHONPATH=/app
 
 # People settings
 
+# Mail
+DJANGO_EMAIL_HOST="mailcatcher"
+DJANGO_EMAIL_PORT=1025
+
+# Backend url
+PEOPLE_BASE_URL="http://localhost:8072"
+
+# OIDC
+OIDC_OP_JWKS_ENDPOINT=http://nginx:8083/realms/people/protocol/openid-connect/certs
+OIDC_OP_AUTHORIZATION_ENDPOINT=http://localhost:8083/realms/people/protocol/openid-connect/auth
+OIDC_OP_TOKEN_ENDPOINT=http://nginx:8083/realms/people/protocol/openid-connect/token
+OIDC_OP_USER_ENDPOINT=http://nginx:8083/realms/people/protocol/openid-connect/userinfo
+
+OIDC_RP_CLIENT_ID=people
+OIDC_RP_CLIENT_SECRET=ThisIsAnExampleKeyForDevPurposeOnly
+OIDC_RP_SIGN_ALGO=RS256
+OIDC_RP_SCOPES="openid email"
+
+LOGIN_REDIRECT_URL=http://localhost:3000
+LOGIN_REDIRECT_URL_FAILURE=http://localhost:3000
+LOGOUT_REDIRECT_URL=http://localhost:3000
+
+OIDC_REDIRECT_ALLOWED_HOSTS=["http://localhost:8083", "http://localhost:3000"]
+OIDC_AUTH_REQUEST_EXTRA_PARAMS={"acr_values": "eidas1"}
+
 # Resource Server
 RESOURCE_SERVER_JWK_PRIVATE_KEY_STR="-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC3boG1kwEGUYL+
@@ -39,28 +64,3 @@ IH5em4M/pHIcsqCi1qggBMbdvzHBUtC3R4sK0CpEFHlN+Y59aGazidcN2FPupNJv
 MbyqKyC6DAzv4jEEhHaN7oY=
 -----END PRIVATE KEY-----
 "
-
-# Mail
-DJANGO_EMAIL_HOST="mailcatcher"
-DJANGO_EMAIL_PORT=1025
-
-# Backend url
-PEOPLE_BASE_URL="http://localhost:8072"
-
-# OIDC
-OIDC_OP_JWKS_ENDPOINT=http://nginx:8083/realms/people/protocol/openid-connect/certs
-OIDC_OP_AUTHORIZATION_ENDPOINT=http://localhost:8083/realms/people/protocol/openid-connect/auth
-OIDC_OP_TOKEN_ENDPOINT=http://nginx:8083/realms/people/protocol/openid-connect/token
-OIDC_OP_USER_ENDPOINT=http://nginx:8083/realms/people/protocol/openid-connect/userinfo
-
-OIDC_RP_CLIENT_ID=people
-OIDC_RP_CLIENT_SECRET=ThisIsAnExampleKeyForDevPurposeOnly
-OIDC_RP_SIGN_ALGO=RS256
-OIDC_RP_SCOPES="openid email"
-
-LOGIN_REDIRECT_URL=http://localhost:3000
-LOGIN_REDIRECT_URL_FAILURE=http://localhost:3000
-LOGOUT_REDIRECT_URL=http://localhost:3000
-
-OIDC_REDIRECT_ALLOWED_HOSTS=["http://localhost:8083", "http://localhost:3000"]
-OIDC_AUTH_REQUEST_EXTRA_PARAMS={"acr_values": "eidas1"}
