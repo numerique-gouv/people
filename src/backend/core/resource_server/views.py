@@ -4,6 +4,7 @@ from joserfc.jwk import KeySet
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .auth import ResourceServerAuthentication
 from .utils import import_private_key_from_settings
 
 
@@ -29,3 +30,16 @@ class JWKSView(APIView):
         jwk = KeySet([private_key]).as_dict()
 
         return Response(jwk)
+
+
+# FIXME: temporary view
+class DataView(APIView):
+    """Temporary view to test resource server authentication."""
+
+    authentication_classes = [ResourceServerAuthentication]
+    permission_classes = []  # disable permission
+
+    def get(self, request):
+        """Temporary route to test resource server authentication."""
+        data = {}
+        return Response(data)
