@@ -4,6 +4,7 @@ from rest_framework import filters, mixins, viewsets
 from rest_framework import permissions as drf_permissions
 
 from core import models as core_models
+from core.api.viewsets import Pagination
 
 from mailbox_manager import models
 from mailbox_manager.api import permissions, serializers
@@ -34,6 +35,7 @@ class MailDomainViewSet(
         Delete targeted team access
     """
 
+    pagination_class = Pagination
     permission_classes = [permissions.AccessPermission]
     serializer_class = serializers.MailDomainSerializer
     filter_backends = [filters.OrderingFilter]
@@ -64,6 +66,7 @@ class MailDomainAccessViewSet(
     MailDomainAccess viewset.
     """
 
+    pagination_class = Pagination
     permission_classes = [drf_permissions.IsAuthenticated]
     serializer_class = serializers.MailDomainAccessSerializer
     filter_backends = [filters.OrderingFilter]
@@ -79,6 +82,7 @@ class MailBoxViewSet(
 ):
     """MailBox ViewSet"""
 
+    pagination_class = Pagination
     permission_classes = [drf_permissions.IsAuthenticated]
     serializer_class = serializers.MailboxSerializer
     queryset = models.Mailbox.objects.all()
