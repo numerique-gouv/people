@@ -40,6 +40,10 @@ services:
         - postgresql
         - mailcatcher
         - redis
+    # FIXME: temporary configuration to connect AC and desk
+    networks:
+      - default
+      - dataprovider_outside
   
   celery-dev:
     user: ${DOCKER_USER:-1000}
@@ -169,3 +173,10 @@ services:
       - "8080:8080"
     depends_on:
       - kc_postgresql
+
+# FIXME: temporary configuration to connect AC and desk
+networks:
+  dataprovider_outside:
+    external: true
+    driver: bridge
+    name: "${DESK_NETWORK:-fc_public}"
