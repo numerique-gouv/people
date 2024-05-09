@@ -41,5 +41,5 @@ class DataView(APIView):
 
     def get(self, request):
         """Temporary route to test resource server authentication."""
-        data = {}
-        return Response(data)
+        token = request.auth
+        return Response(token)

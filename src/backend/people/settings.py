@@ -344,8 +344,8 @@ class Base(Configuration):
     )
 
     # OIDC - OIDC Provider (OP)
-    OIDC_OP_TOKEN_INFO_ENDPOINT = values.Value(
-        None, environ_name="OIDC_OP_TOKEN_INFO_ENDPOINT", environ_prefix=None
+    OIDC_OP_TOKEN_INTROSPECTION_ENDPOINT = values.Value(
+        None, environ_name="OIDC_OP_TOKEN_INTROSPECTION_ENDPOINT", environ_prefix=None
     )
     OIDC_OP_JWKS_ENDPOINT = values.Value(
         environ_name="OIDC_OP_JWKS_ENDPOINT", environ_prefix=None
@@ -359,6 +359,10 @@ class Base(Configuration):
     OIDC_OP_USER_ENDPOINT = values.Value(
         None, environ_name="OIDC_OP_USER_ENDPOINT", environ_prefix=None
     )
+    # TODO: refactor this settings, should be factorized with all endpoints
+    OIDC_OP_ISSUER = values.Value(
+        None, environ_name="OIDC_OP_ISSUER", environ_prefix=None
+    )
 
     # OIDC - Resource Server (RS)
     OIDC_RS_CLIENT_ID = values.Value(
@@ -367,6 +371,9 @@ class Base(Configuration):
     OIDC_RS_CLIENT_SECRET = values.Value(
         environ_name="OIDC_RS_CLIENT_SECRET",
         environ_prefix=None,
+    )
+    OIDC_RS_AUTH_SECRET = values.Value(
+        None, environ_name="OIDC_RS_AUTH_SECRET", environ_prefix=None
     )
     OIDC_RS_PRIVATE_KEY_STR = values.Value(
         default=None,
@@ -378,10 +385,18 @@ class Base(Configuration):
         environ_name="OIDC_RS_ENCRYPTION_ALGO",
         environ_prefix=None,
     )
+    OIDC_RS_ENCRYPTION_ENCODING = values.Value(
+        default="A256GCM",
+        environ_name="OIDC_RS_ENCRYPTION_ENCODING",
+        environ_prefix=None,
+    )
     OIDC_RS_ENCRYPTION_KEY_TYPE = values.Value(
         default="RSA",
         environ_name="OIDC_RS_ENCRYPTION_KEY_TYPE",
         environ_prefix=None,
+    )
+    OIDC_RS_SIGNING_ALG0 = values.Value(
+        default="ES256", environ_name="OIDC_RS_SIGNING_ALG0", environ_prefix=None
     )
 
     # pylint: disable=invalid-name
