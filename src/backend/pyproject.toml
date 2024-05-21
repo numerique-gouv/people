@@ -47,7 +47,7 @@ dependencies = [
     "nested-multipart-parser==1.5.0",
     "psycopg[binary]==3.1.18",
     "PyJWT==2.8.0",
-    "requests==2.31.0",
+    "requests==2.32.0",
     "sentry-sdk==2.1.1",
     "url-normalize==1.4.3",
     "whitenoise==6.6.0",
