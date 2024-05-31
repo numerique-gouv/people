@@ -42,4 +42,13 @@ class DataView(APIView):
     def get(self, request):
         """Temporary route to test resource server authentication."""
         token = request.auth
-        return Response(token)
+        if 'groups' in token.get('scope'):
+            # TODO - return a proper error
+            Response({'error scope "groups" not requested to the authorization server'})
+
+        slugs = [team.slug for team in request.user.teams.all()]
+
+        # TODO - use SCIM specification to exchange data
+        return Response({
+            "groups": slugs
+        })
