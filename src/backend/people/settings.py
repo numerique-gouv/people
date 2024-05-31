@@ -360,9 +360,7 @@ class Base(Configuration):
         None, environ_name="OIDC_OP_USER_ENDPOINT", environ_prefix=None
     )
     # TODO: refactor this settings, should be factorized with all endpoints
-    OIDC_OP_ISSUER = values.Value(
-        None, environ_name="OIDC_OP_ISSUER", environ_prefix=None
-    )
+    OIDC_OP_URL = values.Value(None, environ_name="OIDC_OP_URL", environ_prefix=None)
 
     # OIDC - Resource Server (RS)
     OIDC_RS_CLIENT_ID = values.Value(

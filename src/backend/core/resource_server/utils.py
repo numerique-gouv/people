@@ -47,3 +47,15 @@ def import_private_key_from_settings():
         raise ImproperlyConfigured("OIDC_RS_PRIVATE_KEY_STR setting is wrong.") from err
 
     return private_key
+
+
+def get_settings(attr, *args):
+    """Get the value of a setting from Django settings."""
+    try:
+        if args:
+            return getattr(settings, attr, args[0])
+        return getattr(settings, attr)
+    except AttributeError as err:
+        # FIXME: lint error C0209
+        msg = "Setting {0} not found".format(attr)
+        raise ImproperlyConfigured(msg) from err
