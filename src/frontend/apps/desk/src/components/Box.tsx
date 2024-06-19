@@ -21,8 +21,10 @@ export interface BoxProps {
   $height?: CSSProperties['height'];
   $justify?: CSSProperties['justifyContent'];
   $overflow?: CSSProperties['overflow'];
-  $maxWidth?: CSSProperties['maxWidth'];
   $margin?: MarginPadding;
+  $maxHeight?: CSSProperties['maxHeight'];
+  $minHeight?: CSSProperties['minHeight'];
+  $maxWidth?: CSSProperties['maxWidth'];
   $minWidth?: CSSProperties['minWidth'];
   $padding?: MarginPadding;
   $position?: CSSProperties['position'];
@@ -52,5 +54,7 @@ export const Box = styled('div')<BoxProps>`
   ${({ $width }) => $width && `width: ${$width};`}
   ${({ $maxWidth }) => $maxWidth && `max-width: ${$maxWidth};`}
   ${({ $minWidth }) => $minWidth && `min-width: ${$minWidth};`}
+  ${({ $maxHeight }) => $maxHeight && `max-height: ${$maxHeight};`}
+  ${({ $minHeight }) => $minHeight && `min-height: ${$minHeight};`}
   ${({ $css }) => $css && `${$css};`}
 `;
