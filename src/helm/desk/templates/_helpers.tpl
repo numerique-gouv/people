@@ -125,6 +125,7 @@ tcpSocket:
 httpGet:
   path: {{ .path }}
   port: {{ .targetPort }}
+  scheme: {{ .scheme | default "HTTP" }}
 {{- end }}
 initialDelaySeconds: {{ .initialDelaySeconds | eq nil | ternary 0 .initialDelaySeconds }}
 timeoutSeconds: {{ .timeoutSeconds | eq nil | ternary 1 .timeoutSeconds }}

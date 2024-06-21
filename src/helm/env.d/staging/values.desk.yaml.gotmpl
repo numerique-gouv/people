@@ -92,6 +92,16 @@ backend:
       - python manage.py createsuperuser --admin_email $DJANGO_SUPERUSER_EMAIL --password $DJANGO_SUPERUSER_PASSWORD
     restartPolicy: Never
 
+  probes:
+    liveness:
+      path: /__heartbeat__
+      scheme: HTTPS
+      initialDelaySeconds: 10
+    readiness:
+      path: /__lbheartbeat__
+      scheme: HTTPS
+      initialDelaySeconds: 10
+
 frontend:
   image:
     repository: lasuite/people-frontend
