@@ -2,13 +2,16 @@
 Declare and configure the models for the People additional application : mailbox_manager
 """
 
+import requests
 from django.conf import settings
 from django.core import validators
-from django.db import models
+from django.db import models, transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from core.models import BaseModel, RoleChoices
+
+from core.models import BaseModel, RoleChoices, WebhookStatusChoices
+from mailbox_manager.utils.webhooks import scim_synchronizer
 
 
 class MailDomain(BaseModel):
@@ -120,3 +123,60 @@ class Mailbox(BaseModel):
 
     def __str__(self):
         return f"{self.local_part!s}@{self.domain.name:s}"
+
+    def save(self, *args, **kwargs):
+        """
+        Override save function to fire webhooks on mailbox creation and modification.
+        """
+
+        if self._state.adding:
+            print("JE SUIS LAAA")
+
+            self.domain.webhooks.update(status=WebhookStatusChoices.PENDING)
+            with transaction.atomic():
+                instance = super().save(*args, **kwargs)
+                scim_synchronizer.create_mailbox(self.domain, self.local_part)
+        else:
+            instance = super().save(*args, **kwargs)
+
+        return instance
+
+
+class MailDomainWebhook(BaseModel):
+    """Webhooks fired on changes in domains."""
+
+    domain = models.ForeignKey(
+        MailDomain, related_name="webhooks", on_delete=models.CASCADE
+    )
+    url = models.URLField(_("url"))
+    secret = models.CharField(_("secret"), max_length=255, null=True, blank=True)
+    status = models.CharField(
+        max_length=10,
+        default=WebhookStatusChoices.PENDING,
+        choices=WebhookStatusChoices.choices,
+    )
+
+    class Meta:
+        db_table = "people_maildomain_webhook"
+        verbose_name = _("MailDomain webhook")
+        verbose_name_plural = _("MailDomain webhooks")
+
+    def __str__(self):
+        return f"Webhook to {self.url} for {self.domain}"
+
+    def get_headers(self):
+        """Build header dict from webhook object."""
+        headers = {"Content-Type": "application/json"}
+
+        # self.secret is the encoded basic auth, to request a new token from dimail-api
+        response = requests.get(
+            "http://host.docker.internal:8000/token/",
+            headers={"Authorization": "Basic ZGVzazpwYXNzd29yZA=="},
+        )
+        print("TOKEN RESPONSE IS", response)
+
+        if response.status_code == 401:
+            raise Exception("This secret does not allow for a new token.")
+
+        headers["Authorization"] = f"Bearer {response.json()['access_token']}"
+        return headers
