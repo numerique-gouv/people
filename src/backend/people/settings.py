@@ -515,6 +515,12 @@ class Production(Base):
     CSRF_TRUSTED_ORIGINS = values.ListValue([])
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = values.IntegerValue(
+        default=31536000, environ_name="SECURE_HSTS_SECONDS"
+    )
+    SECURE_SSL_REDIRECT = values.BooleanValue(
+        default=True, environ_name="SECURE_SSL_REDIRECT"
+    )
 
     # SECURE_PROXY_SSL_HEADER allows to fix the scheme in Django's HttpRequest
     # object when your application is behind a reverse proxy.

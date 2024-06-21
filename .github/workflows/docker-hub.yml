@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'fix/warning-backend'
     tags:
       - 'v*'
   pull_request:
