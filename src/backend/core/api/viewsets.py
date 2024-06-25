@@ -1,25 +1,21 @@
 """API endpoints"""
 
 from django.contrib.postgres.search import TrigramSimilarity
-from django.db.models import Func, Max, OuterRef, Prefetch, Q, Subquery, Value
-from django.db.models.functions import Coalesce
+from django.db.models import Func, OuterRef, Prefetch, Q, Subquery, Value
 
 from rest_framework import (
     decorators,
     exceptions,
-    filters,
     mixins,
     pagination,
     response,
     throttling,
     viewsets,
 )
+from rest_framework import filters as drf_filters
 
 from core import models
-
-from . import permissions, serializers
-
-SIMILARITY_THRESHOLD = 0.04
+from core.api import filters, permissions, serializers
 
 
 class NestedGenericViewSet(viewsets.GenericViewSet):
@@ -212,25 +208,7 @@ class UserViewSet(
 
             # Search by case-insensitive and accent-insensitive trigram similarity
             if query := self.request.GET.get("q", ""):
-                similarity = Max(
-                    TrigramSimilarity(
-                        Coalesce(
-                            Func("identities__email", function="unaccent"), Value("")
-                        ),
-                        Func(Value(query), function="unaccent"),
-                    )
-                    + TrigramSimilarity(
-                        Coalesce(
-                            Func("identities__name", function="unaccent"), Value("")
-                        ),
-                        Func(Value(query), function="unaccent"),
-                    )
-                )
-                queryset = (
-                    queryset.annotate(similarity=similarity)
-                    .filter(similarity__gte=SIMILARITY_THRESHOLD)
-                    .order_by("-similarity")
-                )
+                queryset = filters.get_user_queryset(queryset, "identities", query)
 
         return queryset
 
@@ -262,7 +240,7 @@ class TeamViewSet(
 
     permission_classes = [permissions.AccessPermission]
     serializer_class = serializers.TeamSerializer
-    filter_backends = [filters.OrderingFilter]
+    filter_backends = [drf_filters.OrderingFilter]
     ordering_fields = ["created_at"]
     ordering = ["-created_at"]
     queryset = models.Team.objects.all()
@@ -327,7 +305,7 @@ class TeamAccessViewSet(
     list_serializer_class = serializers.TeamAccessReadOnlySerializer
     detail_serializer_class = serializers.TeamAccessSerializer
 
-    filter_backends = [filters.OrderingFilter]
+    filter_backends = [drf_filters.OrderingFilter]
     ordering = ["role"]
     ordering_fields = ["role", "email", "name"]
 
@@ -357,6 +335,11 @@ class TeamAccessViewSet(
         queryset = queryset.filter(team=self.kwargs["team_id"])
 
         if self.action in {"list", "retrieve"}:
+            if query := self.request.GET.get("q", ""):
+                queryset = filters.get_user_queryset(
+                    queryset, "user__identities", query
+                )
+
             # Determine which role the logged-in user has in the team
             user_role_query = models.TeamAccess.objects.filter(
                 user=self.request.user, team=self.kwargs["team_id"]
