@@ -2,15 +2,16 @@
 Declare and configure the models for the People additional application : mailbox_manager
 """
 
-import requests
 from django.conf import settings
 from django.core import validators
 from django.db import models, transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+import requests
 
 from core.models import BaseModel, RoleChoices, WebhookStatusChoices
+
 from mailbox_manager.utils.webhooks import scim_synchronizer
 
 
@@ -130,8 +131,6 @@ class Mailbox(BaseModel):
         """
 
         if self._state.adding:
-            print("JE SUIS LAAA")
-
             self.domain.webhooks.update(status=WebhookStatusChoices.PENDING)
             with transaction.atomic():
                 instance = super().save(*args, **kwargs)
@@ -171,9 +170,9 @@ class MailDomainWebhook(BaseModel):
         # self.secret is the encoded basic auth, to request a new token from dimail-api
         response = requests.get(
             "http://host.docker.internal:8000/token/",
-            headers={"Authorization": "Basic ZGVzazpwYXNzd29yZA=="},
+            headers={"Authorization": f"Basic {self.secret}"},
+            timeout=200,
         )
-        print("TOKEN RESPONSE IS", response)
 
         if response.status_code == 401:
             raise Exception("This secret does not allow for a new token.")

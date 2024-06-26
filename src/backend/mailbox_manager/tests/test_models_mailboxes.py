@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 import pytest
 
-from mailbox_manager import factories
+from mailbox_manager import factories, models
 
 pytestmark = pytest.mark.django_db
 
@@ -72,7 +72,7 @@ def test_models_mailboxes__domain_must_be_a_maildomain_instance():
 
 def test_models_mailboxes__domain_cannot_be_null():
     """The "domain" field should not be null."""
-    with pytest.raises(ValidationError, match="This field cannot be null"):
+    with pytest.raises(models.MailDomain.DoesNotExist, match="Mailbox has no domain."):
         factories.MailboxFactory(domain=None)
 
 

@@ -33,7 +33,6 @@ class SCIMClient:
             "surName": "Test",
             "displayName": f"{identifier} Test",
         }
-        print(f"Sending payload", payload)
 
         return session.post(
             webhook.url,

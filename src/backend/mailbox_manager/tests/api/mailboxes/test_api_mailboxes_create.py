@@ -2,13 +2,18 @@
 Unit tests for the mailbox API
 """
 
+import json
+import re
+
 import pytest
+import responses
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from core import factories as core_factories
 
 from mailbox_manager import factories, models
+from mailbox_manager.api import serializers
 
 pytestmark = pytest.mark.django_db
 
@@ -79,23 +84,67 @@ def test_api_mailboxes__create_authenticated_successful():
     client.force_login(user)
 
     mail_domain = factories.MailDomainFactory(name="saint-jean.collectivite.fr")
+    mailbox_data = serializers.MailboxSerializer(factories.MailboxFactory.build()).data
     response = client.post(
-        f"/api/v1.0/mail-domains/{mail_domain.slug}/mailboxes/",
-        {
-            "first_name": "jean",
-            "last_name": "doe",
-            "local_part": "jean.doe",
-            "secondary_email": "jean.doe@gmail.com",
-            "phone_number": "+33150142700",
-        },
+        f"/api/v1.0/mail-domains/{mail_domain.id}/mailboxes/",
+        mailbox_data,
         format="json",
     )
     assert response.status_code == status.HTTP_201_CREATED
     mailbox = models.Mailbox.objects.get()
-    assert mailbox.local_part == "jean.doe"
-    assert mailbox.secondary_email == "jean.doe@gmail.com"
     assert response.json() == {
         "id": str(mailbox.id),
-        "local_part": str(mailbox.local_part),
-        "secondary_email": str(mailbox.secondary_email),
+        "local_part": str(mailbox_data["local_part"]),
+        "secondary_email": str(mailbox_data["secondary_email"]),
     }
+    assert mailbox.local_part == mailbox_data["local_part"]
+    assert mailbox.secondary_email == mailbox_data["secondary_email"]
+
+
+def test_api_mailboxes__webhook_fire_upon_create():
+    """
+    When the domain has a webhook, creating a mailbox should fire a call.
+    """
+
+    # creating all needed objects
+    domain = factories.MailDomainFactory()
+    webhook = factories.MailDomainWebhookFactory(domain=domain)
+    mailbox_data = serializers.MailboxSerializer(factories.MailboxFactory.build()).data
+
+    client = APIClient()
+    client.force_login(core_factories.UserFactory())
+
+    with responses.RequestsMock() as rsps:
+        # Ensure successful response using "responses":
+        rsp = rsps.add(
+            rsps.GET,
+            re.compile(r".*/token/"),
+            body='{"access_token": "domain_owner_token"}',
+            status=200,
+            content_type="application/json",
+        )
+        rsp = rsps.add(
+            rsps.POST,
+            re.compile(rf".*/api/domains/{domain.name}/mailboxes/"),
+            body='{"email": f"{mailbox_data.local_part}@{mailbox_data.domain.name}", "password": "something_mysterieux", "uuid": "SECURITY}',
+            status=201,
+            content_type="application/json",
+        )
+
+        response = client.post(
+            f"/api/v1.0/mail-domains/{domain.id}/mailboxes/",
+            mailbox_data,
+            format="json",
+        )
+        assert response.status_code == 201
+        assert rsp.call_count == 1
+        assert rsps.calls[1].request.url == webhook.url  # rsps.calls[0] is the token
+
+        # Payload sent to scim provider
+        payload = json.loads(rsps.calls[1].request.body)
+        assert payload == {
+            "displayName": f'{mailbox_data["local_part"]} Test',
+            "email": f'{mailbox_data["local_part"]}@{domain.name}',
+            "givenName": f'{mailbox_data["local_part"]}',
+            "surName": "Test",
+        }

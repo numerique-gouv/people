@@ -65,3 +65,17 @@ class MailboxFactory(factory.django.DjangoModelFactory):
     local_part = factory.LazyAttribute(lambda a: a.full_name.lower().replace(" ", "."))
     domain = factory.SubFactory(MailDomainFactory)
     secondary_email = factory.Faker("email")
+
+
+class MailDomainWebhookFactory(factory.django.DjangoModelFactory):
+    """Create fake domain webhooks for testing."""
+
+    class Meta:
+        model = models.MailDomainWebhook
+
+    domain = factory.SubFactory(MailDomainFactory)
+    url = factory.LazyAttribute(
+        lambda o: f"https://example.com/api/domains/{domain.name}/mailboxes/"
+        % o.domain.name
+    )
+    secret = "encoded_secret"  # noqa: S105

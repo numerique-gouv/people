@@ -1,16 +1,11 @@
 """Test Team synchronization webhooks."""
 
-import json
-import random
-import re
-from logging import Logger
-from unittest import mock
-
 import pytest
 import responses
 
-from mailbox_manager import factories
 from core.utils.webhooks import scim_synchronizer
+
+from mailbox_manager import factories
 
 pytestmark = pytest.mark.django_db
 
@@ -20,7 +15,7 @@ def test_utils_webhooks_add_mailbox_to_domain__no_webhooks():
     mailbox = factories.MailboxFactory()
 
     with responses.RequestsMock():
-        scim_synchronizer.create_mailbox(mailbox.domain, mailbox.identifier)
+        scim_synchronizer.create_mailbox(mailbox.domain, mailbox.local_part)
 
     assert len(responses.calls) == 0
 

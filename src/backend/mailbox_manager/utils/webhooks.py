@@ -45,10 +45,7 @@ class WebhookSCIMClient:
                         webhook.url,
                         exc_info=exc,
                     )
-                except Exception as e:
-                    print("ERROR IS ", e)
                 else:
-                    print(response.json())
                     extra = {
                         "response": response.content,
                     }
