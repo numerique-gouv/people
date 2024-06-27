@@ -104,6 +104,67 @@ class MailDomainAccess(BaseModel):
     def __str__(self):
         return f"Access of user {self.user} on domain {self.domain}."
 
+    def get_abilities(self, user):
+        """
+        Compute and return abilities for a given user taking into account
+        the current state of the object.
+        """
+        is_owner_or_admin = False
+        role = None
+
+        if user.is_authenticated:
+            try:
+                role = self.user_role
+            except AttributeError:
+                try:
+                    role = self._meta.model.objects.filter(
+                        domain=self.domain_id, user=user
+                    ).values("role")[0]["role"]
+                except (self._meta.model.DoesNotExist, IndexError):
+                    role = None
+
+            is_owner_or_admin = role in [
+                MailDomainRoleChoices.OWNER,
+                MailDomainRoleChoices.ADMIN,
+            ]
+
+        if self.role == MailDomainRoleChoices.OWNER:
+            can_delete = (
+                user.id == self.user_id
+                and self.domain.accesses.filter(
+                    role=MailDomainRoleChoices.OWNER
+                ).count()
+                > 1
+            )
+            set_role_to = (
+                [MailDomainRoleChoices.ADMIN, MailDomainRoleChoices.VIEWER]
+                if can_delete
+                else []
+            )
+        else:
+            can_delete = is_owner_or_admin
+            set_role_to = []
+            if role == MailDomainRoleChoices.OWNER:
+                set_role_to.append(MailDomainRoleChoices.OWNER)
+            if is_owner_or_admin:
+                set_role_to.extend(
+                    [MailDomainRoleChoices.ADMIN, MailDomainRoleChoices.VIEWER]
+                )
+
+        # Remove the current role as we don't want to propose it as an option
+        try:
+            set_role_to.remove(self.role)
+        except ValueError:
+            pass
+
+        return {
+            "delete": can_delete,
+            "get": bool(role),
+            "patch": bool(set_role_to),
+            "put": bool(set_role_to),
+            "set_role_to": set_role_to,
+        }
+
 
 class Mailbox(BaseModel):
     """Mailboxes for users from mail domain."""
@@ -168,3 +229,64 @@ class Mailbox(BaseModel):
 
         # Update is not implemented for now
         raise NotImplementedError()
+
+    def get_abilities(self, user):
+        """
+        Compute and return abilities for a given user taking into account
+        the current state of the object.
+        """
+        is_owner_or_admin = False
+        role = None
+
+        if user.is_authenticated:
+            try:
+                role = self.user_role
+            except AttributeError:
+                try:
+                    role = self._meta.model.objects.filter(
+                        domain=self.domain_id, user=user
+                    ).values("role")[0]["role"]
+                except (self._meta.model.DoesNotExist, IndexError):
+                    role = None
+
+            is_owner_or_admin = role in [
+                MailDomainRoleChoices.OWNER,
+                MailDomainRoleChoices.ADMIN,
+            ]
+
+        if role == MailDomainRoleChoices.OWNER:
+            can_delete = (
+                user.id == self.user_id
+                and self.domain.accesses.filter(
+                    role=MailDomainRoleChoices.OWNER
+                ).count()
+                > 1
+            )
+            set_role_to = (
+                [MailDomainRoleChoices.ADMIN, MailDomainRoleChoices.VIEWER]
+                if can_delete
+                else []
+            )
+        else:
+            can_delete = is_owner_or_admin
+            set_role_to = []
+            if role == MailDomainRoleChoices.OWNER:
+                set_role_to.append(MailDomainRoleChoices.OWNER)
+            if is_owner_or_admin:
+                set_role_to.extend(
+                    [MailDomainRoleChoices.ADMIN, MailDomainRoleChoices.VIEWER]
+                )
+
+        # Remove the current role as we don't want to propose it as an option
+        try:
+            set_role_to.remove(role)
+        except ValueError:
+            pass
+
+        return {
+            "delete": can_delete,
+            "get": bool(role),
+            "patch": bool(set_role_to),
+            "put": bool(set_role_to),
+            "set_role_to": set_role_to,
+        }

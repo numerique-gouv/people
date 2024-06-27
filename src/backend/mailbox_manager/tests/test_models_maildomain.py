@@ -70,7 +70,10 @@ def test_models_maildomains_get_abilities_authenticated():
 
 def test_models_maildomains_get_abilities_owner():
     """Check abilities returned for the owner of a maildomain."""
-    access = factories.MailDomainAccessFactory(role=enums.MailDomainRoleChoices.OWNER)
+    user = core_factories.UserFactory()
+    access = factories.MailDomainAccessFactory(
+        role=enums.MailDomainRoleChoices.OWNER, user=user
+    )
     abilities = access.domain.get_abilities(access.user)
     assert abilities == {
         "delete": True,
@@ -96,10 +99,13 @@ def test_models_maildomains_get_abilities_administrator():
     }
 
 
-def test_models_maildomains_get_abilities_viewer():
-    """Check abilities returned for the member of a mail domain. It's a viewer role."""
+def test_models_maildomains_get_abilities_viewer(django_assert_num_queries):
+    """Check abilities returned for the viewer of a mail domain. It's a viewer role."""
     access = factories.MailDomainAccessFactory(role=enums.MailDomainRoleChoices.VIEWER)
-    abilities = access.domain.get_abilities(access.user)
+
+    with django_assert_num_queries(1):
+        abilities = access.domain.get_abilities(access.user)
+
     assert abilities == {
         "delete": False,
         "get": True,
