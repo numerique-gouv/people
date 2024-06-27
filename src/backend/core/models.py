@@ -214,11 +214,15 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
         verbose_name_plural = _("users")
 
     def __str__(self):
-        return (
-            str(self.profile_contact)
-            if self.profile_contact
-            else self.admin_email or str(self.id)
-        )
+        main_identity = self._get_identities_main()
+        if not main_identity.exists():
+            return (
+                f"AdminUser {self.admin_email}"
+                if self.admin_email
+                else f"uuid:{str(self.id)}"
+            )
+
+        return str(main_identity.first()).replace("[main]", "")
 
     def _get_identities_main(self):
         """Return a list with the main identity or an empty list."""
@@ -317,8 +321,9 @@ class Identity(BaseModel):
 
     def __str__(self):
         main_str = "[main]" if self.is_main else ""
-        id_str = self.email or self.sub
-        return f"{id_str:s}{main_str:s}"
+        id_str = self.email or f"sub:{self.sub}"
+        info_str = f"{self.name} {id_str}" if self.name else id_str
+        return f"{info_str}{main_str:s}"
 
     def save(self, *args, **kwargs):
         """
