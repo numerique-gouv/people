@@ -1,6 +1,7 @@
 """API endpoints"""
+from django.db.models import Func, Max, OuterRef, Q, Subquery, Value
 
-from rest_framework import filters, mixins, viewsets
+from rest_framework import exceptions, filters, mixins, pagination, response, viewsets
 from rest_framework import permissions as drf_permissions
 
 from core import models as core_models
@@ -22,7 +23,7 @@ class MailDomainViewSet(
     GET /api/<version>/mail-domains/
         Return a list of mail domains user has access to.
 
-    GET /api/<version>/mail-domains/<domain-slug>/
+    GET /api/<version>/mail-domains/<domain_slug>/
         Return details for a mail domain user has access to.
 
     POST /api/<version>/mail-domains/ with expected data:
@@ -37,6 +38,15 @@ class MailDomainViewSet(
     ordering = ["-created_at"]
     lookup_field = "slug"
     queryset = models.MailDomain.objects.all()
+
+    def get_permissions(self):
+        """User only needs to be authenticated to list accesses"""
+        if self.action == "list":
+            permission_classes = [drf_permissions.IsAuthenticated]
+        else:
+            return super().get_permissions()
+
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         return self.queryset.filter(accesses__user=self.request.user)
@@ -54,19 +64,129 @@ class MailDomainViewSet(
 
 # pylint: disable=too-many-ancestors
 class MailDomainAccessViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
     mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
     """
-    MailDomainAccess viewset.
+    API ViewSet for all interactions with mail domain accesses.
+
+    GET /api/v1.0/mail-domains/<domain_slug>/accesses/:<domain_access_id>
+        Return list of all domain accesses related to the logged-in user or one
+        domain access if an id is provided.
+
+    POST /api/v1.0/mail-domains/<domain_slug>/accesses/ with expected data:
+        - user: str
+        - role: str [owner|admin|member]
+        Return newly created mail domain access
+
+    PUT /api/v1.0/mail-domains/<domain_slug>/accesses/<domain_access_id>/ with expected data:
+        - role: str [owner|admin|member]
+        Return updated domain access
+
+    PATCH /api/v1.0/mail-domains/<domain_slug>/accesses/<domain_access_id>/ with expected data:
+        - role: str [owner|admin|member]
+        Return partially updated domain access
+
+    DELETE /api/v1.0/mail-domains/<domain_slug>/accesses/<domain_access_id>/
+        Delete targeted domain access
     """
 
-    permission_classes = [drf_permissions.IsAuthenticated]
+    lookup_field = "pk"
+    permission_classes = [permissions.AccessPermission]
     serializer_class = serializers.MailDomainAccessSerializer
     filter_backends = [filters.OrderingFilter]
-    ordering_fields = ["created_at", "user", "domain", "role"]
+    ordering_fields = ["created_at", "user", "role"]
     ordering = ["-created_at"]
-    queryset = models.MailDomainAccess.objects.all()
+    ordering_fields = ["role", "user__email", "user__name"]
+    queryset = (
+        models.MailDomainAccess.objects.all().select_related("user").order_by("-created_at")
+    )
+    list_serializer_class = serializers.MailDomainAccessReadOnlySerializer
+    detail_serializer_class = serializers.MailDomainAccessSerializer
+
+    def get_permissions(self):
+        """User only needs to be authenticated to list domain accesses"""
+        if self.action == "list":
+            permission_classes = [drf_permissions.IsAuthenticated]
+        else:
+            return super().get_permissions()
+
+        return [permission() for permission in permission_classes]
+
+    def get_serializer_context(self):
+        """Extra context provided to the serializer class."""
+        context = super().get_serializer_context()
+        context["domain_slug"] = self.kwargs["domain_slug"]
+        return context
+
+    def get_serializer_class(self):
+        if self.action in {"list", "retrieve"}:
+            return self.list_serializer_class
+        return self.detail_serializer_class
+
+    def get_queryset(self):
+        """Return the queryset according to the action."""
+        queryset = super().get_queryset()
+        queryset = queryset.filter(domain__slug=self.kwargs["domain_slug"])
+
+        if self.action in {"list", "retrieve"}:
+            # Determine which role the logged-in user has in the domain
+            user_role_query = models.MailDomainAccess.objects.filter(
+                user=self.request.user, domain__slug=self.kwargs["domain_slug"]
+            ).values("role")[:1]
+
+            queryset = (
+                # The logged-in user should be part of a domain to see its accesses
+                queryset.filter(
+                    domain__accesses__user=self.request.user,
+                )
+                # Abilities are computed based on logged-in user's role and
+                # the user role on each domain access
+                .annotate(
+                    user_role=Subquery(user_role_query),
+                )
+                .select_related("user")
+                .distinct()
+            )
+        return queryset
+
+    def destroy(self, request, *args, **kwargs):
+        """Forbid deleting the last owner access"""
+        instance = self.get_object()
+        domain = instance.domain
+
+        # Check if the access being deleted is the last owner access for the domain
+        if instance.role == "owner" and domain.accesses.filter(role="owner").count() == 1:
+            return response.Response(
+                {"detail": "Cannot delete the last owner access for the domain."},
+                status=400,
+            )
+
+        return super().destroy(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        """Check that we don't change the role if it leads to losing the last owner."""
+        instance = serializer.instance
+
+        # Check if the role is being updated and the new role is not "owner"
+        if (
+            "role" in self.request.data
+            and self.request.data["role"] != models.RoleChoices.OWNER
+        ):
+            domain = instance.domain
+            # Check if the access being updated is the last owner access for the domain
+            if (
+                instance.role == models.RoleChoices.OWNER
+                and domain.accesses.filter(role=models.RoleChoices.OWNER).count() == 1
+            ):
+                message = "Cannot change the role to a non-owner role for the last owner access."
+                raise exceptions.ValidationError({"role": message})
+
+        serializer.save()
 
 
 class MailBoxViewSet(
@@ -76,7 +196,7 @@ class MailBoxViewSet(
 ):
     """MailBox ViewSet"""
 
-    permission_classes = [drf_permissions.IsAuthenticated]
+    permission_classes = [permissions.MailBoxPermission]
     serializer_class = serializers.MailboxSerializer
     queryset = models.Mailbox.objects.all()
 
