@@ -75,7 +75,6 @@ class MailDomainWebhookFactory(factory.django.DjangoModelFactory):
 
     domain = factory.SubFactory(MailDomainFactory)
     url = factory.LazyAttribute(
-        lambda o: f"https://example.com/api/domains/{domain.name}/mailboxes/"
-        % o.domain.name
+        lambda o: "https://example.com/api/domains/%s/mailboxes/" % o.domain.name
     )
-    secret = "encoded_secret"  # noqa: S105
+    secret = factory.Faker("password")

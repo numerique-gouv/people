@@ -455,6 +455,8 @@ class Development(Base):
         # pylint: disable=invalid-name
         self.INSTALLED_APPS += ["django_extensions", "drf_spectacular_sidecar"]
 
+    MAIL_PROVISIONER_URL = "host.docker.internal:8000"
+
 
 class Test(Base):
     """Test environment settings"""

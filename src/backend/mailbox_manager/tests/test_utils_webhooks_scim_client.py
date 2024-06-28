@@ -1,5 +1,10 @@
 """Test Team synchronization webhooks."""
 
+import random
+import re
+from logging import Logger
+from unittest import mock
+
 import pytest
 import responses
 
@@ -20,123 +25,60 @@ def test_utils_webhooks_add_mailbox_to_domain__no_webhooks():
     assert len(responses.calls) == 0
 
 
-# @mock.patch.object(Logger, "info")
-# def test_utils_webhooks_add_user_to_group_success(mock_info):
-#     """The user passed to the function should get added."""
-#     identity = factories.IdentityFactory()
-#     access = factories.TeamAccessFactory(user=identity.user)
-#     webhooks = factories.TeamWebhookFactory.create_batch(2, team=access.team)
+@mock.patch.object(Logger, "info")
+def test_utils_webhooks__create_mailbox_success(mock_info):
+    """The user passed to the function should get added."""
+    domain = factories.MailDomainFactory()
+    webhooks = factories.TeamWebhookFactory.create_batch(2, team=access.team)
 
-#     with responses.RequestsMock() as rsps:
-#         # Ensure successful response by scim provider using "responses":
-#         rsps.add(
-#             rsps.PATCH,
-#             re.compile(r".*/Groups/.*"),
-#             body="{}",
-#             status=200,
-#             content_type="application/json",
-#         )
+    with responses.RequestsMock() as rsps:
+        # Ensure successful response by scim provider using "responses":
+        sp = rsps.add(
+            rsps.GET,
+            re.compile(r".*/token/"),
+            body='{"access_token": "domain_owner_token"}',
+            status=200,
+            content_type="application/json",
+        )
+        rsp = rsps.add(
+            rsps.POST,
+            re.compile(rf".*/api/domains/{domain.name}/mailboxes/"),
+            body='{"email": f"{mailbox_data.local_part}@{mailbox_data.domain.name}", "password": "something_mysterieux", "uuid": "SECURITY}',
+            status=201,
+            content_type="application/json",
+        )
 
-#         scim_synchronizer.add_user_to_group(access.team, access.user)
+        scim_synchronizer.create_mailbox(self.domain, self.local_part)
 
-#         for i, webhook in enumerate(webhooks):
-#             assert rsps.calls[i].request.url == webhook.url
+        assert rsps.calls[i].request.url == webhook.url
 
-#             # Check headers
-#             headers = rsps.calls[i].request.headers
-#             assert "Authorization" not in headers
-#             assert headers["Content-Type"] == "application/json"
+        # Check headers
+        headers = rsps.calls[i].request.headers
+        assert "Authorization" not in headers
+        assert headers["Content-Type"] == "application/json"
 
-#         # Payload sent to scim provider
-#         for call in rsps.calls:
-#             payload = json.loads(call.request.body)
-#             assert payload == {
-#                 "schemas": ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
-#                 "Operations": [
-#                     {
-#                         "op": "add",
-#                         "path": "members",
-#                         "value": [
-#                             {
-#                                 "value": str(access.user.id),
-#                                 "email": identity.email,
-#                                 "type": "User",
-#                             }
-#                         ],
-#                     }
-#                 ],
-#             }
+        # Payload sent to mailbox provider
+        payload = json.loads(call.request.body)
+        assert payload == {
+            "displayName": f'{mailbox_data["local_part"]} Test',
+            "email": f'{mailbox_data["local_part"]}@{domain.name}',
+            "givenName": f'{mailbox_data["local_part"]}',
+            "surName": "Test",
+        }
 
-#     # Logger
-#     assert mock_info.call_count == 2
-#     for i, webhook in enumerate(webhooks):
-#         assert mock_info.call_args_list[i][0] == (
-#             "%s synchronization succeeded with %s",
-#             "add_user_to_group",
-#             webhook.url,
-#         )
+    # Logger
+    assert mock_info.call_count == 2
+    for i, webhook in enumerate(webhooks):
+        assert mock_info.call_args_list[i][0] == (
+            "%s synchronization succeeded with %s",
+            "add_user_to_group",
+            webhook.url,
+        )
 
-#     # Status
-#     for webhook in webhooks:
-#         webhook.refresh_from_db()
-#         assert webhook.status == "success"
-
-
-# @mock.patch.object(Logger, "info")
-# def test_utils_webhooks_remove_user_from_group_success(mock_info):
-#     """The user passed to the function should get removed."""
-#     identity = factories.IdentityFactory()
-#     access = factories.TeamAccessFactory(user=identity.user)
-#     webhooks = factories.TeamWebhookFactory.create_batch(2, team=access.team)
-
-#     with responses.RequestsMock() as rsps:
-#         # Ensure successful response by scim provider using "responses":
-#         rsps.add(
-#             rsps.PATCH,
-#             re.compile(r".*/Groups/.*"),
-#             body="{}",
-#             status=200,
-#             content_type="application/json",
-#         )
-
-#         scim_synchronizer.remove_user_from_group(access.team, access.user)
-
-#         for i, webhook in enumerate(webhooks):
-#             assert rsps.calls[i].request.url == webhook.url
-
-#         # Payload sent to scim provider
-#         for call in rsps.calls:
-#             payload = json.loads(call.request.body)
-#             assert payload == {
-#                 "schemas": ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
-#                 "Operations": [
-#                     {
-#                         "op": "remove",
-#                         "path": "members",
-#                         "value": [
-#                             {
-#                                 "value": str(access.user.id),
-#                                 "email": identity.email,
-#                                 "type": "User",
-#                             }
-#                         ],
-#                     }
-#                 ],
-#             }
-
-#     # Logger
-#     assert mock_info.call_count == 2
-#     for i, webhook in enumerate(webhooks):
-#         assert mock_info.call_args_list[i][0] == (
-#             "%s synchronization succeeded with %s",
-#             "remove_user_from_group",
-#             webhook.url,
-#         )
-
-#     # Status
-#     for webhook in webhooks:
-#         webhook.refresh_from_db()
-#         assert webhook.status == "success"
+    # Status
+    for webhook in webhooks:
+        webhook.refresh_from_db()
+        assert webhook.status == "success"
 
 
 # @mock.patch.object(Logger, "error")

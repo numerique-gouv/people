@@ -9,10 +9,25 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 import requests
+import logging
 
+import requests
+from urllib3.util import Retry
 from core.models import BaseModel, RoleChoices, WebhookStatusChoices
 
-from mailbox_manager.utils.webhooks import scim_synchronizer
+logger = logging.getLogger(__name__)
+
+adapter = requests.adapters.HTTPAdapter(
+    max_retries=Retry(
+        total=4,
+        backoff_factor=0.1,
+        status_forcelist=[500, 502],
+        allowed_methods=["PATCH"],
+    )
+)
+
+session = requests.Session()
+session.mount("http://", adapter)
 
 
 class MailDomain(BaseModel):
@@ -131,14 +146,33 @@ class Mailbox(BaseModel):
         """
 
         if self._state.adding:
-            self.domain.webhooks.update(status=WebhookStatusChoices.PENDING)
             with transaction.atomic():
+                self.create_mailbox(self.local_part)
                 instance = super().save(*args, **kwargs)
-                scim_synchronizer.create_mailbox(self.domain, self.local_part)
         else:
             instance = super().save(*args, **kwargs)
 
         return instance
+
+    def create_mailbox(self, local_part):
+        """Create a mailbox on webhook's domain."""
+
+        payload = {
+            "email": f"{local_part}@{self.domain}",
+            "givenName": local_part,
+            "surName": "Test",
+            "displayName": f"{local_part} Test",
+        }
+
+        return session.post(
+            f"{settings.MAIL_PROVISIONER_URL}/domains/{self.domain}/mailboxes/",
+            json=payload,
+            headers=webhook.get_headers(),
+            # verify=False,
+            verify=True,
+            # verify=self.get_settings("OIDC_VERIFY_SSL", True),
+            timeout=10,
+        )
 
 
 class MailDomainWebhook(BaseModel):
