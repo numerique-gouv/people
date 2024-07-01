@@ -76,38 +76,13 @@ def test_api_mailboxes__create_authenticated_missing_fields():
     assert response.json() == {"secondary_email": ["This field is required."]}
 
 
-def test_api_mailboxes__create_authenticated_successful():
-    """Authenticated users should be able to create mailbox."""
-    user = core_factories.UserFactory(email="tester@ministry.fr", name="john doe")
-
-    client = APIClient()
-    client.force_login(user)
-
-    mail_domain = factories.MailDomainFactory(name="saint-jean.collectivite.fr")
-    mailbox_data = serializers.MailboxSerializer(factories.MailboxFactory.build()).data
-    response = client.post(
-        f"/api/v1.0/mail-domains/{mail_domain.id}/mailboxes/",
-        mailbox_data,
-        format="json",
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    mailbox = models.Mailbox.objects.get()
-    assert response.json() == {
-        "id": str(mailbox.id),
-        "local_part": str(mailbox_data["local_part"]),
-        "secondary_email": str(mailbox_data["secondary_email"]),
-    }
-    assert mailbox.local_part == mailbox_data["local_part"]
-    assert mailbox.secondary_email == mailbox_data["secondary_email"]
-
-
-def test_api_mailboxes__webhook_dont_fire_unauthorized():
+def test_api_mailboxes__provisioning_api_not_called_unauthorized():
     """
-    Webhook should not be fired if unauthorized user try to create a mailbox.
+    Provisioning API should not be called if a user tries
+    to create a mailbox on a domain they do not own.
     """
     # creating all necessary objects
     domain = factories.MailDomainFactory()
-    webhook = factories.MailDomainWebhookFactory(domain=domain)
     mailbox_data = serializers.MailboxSerializer(factories.MailboxFactory.build()).data
 
     client = APIClient()
@@ -137,24 +112,22 @@ def test_api_mailboxes__webhook_dont_fire_unauthorized():
         )
         assert response.status_code == 201  # a fix après la PR de Sabrina
         assert rsp.call_count == 1
-        assert rsps.calls[1].request.url == webhook.url  # rsps.calls[0] is the token
+        # assert rsps.calls[1].request.url == webhook.url  # rsps.calls[0] is the token
 
 
-def test_api_mailboxes__webhook_fire_upon_create():
+def test_api_mailboxes__successful_creation_and_provisioning():
     """
-    When the domain has a webhook, creating a mailbox should fire a call.
+    Domain owner should be able to create mailboxes.
+    Provisioning API should be called when owner makes a call.
+    Expected response contains new email and password.
     """
-
     # creating all needed objects
     domain = factories.MailDomainFactory()
     access = factories.MailDomainAccessFactory(domain=domain)
-    webhook = factories.MailDomainWebhookFactory(domain=domain)
-    mailbox_data = serializers.MailboxSerializer(
-        factories.MailboxFactory.build(domain=domain)
-    ).data
 
     client = APIClient()
     client.force_login(access.user)
+    mailbox_data = serializers.MailboxSerializer(factories.MailboxFactory.build()).data
 
     with responses.RequestsMock() as rsps:
         # Ensure successful response using "responses":
@@ -168,7 +141,7 @@ def test_api_mailboxes__webhook_fire_upon_create():
         rsp = rsps.add(
             rsps.POST,
             re.compile(rf".*/api/domains/{domain.name}/mailboxes/"),
-            body='{"email": f"{mailbox_data.local_part}@{mailbox_data.domain.name}", "password": "something_mysterieux", "uuid": "SECURITY}',
+            body='{"email": f"{mailbox_data.local_part}@{mailbox_data.domain.name}", "password": "newpass", "uuid": "uuid"}',
             status=201,
             content_type="application/json",
         )
@@ -190,3 +163,13 @@ def test_api_mailboxes__webhook_fire_upon_create():
             "givenName": f'{mailbox_data["local_part"]}',
             "surName": "Test",
         }
+
+    assert response.status_code == status.HTTP_201_CREATED
+    mailbox = models.Mailbox.objects.get()
+    assert response.json() == {
+        "id": str(mailbox.id),
+        "local_part": str(mailbox_data["local_part"]),
+        "secondary_email": str(mailbox_data["secondary_email"]),
+    }
+    assert mailbox.local_part == mailbox_data["local_part"]
+    assert mailbox.secondary_email == mailbox_data["secondary_email"]

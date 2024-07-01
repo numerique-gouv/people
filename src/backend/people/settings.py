@@ -413,6 +413,10 @@ class Base(Configuration):
             with sentry_sdk.configure_scope() as scope:
                 scope.set_extra("application", "backend")
 
+    MAIL_PROVISIONER_URL = (
+        "https://main.dev.ox.numerique.gouv.fr"  # "http://host.docker.internal:8000"
+    )
+
 
 class Build(Base):
     """Settings used when the application is built.
@@ -454,8 +458,6 @@ class Development(Base):
     def __init__(self):
         # pylint: disable=invalid-name
         self.INSTALLED_APPS += ["django_extensions", "drf_spectacular_sidecar"]
-
-    MAIL_PROVISIONER_URL = "host.docker.internal:8000"
 
 
 class Test(Base):

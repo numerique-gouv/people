@@ -25,6 +25,7 @@ class MailDomainFactory(factory.django.DjangoModelFactory):
 
     name = factory.Faker("domain_name")
     slug = factory.LazyAttribute(lambda o: slugify(o.name))
+    secret = factory.Faker("password")
 
     @factory.post_generation
     def users(self, create, extracted, **kwargs):
@@ -65,16 +66,3 @@ class MailboxFactory(factory.django.DjangoModelFactory):
     local_part = factory.LazyAttribute(lambda a: a.full_name.lower().replace(" ", "."))
     domain = factory.SubFactory(MailDomainFactory)
     secondary_email = factory.Faker("email")
-
-
-class MailDomainWebhookFactory(factory.django.DjangoModelFactory):
-    """Create fake domain webhooks for testing."""
-
-    class Meta:
-        model = models.MailDomainWebhook
-
-    domain = factory.SubFactory(MailDomainFactory)
-    url = factory.LazyAttribute(
-        lambda o: "https://example.com/api/domains/%s/mailboxes/" % o.domain.name
-    )
-    secret = factory.Faker("password")

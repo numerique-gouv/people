@@ -6,20 +6,10 @@ from django.utils.translation import gettext_lazy as _
 from mailbox_manager import models
 
 
-class MailDomainWebhookInline(admin.TabularInline):
-    """Inline admin class for domains webhooks."""
-
-    extra = 0
-    autocomplete_fields = ["domain"]
-    model = models.MailDomainWebhook
-    readonly_fields = ("created_at", "updated_at")
-
-
 @admin.register(models.MailDomain)
 class MailDomainAdmin(admin.ModelAdmin):
     """Mail domain admin interface declaration."""
 
-    inlines = [MailDomainWebhookInline]
     list_display = (
         "name",
         "created_at",
