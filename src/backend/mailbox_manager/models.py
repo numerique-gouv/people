@@ -2,13 +2,32 @@
 Declare and configure the models for the People additional application : mailbox_manager
 """
 
+import logging
+
 from django.conf import settings
-from django.core import validators
-from django.db import models
+from django.core import exceptions, validators
+from django.db import models, transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+import requests
+from urllib3.util import Retry
+
 from core.models import BaseModel, RoleChoices
+
+logger = logging.getLogger(__name__)
+
+adapter = requests.adapters.HTTPAdapter(
+    max_retries=Retry(
+        total=4,
+        backoff_factor=0.1,
+        status_forcelist=[500, 502],
+        allowed_methods=["PATCH"],
+    )
+)
+
+session = requests.Session()
+session.mount("http://", adapter)
 
 
 class MailDomain(BaseModel):
@@ -18,6 +37,7 @@ class MailDomain(BaseModel):
         _("name"), max_length=150, null=False, blank=False, unique=True
     )
     slug = models.SlugField(null=False, blank=False, unique=True, max_length=80)
+    secret = models.CharField(_("secret"), max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "people_mail_domain"
@@ -58,6 +78,29 @@ class MailDomain(BaseModel):
             "delete": role == RoleChoices.OWNER,
             "manage_accesses": is_owner_or_admin,
         }
+
+    def get_headers(self):
+        """Build header dict from webhook object."""
+        # self.secret is the encoded basic auth, to request a new token from dimail-api
+        headers = {"Content-Type": "application/json"}
+
+        response = requests.get(
+            f"{settings.MAIL_PROVISIONER_URL}/token/",
+            headers={"Authorization": f"Basic {self.secret}"},
+            timeout=200,
+        )
+
+        if response.json() == "{'detail': 'Permission denied'}":
+            raise exceptions.PermissionDenied(
+                "This secret does not allow for a new token."
+            )
+
+        # import pdb; pdb.set_trace()
+
+        if "access_token" in response.json():
+            headers["Authorization"] = f"Bearer {response.json()['access_token']}"
+
+        return headers
 
 
 class MailDomainAccess(BaseModel):
@@ -120,3 +163,49 @@ class Mailbox(BaseModel):
 
     def __str__(self):
         return f"{self.local_part!s}@{self.domain.name:s}"
+
+    def save(self, *args, **kwargs):
+        """
+        Override save function to fire webhooks on mailbox creation and modification.
+        """
+
+        if not self.domain.secret:
+            raise exceptions.FieldError(
+                "Please configure your domain's secret before creating any mailbox."
+            )
+
+        if self._state.adding:
+            with transaction.atomic():
+                self.send_mailbox_request(self.local_part)
+                instance = super().save(*args, **kwargs)
+
+        else:
+            instance = super().save(*args, **kwargs)
+
+        return instance
+
+    def send_mailbox_request(self, local_part):
+        """Send a CREATE mailbox request to mail provisioning API."""
+
+        payload = {
+            "email": f"{local_part}@{self.domain}",
+            "givenName": local_part,
+            "surName": "Test",
+            "displayName": f"{local_part} Test",
+        }
+
+        try:
+            response = session.post(
+                f"{settings.MAIL_PROVISIONER_URL}/domains/{self.domain}/mailboxes/",
+                json=payload,
+                headers=self.domain.get_headers(),
+                # verify=False,
+                verify=True,
+                # verify=self.get_settings("OIDC_VERIFY_SSL", True),
+                timeout=10,
+            )
+        except requests.exceptions.ConnectionError as e:
+            raise e
+
+        print(response.json())  # noqa T201 - Needed to get password of new mailbox
+        return response
