@@ -4,6 +4,7 @@ image:
   tag: "main"
 
 backend:
+  replicas: 1
   migrateJobAnnotations:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
