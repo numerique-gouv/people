@@ -1,0 +1,45 @@
+"""Resource Server Authentication"""
+
+import base64
+import binascii
+
+from django.conf import settings
+
+from mozilla_django_oidc.contrib.drf import OIDCAuthentication
+
+from .backend import ResourceServerBackend
+from .clients import AuthorizationServerClient
+
+
+class ResourceServerAuthentication(OIDCAuthentication):
+    """Authenticate resource owners using the token received from the authorization server."""
+
+    def __init__(self):
+        super().__init__()
+
+        authorization_server = AuthorizationServerClient(
+            url=settings.OIDC_OP_URL,
+            verify_ssl=settings.OIDC_VERIFY_SSL,
+            timeout=settings.OIDC_TIMEOUT,
+            proxy=settings.OIDC_PROXY,
+            endpoint_jwks="/jwks",
+            endpoint_introspection="/checktoken",
+        )
+
+        self.backend = ResourceServerBackend(authorization_server)
+
+    def get_access_token(self, request):
+        """Retrieve and decode the access token from the request.
+
+        This method overcharges the 'get_access_token' method from the parent class,
+        to support service providers that would base64 encode the bearer token.
+        """
+
+        access_token = super().get_access_token(request)
+
+        try:
+            access_token = base64.b64decode(access_token).decode("utf-8")
+        except (binascii.Error, TypeError):
+            pass
+
+        return access_token
