@@ -2,13 +2,17 @@
 
 import base64
 import binascii
+import logging
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 
 from .backend import ResourceServerBackend
 from .clients import AuthorizationServerClient
+
+logger = logging.getLogger(__name__)
 
 
 class ResourceServerAuthentication(OIDCAuthentication):
@@ -17,16 +21,21 @@ class ResourceServerAuthentication(OIDCAuthentication):
     def __init__(self):
         super().__init__()
 
-        authorization_server = AuthorizationServerClient(
-            url=settings.OIDC_OP_URL,
-            verify_ssl=settings.OIDC_VERIFY_SSL,
-            timeout=settings.OIDC_TIMEOUT,
-            proxy=settings.OIDC_PROXY,
-            endpoint_jwks="/jwks",
-            endpoint_introspection="/checktoken",
-        )
+        try:
+            authorization_server = AuthorizationServerClient(
+                url=settings.OIDC_OP_URL,
+                verify_ssl=settings.OIDC_VERIFY_SSL,
+                timeout=settings.OIDC_TIMEOUT,
+                proxy=settings.OIDC_PROXY,
+                endpoint_jwks="/jwks",
+                endpoint_introspection="/checktoken",
+            )
 
-        self.backend = ResourceServerBackend(authorization_server)
+            self.backend = ResourceServerBackend(authorization_server)
+
+        except ImproperlyConfigured:
+            logger.debug("Resource server authentication is not enabled", exc_info=True)
+            self.backend = None
 
     def get_access_token(self, request):
         """Retrieve and decode the access token from the request.

@@ -2,6 +2,8 @@
 
 from posixpath import join as urljoin
 
+from django.core.exceptions import ImproperlyConfigured
+
 import requests
 from joserfc.jwk import KeySet
 
@@ -30,6 +32,11 @@ class AuthorizationServerClient:
         timeout,
         proxy,
     ):
+        if not url or not endpoint_jwks or not endpoint_introspection:
+            raise ImproperlyConfigured(
+                "Could not instantiate AuthorizationServerClient."
+            )
+
         self.url = url
         self._url_introspection = urljoin(self.url, endpoint_introspection.lstrip("/"))
         self._url_jwks = urljoin(self.url, endpoint_jwks.lstrip("/"))

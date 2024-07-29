@@ -4,7 +4,7 @@ import logging
 
 from django.conf import settings
 from django.contrib import auth
-from django.core.exceptions import SuspiciousOperation
+from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 
 from joserfc import jwe as jose_jwe
 from joserfc import jwt as jose_jwt
@@ -41,6 +41,10 @@ class ResourceServerBackend:
         self._encryption_algorithm = settings.OIDC_RS_ENCRYPTION_ALGO
         self._signing_algorithm = settings.OIDC_RS_SIGNING_ALGO
         self._scopes = settings.OIDC_RS_SCOPES
+
+        if not self._client_id or not self._client_secret or not authorization_server:
+            raise ImproperlyConfigured("Could not instantiate ResourceServerBackend.")
+
         self._authorization_server = authorization_server
 
         self._claims_registry = jose_jwt.JWTClaimsRegistry(
