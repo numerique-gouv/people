@@ -395,7 +395,7 @@ def test_api_contacts_create_authenticated_successful():
 @override_settings(ALLOW_API_USER_CREATE=True)
 def test_api_contacts_create_authenticated_existing_override():
     """
-    Trying to create a contact for base contact that is already overriden by the user
+    Trying to create a contact for base contact that is already override by the user
     should receive a 400 error.
     """
     user = factories.UserFactory(profile_contact=None)

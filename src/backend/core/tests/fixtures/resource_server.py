@@ -1,0 +1,36 @@
+"""Fixtures for Resource Server (RS)."""
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def default_private_key_str(settings):
+    """Use a mocked private key while manipulating JWK"""
+    settings.OIDC_RS_PRIVATE_KEY_STR = """-----BEGIN PRIVATE KEY-----
+MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC5fSrzVhEdAZfU
+FloKfh6TdviRCwVOUgSX5+X6a7QoEGWhqupWqg186Y0jxrOr9hyXysI3QIPJfPEb
+2ebxqWs7Ely2OWDG7mv7xrT98wkH3gf5p7W47RWYSoQjFB+p9RKIZgeWNn1zh+RK
+XxeHOiAEcFagzVu5ZcNmBDAvj1ZrUlv7E2w9+W8hs69BPjjYzHpt1ZLblPQzHkzi
+ELaZxymFlgUY8FZXDrslmwtFFBsv7sTNohUBKMMN2btXae34bFVf3cYGeUcTJI1i
+AsZZ/mP5D2/+9tFh60BH21+jfowqp39vHuSVz+weVIPu5KdnXdQLJvVjWViD5kzK
+D1dRY+49AgMBAAECggEANA93cJilcPizfmlPmEZRmp33oe3v7U2D0Ibbu29jPyNr
+AvcPkodkBb0fSf1JDGilGc1kuVE4K+MPYPvFn+onGItMzjBIg00DrcTVo7kEvdqJ
+bn6tuFuChh3T/Gx3fqI0M2g/lN9yUmy/nEgYOHIN7nEBP1yj8+Ml9ooSZCbc4H3g
+utCwmtQugLo13aApzsaE6NaM+UhCXha6PFpFOt+ZKHQ3tQVGvnB6hOm23VPI1eDV
+4rKWbAGTOdh4yny0U6D4r4ZO1Tlc5vvsyg5jKnqxKQQeffk1vbqikwdQ9edVOrEz
+eiSSC6CIcCkTIPHi7LjZdPloEBf4/W6ws98fsHIiWQKBgQDi75v2Y6FDv6wA2EyG
+zz5faYsUeHIWokOZM+6AKC5qjblowc/W5uRwa4PxQqlym+UMwEeobGYQry1mVSYx
+rhDNs0rwMQKuaBmo91kX8MtGz+QEhu/uSG0CWC79W4npSmQ4lFzGHBmi1idQWMLl
+5GqtNxMyqpW7QoG3Xw2PWJCXVwKBgQDRPqngvyN1fs04HN7GgszvEvCWt66olzab
+6/nw5USgrs2a9Y0O54+gWzmJa0peEXfBMEeerRaohjQMJp/Uq19zSrgaAjgwK4vF
+r9g7he1ykCt0WNPsxe0+jaOzEc/n6Cl4ogeQrixcs4QHfsq3l/8QCKxzLQDWKKbi
+mNqYaF0OiwKBgGbezwglqZiYblQDuMzzbQa7RTyGTNFNxO7Rx694h3HtxLpkAN8d
+0zfSxQC8gytc17ur/c+vM6Ukg6P7vVCP4zYbrECtNtXwgpFBbrWXhc4XtvkGYgTV
+9/Q0HTjkIeQKwNuVBWkYm9Zg1Xlqgw7LOEBE0wMIqM82Gq8Q+4ibURAJAoGAEUhQ
+taxz3E+F2b2gtNq23IQ+9OPk/C3JJ+W8tiXpni/x8XuYlAOSPFdskCoZcV2V+5Hm
+SHfZaD/1ao+CIgmpj5c7T4Kha3EdUU2t2XS9YPoBbNGtZ2ANsV33iGHPP0NQsZMI
+du274kg9fnT9f16BhayBud2ctROUfSDM5Uuxa/MCgYBpF+/TiDodgcW8rUHBgvY0
+PyhQvhR4uSf23USAoPuu5gd7l2GiPyPZ1CsNalmF7gIFr8GSDmTUiRBVjv2jU0Y2
+GeLl0JZYj4pSV5M8SJhdAgeD9O73C4DR5OJZaqQ4ssNVclEeyy38lysgi3A3CeiH
+/VNHANClyDoseJND0WlTXQ==
+-----END PRIVATE KEY-----"""
