@@ -31,17 +31,20 @@ def test_api_mailboxes__create_anonymous_forbidden():
     assert not models.Mailbox.objects.exists()
 
 
-def test_api_mailboxes__create_authenticated_missing_fields():
+def test_api_mailboxes__create_administrator_missing_fields():
     """
-    Authenticated users should not be able to create mailboxes
+    Administrator users should not be able to create mailboxes
     without local part or secondary mail.
     """
-    user = core_factories.UserFactory(email="tester@ministry.fr", name="john doe")
-
-    client = APIClient()
-    client.force_login(user)
-
+    #user = core_factories.UserFactory(email="tester@ministry.fr", name="john doe")
     mail_domain = factories.MailDomainEnabledFactory()
+    access = factories.MailDomainAccessFactory(role="administrator", domain=mail_domain)
+    abilities = access.domain.get_abilities(access.user)
+    # todo: fix test with new permission!
+    client = APIClient()
+    client.force_login(access.user)
+
+
     response = client.post(
         f"/api/v1.0/mail-domains/{mail_domain.slug}/mailboxes/",
         {
@@ -76,6 +79,7 @@ def test_api_mailboxes__create_authenticated_successful():
     user = core_factories.UserFactory(email="tester@ministry.fr", name="john doe")
 
     client = APIClient()
+    # fixme
     client.force_login(user)
 
     mail_domain = factories.MailDomainEnabledFactory(name="saint-jean.collectivite.fr")
