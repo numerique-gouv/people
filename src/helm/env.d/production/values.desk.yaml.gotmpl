@@ -1,7 +1,13 @@
 image:
   repository: lasuite/people-backend
   pullPolicy: Always
-  tag: "v0.1.0"
+  tag: "v0.2.1"
+
+frontend:
+  image:
+    repository: lasuite/people-frontend
+    pullPolicy: Always
+    tag: "v0.2.1"
 
 backend:
   migrateJobAnnotations:
@@ -91,12 +97,6 @@ backend:
       - "-c"
       - python manage.py createsuperuser --username $DJANGO_SUPERUSER_EMAIL --password $DJANGO_SUPERUSER_PASSWORD
     restartPolicy: Never
-
-frontend:
-  image:
-    repository: lasuite/people-frontend
-    pullPolicy: Always
-    tag: "v0.1.0"
 
 ingress:
   enabled: true
