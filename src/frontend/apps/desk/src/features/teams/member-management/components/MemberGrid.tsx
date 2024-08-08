@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import IconUser from '@/assets/icons/icon-user.svg';
-import { Box, Card, TextErrors } from '@/components';
+import { Box, Card, Text, TextErrors } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
 import { ModalAddMembers } from '@/features/teams/member-add';
 import { Role, Team } from '@/features/teams/team-management';
@@ -160,6 +160,15 @@ export const MemberGrid = ({ team, currentRole }: MemberGridProps) => {
             {
               headerName: t('Names'),
               field: 'user.name',
+              renderCell: ({ row }) => (
+                <Text
+                  $weight="bold"
+                  $theme="primary"
+                  $css="text-transform: capitalize;"
+                >
+                  {row.user.name}
+                </Text>
+              ),
             },
             {
               field: 'user.email',
