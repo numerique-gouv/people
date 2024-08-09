@@ -99,7 +99,7 @@ test.describe('Mail domains', () => {
           response.status() === 200,
       );
 
-      const panel = page.getByLabel('mail domains panel').first();
+      const panel = page.getByLabel('Mail domains panel').first();
 
       await panel
         .getByRole('button', {
@@ -139,7 +139,7 @@ test.describe('Mail domains', () => {
         .click();
       await expect(page).toHaveURL(/mail-domains\//);
       await expect(
-        page.getByLabel('mail domains panel', { exact: true }),
+        page.getByLabel('Mail domains panel', { exact: true }),
       ).toBeVisible();
       await expect(page.getByText('No domains exist.')).toBeVisible();
     });
@@ -163,7 +163,7 @@ test.describe('Mail domains', () => {
         .click();
       await expect(page).toHaveURL(/mail-domains\//);
       await expect(
-        page.getByLabel('mail domains panel', { exact: true }),
+        page.getByLabel('Mail domains panel', { exact: true }),
       ).toBeVisible();
       await expect(page.getByText('No domains exist.')).toHaveCount(0);
       await expect(page.getByText('domain.fr')).toBeVisible();
