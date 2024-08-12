@@ -1,7 +1,8 @@
+import { t as tImported } from 'i18next';
 import { useRouter } from 'next/router';
 import React from 'react';
 
-import { Box, StyledLink, Text } from '@/components';
+import { Box, StyledLink, Text, TextProps } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
 import { MailDomain } from '@/features/mail-domains';
 import IconMailDomains from '@/features/mail-domains/assets/icon-mail-domains.svg';
@@ -18,10 +19,45 @@ export const PanelMailDomains = ({ mailDomain }: MailDomainProps) => {
 
   const isActive = mailDomain.slug === slug;
 
+  const getStatusText = (status: MailDomain['status']) => {
+    let object: { text: string; theme: TextProps['$theme'] } = {
+      text: '',
+      theme: 'greyscale',
+    };
+
+    switch (status) {
+      case 'pending':
+        object = {
+          text: tImported('[pending]'),
+          theme: 'warning',
+        };
+        break;
+      case 'enabled':
+        object = {
+          text: tImported('[enabled]'),
+          theme: 'success',
+        };
+        break;
+      case 'disabled':
+        object = {
+          text: tImported('[disabled]'),
+          theme: 'greyscale',
+        };
+        break;
+      case 'failed':
+        object = {
+          text: tImported('[failed]'),
+          theme: 'danger',
+        };
+    }
+
+    return object;
+  };
+
   const activeStyle = `
     border-right: 4px solid ${colorsTokens()['primary-600']};
     background: ${colorsTokens()['primary-400']};
-    span{
+    span:not(:last-child){
       color: ${colorsTokens()['primary-text']};
     }
   `;
@@ -31,11 +67,15 @@ export const PanelMailDomains = ({ mailDomain }: MailDomainProps) => {
       border-right: 4px solid ${colorsTokens()['primary-400']};
       background: ${colorsTokens()['primary-300']};
 
-      span{
+      span:not(:last-child){
         color: ${colorsTokens()['primary-text']};
       }
     }
   `;
+
+  const { text: statusText, theme: statusTheme } = getStatusText(
+    mailDomain.status,
+  );
 
   return (
     <Box
@@ -51,7 +91,12 @@ export const PanelMailDomains = ({ mailDomain }: MailDomainProps) => {
         className="p-s pt-t pb-t"
         href={`/mail-domains/${mailDomain.slug}`}
       >
-        <Box $align="center" $direction="row" $gap="0.5rem">
+        <Box
+          $position="relative"
+          $align="center"
+          $direction="row"
+          $gap="0.5rem"
+        >
           <IconMailDomains
             aria-hidden="true"
             color={colorsTokens()['primary-500']}
@@ -72,6 +117,13 @@ export const PanelMailDomains = ({ mailDomain }: MailDomainProps) => {
             `}
           >
             {mailDomain.name}
+          </Text>
+          <Text
+            $css="position: absolute; right: 0; bottom: 0; padding-right: 1rem;"
+            $size="s"
+            $theme={statusTheme}
+          >
+            {statusText}
           </Text>
         </Box>
       </StyledLink>

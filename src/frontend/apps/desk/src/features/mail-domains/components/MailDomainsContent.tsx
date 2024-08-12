@@ -1,12 +1,15 @@
 import { UUID } from 'crypto';
 
 import {
+  Alert,
   Button,
   DataGrid,
   Loader,
   SortModel,
+  VariantType,
   usePagination,
 } from '@openfun/cunningham-react';
+import { TFunction } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -98,9 +101,8 @@ export function MailDomainsContent({ mailDomain }: { mailDomain: MailDomain }) {
       ) : null}
 
       <TopBanner
-        name={mailDomain.name}
-        setIsFormVisible={setIsCreateMailboxFormVisible}
-        abilities={mailDomain?.abilities}
+        mailDomain={mailDomain}
+        showMailBoxCreationForm={setIsCreateMailboxFormVisible}
       />
 
       <Card
@@ -150,39 +152,108 @@ export function MailDomainsContent({ mailDomain }: { mailDomain: MailDomain }) {
 }
 
 const TopBanner = ({
-  name,
-  setIsFormVisible,
-  abilities,
+  mailDomain,
+  showMailBoxCreationForm,
 }: {
-  name: string;
-  setIsFormVisible: (value: boolean) => void;
-  abilities: MailDomain['abilities'];
+  mailDomain: MailDomain;
+  showMailBoxCreationForm: (value: boolean) => void;
 }) => {
   const { t } = useTranslation();
 
   return (
-    <>
+    <Box
+      $direction="column"
+      $margin={{ all: 'big', bottom: 'tiny' }}
+      $gap="1rem"
+    >
       <Box
         $direction="row"
         $align="center"
-        $margin={{ all: 'big', vertical: 'xbig' }}
         $gap="2.25rem"
+        $justify="space-between"
       >
-        <MailDomainsLogo aria-hidden="true" />
-        <Text $margin="none" as="h3" $size="h3">
-          {name}
-        </Text>
+        <Box $direction="row" $margin="none" $gap="2.25rem">
+          <MailDomainsLogo aria-hidden="true" />
+          <Text $margin="none" as="h3" $size="h3">
+            {mailDomain?.name}
+          </Text>
+        </Box>
       </Box>
-      <Box $margin={{ all: 'big', bottom: 'small' }} $align="flex-end">
-        {abilities.post ? (
-          <Button
-            aria-label={t(`Create a mailbox in {{name}} domain`, { name })}
-            onClick={() => setIsFormVisible(true)}
-          >
-            {t('Create a mailbox')}
-          </Button>
-        ) : null}
+
+      <Box $direction="row" $justify="space-between">
+        <AlertStatus t={t} status={mailDomain.status} />
       </Box>
-    </>
+      {mailDomain?.abilities.post && (
+        <Box $direction="row-reverse">
+          <Box $display="inline">
+            <Button
+              aria-label={t('Create a mailbox in {{name}} domain', {
+                name: mailDomain?.name,
+              })}
+              disabled={mailDomain?.status !== 'enabled'}
+              onClick={() => showMailBoxCreationForm(true)}
+            >
+              {t('Create a mailbox')}
+            </Button>
+          </Box>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+const AlertStatus = ({
+  t,
+  status,
+}: {
+  t: TFunction<'translations'>;
+  status: MailDomain['status'];
+}) => {
+  const getVariantAndText = (status?: string) => {
+    switch (status) {
+      case 'pending':
+        return {
+          variant: VariantType.WARNING,
+          text: t(
+            'This mail domain is created, but is not ready to use yet. ' +
+              'You will be able to create mailboxes once our team has validated it.',
+          ),
+        };
+      case 'disabled':
+        return {
+          variant: VariantType.ERROR,
+          text: t(
+            'This mail domain is disabled, and can not be used. ' +
+              'Please contact our support for more explanations.',
+          ),
+        };
+      case 'failed':
+        return {
+          variant: VariantType.ERROR,
+          text: t(
+            'This mail domain is invalidated, and can not be used. ' +
+              'Please, contact our support for more explanations.',
+          ),
+        };
+      case 'enabled':
+        return {
+          variant: VariantType.SUCCESS,
+          text: t('This mail domain is active.'),
+        };
+      default:
+        return undefined;
+    }
+  };
+
+  const variantAndText = getVariantAndText(status);
+
+  if (!variantAndText) {
+    return null;
+  }
+
+  return (
+    <Alert canClose={false} type={variantAndText.variant}>
+      <Text>{variantAndText.text}</Text>
+    </Alert>
   );
 };
