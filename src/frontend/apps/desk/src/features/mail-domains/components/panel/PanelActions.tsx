@@ -46,11 +46,10 @@ export const PanelActions = () => {
       <StyledLink href="/mail-domains/create">
         <BoxButton
           as="span"
+          $margin={{ all: 'auto' }}
           aria-label={t('Create a mail domain')}
-          aria-hidden={false}
           $color={colorsTokens()['primary-600']}
           tabIndex={-1}
-          $margin={{ all: 'auto' }}
         >
           <IconAdd width={27} height={27} aria-hidden="true" />
         </BoxButton>
