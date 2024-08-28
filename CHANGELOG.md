@@ -29,6 +29,6 @@ and this project adheres to
 - ✨(domains) create and manage domains on admin + API
 - ✨(domains) mailbox creation + link to email provisioning API
 
-[unreleased]: https://github.com/numerique-gouv/people/compare/v1.0.1...main
-[1.0.1]: https://github.com/numerique-gouv/people/releases/v1.0.1
-[1.0.0]: https://github.com/numerique-gouv/people/releases/v1.0.0
+[unreleased]: https://github.com/numerique-gouv/people/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/numerique-gouv/people/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/numerique-gouv/people/releases/tag/v1.0.0
