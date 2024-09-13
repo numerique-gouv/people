@@ -2,6 +2,8 @@
 
 from rest_framework import serializers
 
+from core.api.serializers import UserSerializer
+
 from mailbox_manager import models
 
 
@@ -62,3 +64,24 @@ class MailDomainAccessSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id"]
+
+
+class MailDomainAccessReadOnlySerializer(MailDomainAccessSerializer):
+    """Serialize mail domain accesses for list and retrieve actions."""
+
+    user = UserSerializer(read_only=True, fields=["id", "name", "email"])
+
+    class Meta:
+        model = models.MailDomainAccess
+        fields = [
+            "id",
+            "user",
+            "role",
+            "can_set_role_to",
+        ]
+        read_only_fields = [
+            "id",
+            "user",
+            "role",
+            "can_set_role_to",
+        ]

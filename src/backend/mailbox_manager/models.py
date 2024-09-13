@@ -104,6 +104,12 @@ class MailDomainAccess(BaseModel):
     def __str__(self):
         return f"Access of user {self.user} on domain {self.domain}."
 
+    def can_set_role_to(self):
+        """Return roles available to set"""
+        roles = list(MailDomainRoleChoices)
+        roles.remove(self.role)
+        return sorted(roles)
+
 
 class Mailbox(BaseModel):
     """Mailboxes for users from mail domain."""
