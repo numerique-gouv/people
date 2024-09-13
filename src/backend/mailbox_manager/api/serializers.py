@@ -2,7 +2,9 @@
 
 from rest_framework import serializers
 
-from mailbox_manager import models
+from core.api.serializers import UserSerializer
+
+from mailbox_manager import enums, models
 
 
 class MailboxSerializer(serializers.ModelSerializer):
@@ -50,7 +52,10 @@ class MailDomainSerializer(serializers.ModelSerializer):
 
 
 class MailDomainAccessSerializer(serializers.ModelSerializer):
-    """Serialize mail domain accesses."""
+    """Serialize mail domain access."""
+
+    user = UserSerializer(read_only=True, fields=["id", "name", "email"])
+    can_set_role_to = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = models.MailDomainAccess
@@ -58,7 +63,40 @@ class MailDomainAccessSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "role",
-            "created_at",
-            "updated_at",
+            "can_set_role_to",
         ]
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "user", "created_at", "updated_at", "can_set_role_to"]
+
+    def get_can_set_role_to(self, access):
+        """Return roles available to set"""
+        roles = list(enums.MailDomainRoleChoices)
+        user_role = access.user_role
+        if user_role != enums.MailDomainRoleChoices.OWNER:
+            roles.remove(enums.MailDomainRoleChoices.OWNER)
+        if user_role == enums.MailDomainRoleChoices.VIEWER or (
+            user_role != enums.MailDomainRoleChoices.OWNER
+            and access.role == enums.MailDomainRoleChoices.OWNER
+        ):
+            return []
+        # remove role already set
+        roles.remove(access.role)
+        return sorted(roles)
+
+
+class MailDomainAccessReadOnlySerializer(MailDomainAccessSerializer):
+    """Serialize mail domain access for list and retrieve actions."""
+
+    class Meta:
+        model = models.MailDomainAccess
+        fields = [
+            "id",
+            "user",
+            "role",
+            "can_set_role_to",
+        ]
+        read_only_fields = [
+            "id",
+            "user",
+            "role",
+            "can_set_role_to",
+        ]
