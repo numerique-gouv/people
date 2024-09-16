@@ -5,11 +5,12 @@ import { ReactElement } from 'react';
 
 import { Box } from '@/components';
 import { TextErrors } from '@/components/TextErrors';
-import { MailDomainsContent, MailDomainsLayout } from '@/features/mail-domains';
-import { useMailDomain } from '@/features/mail-domains/api/useMailDomain';
+import { MailDomainsLayout } from '@/features/mail-domains';
+import { Role, useMailDomain } from '@/features/mail-domains/domains';
+import { AccessesContent } from '@/features/mail-domains/member-management';
 import { NextPageWithLayout } from '@/types/next';
 
-const Page: NextPageWithLayout = () => {
+const MembersPage: NextPageWithLayout = () => {
   const router = useRouter();
 
   if (router?.query?.slug && typeof router.query.slug !== 'string') {
@@ -22,9 +23,9 @@ const Page: NextPageWithLayout = () => {
 
   const {
     data: mailDomain,
-    error: error,
+    error,
     isError,
-    isLoading: isLoading,
+    isLoading,
   } = useMailDomain({ slug: String(slug) });
 
   if (error?.status === 404) {
@@ -42,13 +43,25 @@ const Page: NextPageWithLayout = () => {
         <Loader />
       </Box>
     );
-  } else {
-    return mailDomain ? <MailDomainsContent mailDomain={mailDomain} /> : null;
   }
+
+  if (mailDomain) {
+    const currentRole = mailDomain.abilities.delete
+      ? Role.OWNER
+      : mailDomain.abilities.manage_accesses
+        ? Role.ADMIN
+        : Role.VIEWER;
+
+    return (
+      <AccessesContent mailDomain={mailDomain} currentRole={currentRole} />
+    );
+  }
+
+  return null;
 };
 
-Page.getLayout = function getLayout(page: ReactElement) {
+MembersPage.getLayout = function getLayout(page: ReactElement) {
   return <MailDomainsLayout>{page}</MailDomainsLayout>;
 };
 
-export default Page;
+export default MembersPage;

@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react';
 
 import { Box } from '@/components';
 import { MailDomainsLayout } from '@/features/mail-domains';
-import { ModalAddMailDomain } from '@/features/mail-domains/components/ModalAddMailDomain';
+import { ModalAddMailDomain } from '@/features/mail-domains/domains/components';
 import { NextPageWithLayout } from '@/types/next';
 
 const Page: NextPageWithLayout = () => {

@@ -5,11 +5,11 @@ import fetchMock from 'fetch-mock';
 import React from 'react';
 
 import { APIError } from '@/api';
+import { CreateMailboxParams } from '@/features/mail-domains/mailboxes/api';
+import { ModalCreateMailbox } from '@/features/mail-domains/mailboxes/components';
 import { AppWrapper } from '@/tests/utils';
 
-import { CreateMailboxParams } from '../../api';
-import { MailDomain } from '../../types';
-import { ModalCreateMailbox } from '../ModalCreateMailbox';
+import { MailDomain } from '../../domains/types';
 
 const mockMailDomain: MailDomain = {
   name: 'domain.fr',
@@ -29,8 +29,8 @@ const mockMailDomain: MailDomain = {
 };
 
 const mockOnSuccess = jest.fn();
-jest.mock('../../api/useCreateMailbox', () => {
-  const { createMailbox } = jest.requireActual('../../api/useCreateMailbox');
+jest.mock('../api/useCreateMailbox', () => {
+  const { createMailbox } = jest.requireActual('../api/useCreateMailbox');
 
   return {
     useCreateMailbox: jest.fn().mockImplementation(({ onError }) =>
