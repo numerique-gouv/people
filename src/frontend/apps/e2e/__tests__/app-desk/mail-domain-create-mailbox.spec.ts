@@ -2,7 +2,7 @@ import { Page, expect, test } from '@playwright/test';
 import {
   CreateMailboxParams,
   MailDomain,
-} from 'app-desk/src/features/mail-domains';
+} from 'app-desk/src/features/mail-domains/index';
 
 import { keyCloakSignIn } from './common';
 
