@@ -91,7 +91,7 @@ def test_api_mail_domain__accesses_list_authenticated_related():
                     "name": str(administrator.name),
                 },
                 "role": str(access2.role),
-                "can_set_role_to": ["owner", "viewer"],
+                "can_set_role_to": [enums.MailDomainRoleChoices.OWNER, enums.MailDomainRoleChoices.VIEWER],
             },
             {
                 "id": str(access1.id),
@@ -101,7 +101,7 @@ def test_api_mail_domain__accesses_list_authenticated_related():
                     "name": str(owner.name),
                 },
                 "role": str(access1.role),
-                "can_set_role_to": ["administrator", "viewer"],
+                "can_set_role_to": [enums.MailDomainRoleChoices.ADMIN, enums.MailDomainRoleChoices.VIEWER],
             },
             {
                 "id": str(access3.id),
@@ -111,7 +111,7 @@ def test_api_mail_domain__accesses_list_authenticated_related():
                     "name": str(viewer.name),
                 },
                 "role": str(access3.role),
-                "can_set_role_to": ["administrator", "owner"],
+                "can_set_role_to": [enums.MailDomainRoleChoices.ADMIN, enums.MailDomainRoleChoices.OWNER],
             },
         ],
         key=lambda x: x["role"],

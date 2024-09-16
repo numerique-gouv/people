@@ -107,6 +107,7 @@ class MailDomainAccess(BaseModel):
     def can_set_role_to(self):
         """Return roles available to set"""
         roles = list(MailDomainRoleChoices)
+        # todo: only owner can set change a user to an owner
         roles.remove(self.role)
         return sorted(roles)
 

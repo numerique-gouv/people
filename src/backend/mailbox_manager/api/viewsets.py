@@ -56,8 +56,9 @@ class MailDomainViewSet(
 
 # pylint: disable=too-many-ancestors
 class MailDomainAccessViewSet(
-    mixins.ListModelMixin,
     viewsets.GenericViewSet,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
 ):
     """
     API ViewSet for all interactions with mail domain accesses.
@@ -108,6 +109,7 @@ class MailDomainAccessViewSet(
                 )
                 # Abilities are computed based on logged-in user's role and
                 # the user role on each domain access
+                #todo: check user_role utility
                 .annotate(
                     user_role=Subquery(user_role_query),
                 )
