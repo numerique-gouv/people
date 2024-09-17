@@ -37,13 +37,13 @@ test.describe('Header', () => {
     ).toBeVisible();
 
     await expect(header.getByRole('combobox').getByText('EN')).toBeVisible();
-    await expect(header.getByText('My account')).toBeVisible();
+    await expect(header.getByText('No Username')).toBeVisible();
   });
 
   test('checks logout button', async ({ page }) => {
     await page
       .getByRole('button', {
-        name: 'My account',
+        name: 'No Username',
       })
       .click();
 
