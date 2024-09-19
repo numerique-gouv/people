@@ -1,7 +1,6 @@
 import { PropsWithChildren } from 'react';
 
 import { Box } from '@/components';
-import { Footer } from '@/features/footer/Footer';
 import { HEADER_HEIGHT, Header } from '@/features/header';
 import { Menu } from '@/features/menu';
 
@@ -25,7 +24,7 @@ export function MainLayout({ children }: PropsWithChildren) {
           </Box>
         </Box>
       </Box>
-      <Footer />
+      {/*<Footer />*/}
     </Box>
   );
 }

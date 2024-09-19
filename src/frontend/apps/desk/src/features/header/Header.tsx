@@ -11,7 +11,7 @@ import { LanguagePicker } from '../language/';
 import { AccountDropdown } from './AccountDropdown';
 import { default as IconApplication } from './assets/icon-application.svg?url';
 
-export const HEADER_HEIGHT = '100px';
+export const HEADER_HEIGHT = '60px';
 
 const RedStripe = styled.div`
   position: absolute;
@@ -33,31 +33,19 @@ export const Header = () => {
       $zIndex="100"
       $css="box-shadow: 0 1px 4px #00000040;"
     >
-      <RedStripe />
+
       <Box
-        $margin={{ horizontal: 'xbig' }}
+        $margin={{ horizontal: 'small' }}
         $align="center"
         $justify="space-between"
         $direction="row"
       >
         <Box $align="center" $gap="6rem" $direction="row">
-          <LogoGouv
-            textProps={{
-              $size: 't',
-              $css: `
-                line-height:11px;
-                text-transform: uppercase;
-              `,
-              $margin: { vertical: '3px' },
-              $maxWidth: '100px',
-            }}
-          >
-            République Française
-          </LogoGouv>
+
           <StyledLink href="/">
             <Box $align="center" $gap="1rem" $direction="row">
-              <Image priority src={IconApplication} alt="" />
-              <Text $margin="none" as="h2" $theme="primary">
+              <Image height={30} priority src={IconApplication} alt="" />
+              <Text $margin="none" as="h3" $theme="primary">
                 {t('Régie')}
               </Text>
             </Box>

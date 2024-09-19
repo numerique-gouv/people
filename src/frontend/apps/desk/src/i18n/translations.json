@@ -201,7 +201,8 @@
       "{{count}} member_many": "{{count}} membres",
       "{{count}} member_one": "{{count}} membre",
       "{{count}} member_other": "{{count}} membres",
-      "{{label}} button": "Bouton {{label}}"
+      "{{label}} button": "Bouton {{label}}",
+      "Contacts": "Contacts"
     }
   }
 }

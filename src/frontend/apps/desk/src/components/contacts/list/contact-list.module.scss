@@ -1,0 +1,41 @@
+.listContainer {
+  height: 100%;
+
+
+}
+
+
+
+
+
+
+.letterShortcuts {
+  display: flex;
+  background-color: #b3cef0;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 99;
+  position: sticky;
+  top: 20px;
+  right: 0;
+  gap: 5px;
+
+  width:max-content;
+  margin-left:auto;
+  padding: 10px;
+
+
+
+}
+
+.contactItem {
+  cursor: pointer;
+  padding: 3px 12px 5px 24px;
+  &:hover {
+    background-color: var(--c--theme--colors--primary-200);
+  }
+
+  &.active {
+    background-color: var(--c--theme--colors--primary-200);
+  }
+}
