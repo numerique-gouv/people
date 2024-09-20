@@ -64,6 +64,11 @@ main ::-webkit-scrollbar-thumb:hover {
   justify-content: space-between;
 }
 
+.justify-end {
+    justify-content: flex-end;
+}
+
+
 
 .contact-list-container {
   display: flex;

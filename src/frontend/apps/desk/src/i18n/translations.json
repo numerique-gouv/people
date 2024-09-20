@@ -2,6 +2,7 @@
   "de": { "translation": {} },
   "en": {
     "translation": {
+      "form.dirty.modal": "Are you sure you want to exit, your form has been modified",
       "{{count}} member_many": "{{count}} members",
       "{{count}} member_one": "{{count}} member",
       "{{count}} member_other": "{{count}} members"
@@ -202,7 +203,8 @@
       "{{count}} member_one": "{{count}} membre",
       "{{count}} member_other": "{{count}} membres",
       "{{label}} button": "Bouton {{label}}",
-      "Contacts": "Contacts"
+      "Contacts": "Contacts",
+      "form.dirty.modal": "Êtes-vous sûr de vouloir quitter, votre formulaire a été modifié"
     }
   }
 }
