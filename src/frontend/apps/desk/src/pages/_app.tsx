@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AppProvider } from '@/core/';
 import { NextPageWithLayout } from '@/types/next';
 
-import './globals.css';
+import './globals.scss';
 
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;

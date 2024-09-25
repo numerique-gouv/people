@@ -1,13 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import IconGroup from '@/assets/icons/icon-group.svg';
-import Account from '@/assets/icons/account.svg';
 import { Box } from '@/components/';
+import { Icon } from '@/components/icons/Icon';
 import useCunninghamTheme from '@/cunningham/useCunninghamTheme';
 
-import MenuItem from './MenuItems';
-import IconMailDomains from './assets/icon-mails.svg';
+import { MenuItem } from './MenuItems';
 
 export const Menu = () => {
   const { colorsTokens } = useCunninghamTheme();
@@ -19,26 +17,34 @@ export const Menu = () => {
       $background={colorsTokens()['primary-700']}
       $height="100%"
       $justify="space-between"
-      $padding="none"
-      $margin="none"
+      $padding="5px"
+      $margin="0"
     >
-      <Box $padding={{ top: 'small' }} $direction="column" $gap="0.8rem">
+      <Box
+        $padding={{ top: 'small' }}
+        $width="70px"
+        className="flex-center"
+        $direction="column"
+        $gap="0.8rem"
+      >
         <MenuItem
-            Icon={IconGroup}
-            label={t('Contacts')}
-            href="/contacts"
-            alias={['/contacts']}
+          icon={<Icon icon="account_circle" className="clr-primary-700" />}
+          label={t('Contacts')}
+          route="/contacts"
+          activePaths={['/contacts']}
         />
+
         <MenuItem
-          Icon={IconGroup}
+          icon={<Icon icon="groups" className="clr-primary-700" />}
           label={t('Teams')}
-          href="/teams"
-          alias={['/teams']}
+          route="/teams"
+          activePaths={['/teams']}
         />
         <MenuItem
-          Icon={IconMailDomains}
+          icon={<Icon icon="domain" className="clr-primary-700" />}
           label={t('Mail Domains')}
-          href="/mail-domains"
+          route="/mail-domains"
+          activePaths={['/mail-domains']}
         />
       </Box>
     </Box>

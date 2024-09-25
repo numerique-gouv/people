@@ -22,13 +22,16 @@ const other_contact = [
   'Robin Lecomte',
 ];
 
+export type QuickSearchAction = {
+  onSelect?: () => void;
+  content: ReactNode;
+};
+
 export type QuickSearchData<T> = {
   groupName: string;
   elements: T[];
-  actions?: {
-    onSelect?: () => void;
-    content: ReactNode;
-  }[];
+  startActions?: QuickSearchAction[];
+  endActions?: QuickSearchAction[];
 };
 
 type Props<T> = {
@@ -77,6 +80,16 @@ export function QuickSearch<T>({
                 heading={group.groupName}
                 forceMount={true}
               >
+                {group.startActions?.map((action, index) => {
+                  return (
+                    <Item
+                      key={`${group.groupName}-action-${index}`}
+                      onSelect={action.onSelect}
+                    >
+                      {action.content}
+                    </Item>
+                  );
+                })}
                 {group.elements.map((groupElement, index) => {
                   return (
                     <Item
@@ -87,7 +100,7 @@ export function QuickSearch<T>({
                     </Item>
                   );
                 })}
-                {group.actions?.map((action, index) => {
+                {group.endActions?.map((action, index) => {
                   return (
                     <Item
                       key={`${group.groupName}-action-${index}`}

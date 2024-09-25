@@ -2,20 +2,18 @@ import * as React from 'react';
 
 import { Box, Text } from '@/components';
 import { ContactAvatar } from '@/components/avatar/ContactAvatar';
+import { Contact } from '@/types/contact';
 
 type Props = {
-  fullName: string;
+  contact: Contact;
 };
-export const ContactListItem = ({ fullName }: Props) => {
-  const firstName = fullName.split(' ').slice(0, -1).join(' ');
-  const lastName = fullName.split(' ').slice(-1).join(' ');
-
+export const ContactListItem = ({ contact }: Props) => {
   return (
     <Box $display="flex" $direction="row" $align="center" $gap="10px">
-      <ContactAvatar letter={firstName.charAt(0)} />
+      <ContactAvatar letter={contact.firstName.charAt(0)} />
       <Box $display="flex" $direction="row">
-        <Text>{firstName}&nbsp;</Text>
-        <Text $weight="bold">{lastName} </Text>
+        <span>{contact.firstName}&nbsp;</span>
+        <Text $weight="bold">{contact.lastName} </Text>
       </Box>
     </Box>
   );

@@ -1,0 +1,15 @@
+{
+  "en": {
+    "translation": {
+      "contact.home.unselected.title": "No contacts selected",
+      "contact.home.unselected.subTitle": "Select a contact from your address book or search the database."
+    }
+  },
+  "fr": {
+    "translation": {
+
+      "contact.home.unselected.title": "Aucun contact sélectionné",
+      "contact.home.unselected.subTitle": "Sélectionnez un contact de votre carnet d’adresses ou recherchez dans la base de données."
+    }
+  }
+}

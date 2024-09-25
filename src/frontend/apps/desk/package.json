@@ -17,6 +17,7 @@
   "dependencies": {
     "@gouvfr-lasuite/integration": "1.0.2",
     "@hookform/resolvers": "3.9.0",
+    "@ngneat/falso": "^7.2.0",
     "@openfun/cunningham-react": "2.9.4",
     "@tanstack/react-query": "5.56.2",
     "classnames": "^2.5.1",

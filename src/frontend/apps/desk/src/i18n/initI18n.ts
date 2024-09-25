@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import { LANGUAGES_ALLOWED, LANGUAGE_LOCAL_STORAGE } from './conf';
+import resourcesContact from './contacts/contact-translations.json';
 import resources from './translations.json';
 import { getLanguage } from './utils';
 
@@ -24,6 +25,9 @@ i18n
   .catch(() => {
     throw new Error('i18n initialization failed');
   });
+
+i18n.addResourceBundle('fr', 'contact', resourcesContact.fr.translation);
+i18n.addResourceBundle('en', 'contact', resourcesContact.en.translation);
 
 // Save language in local storage
 i18n.on('languageChanged', (lng) => {

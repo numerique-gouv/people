@@ -20,16 +20,15 @@ export const ContactListHeader = () => {
           color="primary"
           size="nano"
           icon={<span className="material-icons">add</span>}
-          iconPosition="right"
         />
       </div>
-      <div onClick={modal.open} className={styles.headerInput} role="none">
+      <a onClick={modal.open} className={styles.headerInput}>
         <div className="flex justify-between align-items ">
           <span className="material-icons fs-h4 clr-greyscale-600">search</span>
           <span className="fs-m ml-st clr-greyscale-600">Rechercher</span>
         </div>
         <div className={styles.kbd}># K</div>
-      </div>
+      </a>
 
       <Modal
         closeOnClickOutside={true}

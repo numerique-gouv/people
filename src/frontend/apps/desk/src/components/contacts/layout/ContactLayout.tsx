@@ -15,7 +15,6 @@ export function ContactLayout({ children }: PropsWithChildren) {
       <Box $height="inherit" $direction="row">
         <ContactLayoutLeft />
         <Box className={style.mainContent}>{children}</Box>
-        <div className={style.rightPanel}>Test</div>
       </Box>
     </MainLayout>
   );

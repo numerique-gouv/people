@@ -5,6 +5,8 @@ import { useMemo } from 'react';
 import { Box, StyledLink } from '@/components';
 import { ContactListItem } from '@/components/contacts/list/ContactListItem';
 import { ContactListHeader } from '@/components/contacts/list/header/ContactListHeader';
+import { useContacts } from '@/services/apiHooks/useContact';
+import { Contact } from '@/types/contact';
 
 import styles from './contact-list.module.scss';
 
@@ -28,18 +30,26 @@ export const contacts = [
 
 type ContactGroup = {
   letter: string;
-  names: string[];
+  contacts: Contact[];
 };
 
 export const ContactList = () => {
+  const listQuery = useContacts();
   const {
     query: { id },
   } = useRouter();
 
   const groups = useMemo(() => {
-    const map = contacts.reduce(
-      (acc: { [key: string]: string[] }, val: string) => {
-        const lastName = val.split(' ').slice(-1).join(' ');
+    if (!listQuery.data) {
+      return [];
+    }
+    const data = listQuery.data.sort((a, b) =>
+      a.lastName.localeCompare(b.lastName),
+    );
+
+    const map = data.reduce(
+      (acc: { [key: string]: Contact[] }, val: Contact) => {
+        const lastName = val.lastName;
         const char = lastName.charAt(0).toUpperCase();
         const current = acc[char] ?? [];
         current.push(val);
@@ -50,10 +60,10 @@ export const ContactList = () => {
     );
     const res: ContactGroup[] = Object.keys(map).map((el) => ({
       letter: el,
-      names: map[el],
+      contacts: map[el],
     }));
     return res;
-  }, []);
+  }, [listQuery.data]);
 
   return (
     <div className={`${styles.listContainer}`}>
@@ -64,16 +74,16 @@ export const ContactList = () => {
             <div className="fs-l fw-bold pl-s clr-greyscale-500">
               {group.letter}
             </div>
-            {group.names.map((contact) => (
+            {group.contacts.map((contact) => (
               <Box
                 className={[
                   styles.contactItem,
-                  id === contact ? styles.active : undefined,
+                  id === contact.id ? styles.active : undefined,
                 ].join(' ')}
-                key={`${contact}-${index}`}
+                key={`${contact.id}-${index}`}
               >
-                <StyledLink href={`/contacts/${contact}`}>
-                  <ContactListItem fullName={contact} />
+                <StyledLink href={`/contacts/${contact.id}`}>
+                  <ContactListItem contact={contact} />
                 </StyledLink>
               </Box>
             ))}

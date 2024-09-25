@@ -4,7 +4,9 @@ import * as React from 'react';
 import { MutableRefObject, useEffect, useState } from 'react';
 import { FieldValues, FormProvider, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import {Box} from "@/components";
+
+import { Box } from '@/components';
+import { LoadingButton } from '@/components/button/LoadingButton';
 
 export interface RHFProviderProps<T extends FieldValues> {
   children: React.ReactNode;
@@ -59,19 +61,18 @@ export function RHFProvider<T extends FieldValues>({
       >
         {children}
         {(showSubmit || actionButtons) && (
-          <Box className={'flex justify-end mt-b'} $gap={5}>
+          <Box className="flex justify-end mt-b" $gap={5}>
             {actionButtons}
             {showSubmit && (
               <LoadingButton
                 data-testid={id ? `submit-button-${id}` : 'submit-button'}
                 loading={isSubmitting}
-                variant="contained"
                 type="submit"
               >
-                <FormattedMessage {...messages.submit} />
+                {t('Submit')}
               </LoadingButton>
             )}
-          </div>
+          </Box>
         )}
       </form>
       <ConfirmationModal

@@ -1,8 +1,11 @@
-import { Button } from '@openfun/cunningham-react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, DropButton, IconOptions, Text } from '@/components';
+import { IconOptions } from '@/components';
+import {
+  DropdownMenu,
+  DropdownMenuOption,
+} from '@/components/dropdown-menu/DropdownMenu';
 
 import { Role, Team } from '../types';
 
@@ -24,51 +27,46 @@ export const TeamActions = ({ currentRole, team }: TeamActionsProps) => {
     return null;
   }
 
+  const onClickUpdate = () => {
+    setIsModalUpdateOpen(true);
+    setIsDropOpen(false);
+  };
+
+  const onClickRemove = () => {
+    setIsModalRemoveOpen(true);
+    setIsDropOpen(false);
+  };
+
+  const actions: DropdownMenuOption[] = [
+    {
+      label: t('Update the team'),
+      icon: 'edit',
+      callback: onClickUpdate,
+    },
+    ...(currentRole === Role.OWNER
+      ? [
+          {
+            label: t('Delete the team'),
+            icon: 'delete',
+            callback: onClickRemove,
+          },
+        ]
+      : []),
+  ];
+
   return (
     <>
-      <DropButton
-        button={
-          <IconOptions
-            isOpen={isDropOpen}
-            aria-label={t('Open the team options')}
-          />
-        }
+      <DropdownMenu
+        options={actions}
         onOpenChange={(isOpen) => setIsDropOpen(isOpen)}
         isOpen={isDropOpen}
       >
-        <Box>
-          <Button
-            onClick={() => {
-              setIsModalUpdateOpen(true);
-              setIsDropOpen(false);
-            }}
-            color="primary-text"
-            icon={
-              <span className="material-icons" aria-hidden="true">
-                edit
-              </span>
-            }
-          >
-            <Text $theme="primary">{t('Update the team')}</Text>
-          </Button>
-          {currentRole === Role.OWNER && (
-            <Button
-              onClick={() => {
-                setIsModalRemoveOpen(true);
-                setIsDropOpen(false);
-              }}
-              color="primary-text"
-              icon={
-                <span className="material-icons" aria-hidden="true">
-                  delete
-                </span>
-              }
-            >
-              <Text $theme="primary">{t('Delete the team')}</Text>
-            </Button>
-          )}
-        </Box>
-      </DropButton>
+        <IconOptions
+          isOpen={isDropOpen}
+          aria-label={t('Open the team options')}
+        />
+      </DropdownMenu>
+
       {isModalUpdateOpen && (
         <ModalUpdateTeam
           onClose={() => setIsModalUpdateOpen(false)}

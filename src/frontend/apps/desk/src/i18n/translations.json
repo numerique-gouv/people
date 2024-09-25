@@ -5,11 +5,24 @@
       "form.dirty.modal": "Are you sure you want to exit, your form has been modified",
       "{{count}} member_many": "{{count}} members",
       "{{count}} member_one": "{{count}} member",
-      "{{count}} member_other": "{{count}} members"
+      "{{count}} member_other": "{{count}} members",
+      "form.url.label": "URL",
+      "form.mail.label": "Email",
+      "form.address.label": "Address",
+      "form.notes.label": "Notes",
+      "form.update.mode.title": "Update",
+      "form.contact.information.label": "Information",
+      "form.contact.phone.label": "Phone",
+      "form.contact.header.create.title": "New contact",
+      "form.contact.moreInfo.title": "Additional information",
+      "form.contact.contact.title": "Data from your address book",
+      "form.contact.publicData.title": "Données de l'annuaire",
+      "delete.contact.modal.title": "Voulez vous supprimer le contact : {{contact}}"
     }
   },
   "fr": {
     "translation": {
+      "Remove contact": "Supprimer du carnet d'adresse",
       "0 group to display.": "0 groupe à afficher.",
       "Access icon": "Icône d'accès",
       "Accesses list card": "Carte de la liste des accès",
@@ -204,7 +217,28 @@
       "{{count}} member_other": "{{count}} membres",
       "{{label}} button": "Bouton {{label}}",
       "Contacts": "Contacts",
-      "form.dirty.modal": "Êtes-vous sûr de vouloir quitter, votre formulaire a été modifié"
+      "Submit": "Envoyer",
+      "Update": "Modifier",
+      "Firstname": "Prénom",
+      "Lastname": "Nom",
+      "Informations": "Informations",
+
+
+      "form.url.label": "URL",
+      "form.mail.label": "Email",
+      "form.address.label": "Adresse",
+      "form.notes.label": "Notes",
+      "form.update.mode.title": "Édition",
+      "form.dirty.modal": "Êtes-vous sûr de vouloir quitter, votre formulaire a été modifié",
+      "form.contact.information.label": "Information",
+      "form.contact.phone.label": "Téléphone",
+      "form.contact.header.create.title": "Nouveau contact",
+      "form.contact.publicData.title": "Données de l'annuaire",
+      "form.contact.moreInfo.title": "Informations complémentaires",
+      "form.contact.contact.title": "Données de votre carnet d’adresses ",
+      "delete.contact.modal.title": "Voulez vous supprimer le contact : {{contact}}",
+      "contact.home.unselected.title": "Aucun contact sélectionné",
+      "contact.home.unselected.subTitle": "Sélectionnez un contact de votre carnet d’adresses ou recherchez dans la base de données."
     }
   }
 }

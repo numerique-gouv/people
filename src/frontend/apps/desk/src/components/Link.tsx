@@ -7,7 +7,7 @@ export interface LinkProps {
 
 export const StyledLink = styled(Link)<LinkProps>`
   text-decoration: none;
-  color: #ffffff33;
+  color: black;
   &[aria-current='page'] {
     color: #ffffff;
   }
