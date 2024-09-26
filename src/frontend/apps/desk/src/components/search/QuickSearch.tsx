@@ -1,6 +1,8 @@
 import { Command } from 'cmdk';
 import React, { ReactNode, useEffect } from 'react';
 
+import { FocusOnContent } from '@/components/responsive/FocusOnContent';
+
 const my_contacts = [
   'Daniel Anatole',
   'Émilien Arnoult',
@@ -86,7 +88,7 @@ export function QuickSearch<T>({
                       key={`${group.groupName}-action-${index}`}
                       onSelect={action.onSelect}
                     >
-                      {action.content}
+                      <FocusOnContent>{action.content}</FocusOnContent>
                     </Item>
                   );
                 })}

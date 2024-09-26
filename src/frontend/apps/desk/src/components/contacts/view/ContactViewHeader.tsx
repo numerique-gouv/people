@@ -14,6 +14,8 @@ import {
   DropdownMenu,
   DropdownMenuOption,
 } from '@/components/dropdown-menu/DropdownMenu';
+import { Icon } from '@/components/icons/Icon';
+import { FocusOnLeft } from '@/components/responsive/FocusOnLeft';
 import { useDeleteContact } from '@/services/apiHooks/useContact';
 import { Contact } from '@/types/contact';
 
@@ -69,6 +71,11 @@ export const ContactViewHeader = ({ contact, showOptions = true }: Props) => {
           {getInformationText()}
         </span>
 
+        <div className={style.back}>
+          <FocusOnLeft>
+            <Icon icon="arrow_back" />
+          </FocusOnLeft>
+        </div>
         {showOptions && (
           <div className={style.moreActions}>
             <DropdownMenu

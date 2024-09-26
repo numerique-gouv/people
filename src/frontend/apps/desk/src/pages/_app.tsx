@@ -25,6 +25,8 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
             'La Suite administration interface: management of users and rights on the various tools (messaging, storage, etc.)',
           )}
         />
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </Head>
       <AppProvider>{getLayout(<Component {...pageProps} />)}</AppProvider>

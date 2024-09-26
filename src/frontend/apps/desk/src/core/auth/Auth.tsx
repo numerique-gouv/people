@@ -14,7 +14,7 @@ export const Auth = ({ children }: PropsWithChildren) => {
 
   if (!authenticated) {
     return (
-      <Box $height="100vh" $width="100vw" $align="center" $justify="center">
+      <Box $height="100dvh" $width="100vw" $align="center" $justify="center">
         <Loader />
       </Box>
     );

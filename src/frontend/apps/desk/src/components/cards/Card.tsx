@@ -20,7 +20,7 @@ export const Card = ({
 
   return (
     <Box
-      className={`${style[size]}`}
+      className={`${style.card} ${style[size]}`}
       $background="white"
       $radius="4px"
       $css={`

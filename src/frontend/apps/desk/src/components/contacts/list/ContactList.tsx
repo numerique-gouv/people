@@ -1,10 +1,11 @@
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useMemo } from 'react';
+import { RefObject, useMemo } from 'react';
 
 import { Box, StyledLink } from '@/components';
 import { ContactListItem } from '@/components/contacts/list/ContactListItem';
 import { ContactListHeader } from '@/components/contacts/list/header/ContactListHeader';
+import { FocusOnContent } from '@/components/responsive/FocusOnContent';
 import { useContacts } from '@/services/apiHooks/useContact';
 import { Contact } from '@/types/contact';
 
@@ -35,6 +36,7 @@ type ContactGroup = {
 
 export const ContactList = () => {
   const listQuery = useContacts();
+
   const {
     query: { id },
   } = useRouter();
@@ -65,31 +67,69 @@ export const ContactList = () => {
     return res;
   }, [listQuery.data]);
 
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+  const refs = alphabet.reduce(
+    (acc: { [key: string]: RefObject<any> }, value) => {
+      acc[value.toUpperCase()] = React.createRef();
+      return acc;
+    },
+    {},
+  );
+
+  // const scrollIntoView = (letter: string) => {
+  //   const ref = refs[letter.toUpperCase()];
+  //   if (!ref || !ref.current) {
+  //     return;
+  //   }
+  //   ref.current.scrollIntoView({
+  //     behavior: 'smooth',
+  //     block: 'start',
+  //   });
+  // };
+
   return (
-    <div className={`${styles.listContainer}`}>
+    <div>
       <ContactListHeader />
-      {groups.map((group, index) => {
-        return (
-          <Box key={group.letter} $gap="10px">
-            <div className="fs-l fw-bold pl-s clr-greyscale-500">
-              {group.letter}
-            </div>
-            {group.contacts.map((contact) => (
-              <Box
-                className={[
-                  styles.contactItem,
-                  id === contact.id ? styles.active : undefined,
-                ].join(' ')}
-                key={`${contact.id}-${index}`}
-              >
-                <StyledLink href={`/contacts/${contact.id}`}>
-                  <ContactListItem contact={contact} />
-                </StyledLink>
-              </Box>
-            ))}
-          </Box>
-        );
-      })}
+      <div className={`${styles.listContainer}`}>
+        {/*<div className={styles.fixedElement}>*/}
+        {/*  <div className={styles.letterShortcutsList}>*/}
+        {/*    {alphabet.map((element) => {*/}
+        {/*      return (*/}
+        {/*        <span*/}
+        {/*          onClick={() => scrollIntoView(element)}*/}
+        {/*          className={`fs-s clr-greyscale-300 ${styles.letterShortcut}`}*/}
+        {/*        >*/}
+        {/*          {element.toUpperCase()}*/}
+        {/*        </span>*/}
+        {/*      );*/}
+        {/*    })}*/}
+        {/*  </div>*/}
+        {/*</div>*/}
+        {groups.map((group, index) => {
+          return (
+            <Box ref={refs[group.letter]} key={group.letter} $gap="10px">
+              <div className="fs-l fw-bold pl-s clr-greyscale-500">
+                {group.letter}
+              </div>
+              {group.contacts.map((contact) => (
+                <Box
+                  className={[
+                    styles.contactItem,
+                    id === contact.id ? styles.active : undefined,
+                  ].join(' ')}
+                  key={`${contact.id}-${index}`}
+                >
+                  <FocusOnContent>
+                    <StyledLink href={`/contacts/${contact.id}`}>
+                      <ContactListItem contact={contact} />
+                    </StyledLink>
+                  </FocusOnContent>
+                </Box>
+              ))}
+            </Box>
+          );
+        })}
+      </div>
     </div>
   );
 };

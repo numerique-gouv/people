@@ -1,12 +1,15 @@
+import { Button } from '@openfun/cunningham-react';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import HomeIcon from '@/assets/icons/contacts/home-contact.svg';
+import { useResponsive } from '@/hooks/useResponsive';
 
 import styles from './unselected-contact.module.scss';
 
 type Props = {};
 export const UnselectedContact = (props: Props) => {
+  const responsive = useResponsive();
   const { t } = useTranslation('contact');
   return (
     <div className={styles.container}>
@@ -17,6 +20,7 @@ export const UnselectedContact = (props: Props) => {
       <span className="fs-s clr-greyscale-500 text-center">
         {t('contact.home.unselected.subTitle')}
       </span>
+      <Button onClick={responsive.focusOnLeft} />
     </div>
   );
 };

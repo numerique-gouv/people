@@ -10,21 +10,18 @@ export function MainLayout({ children }: PropsWithChildren) {
   const { config } = useConfigStore();
 
   return (
-    <Box>
-      <Box $height="100vh">
-        <Header />
-        <Box $css="flex: 1;" $direction="row">
-          {config?.FEATURES.TEAMS && <Menu />}
-          <Box
-            as="main"
-            $height={`calc(100vh - ${HEADER_HEIGHT})`}
-            $width="100%"
-          >
-            {children}
-          </Box>
+    <Box $height="100dvh">
+      <Header />
+      <Box $css="flex: 1;" $direction="row">
+        {config?.FEATURES.TEAMS && <Menu />}
+        <Box
+          as="main"
+          $height={`calc(100dvh - ${HEADER_HEIGHT})`}
+          $width="100%"
+        >
+          {children}
         </Box>
       </Box>
-      {/*<Footer />*/}
     </Box>
   );
 }

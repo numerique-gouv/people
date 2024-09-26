@@ -1,21 +1,38 @@
+import classNames from 'classnames';
+import * as React from 'react';
 import { PropsWithChildren } from 'react';
 
-import { Box } from '@/components';
-import { ContactLayoutLeft } from '@/components/contacts/layout/ContactLayoutLeft';
-import { MainLayout } from '@/core';
-import { useCunninghamTheme } from '@/cunningham';
+import { ContactList } from '@/components/contacts/list/ContactList';
+import { ResponsiveLayout } from '@/core/layouts/responsive/ResponsiveLayout';
+import { useResponsive } from '@/hooks/useResponsive';
 
 import style from './contract-layout.module.scss';
 
 export function ContactLayout({ children }: PropsWithChildren) {
-  const { colorsTokens } = useCunninghamTheme();
-
+  const store = useResponsive();
   return (
-    <MainLayout>
-      <Box $height="inherit" $direction="row">
-        <ContactLayoutLeft />
-        <Box className={style.mainContent}>{children}</Box>
-      </Box>
-    </MainLayout>
+    <ResponsiveLayout>
+      {/*<div className={`hideForMobile ${style.contentDesktop}`}>*/}
+      {/*  <ContactLayoutLeft />*/}
+      {/*  <Box className={style.mainContent}>{children}</Box>*/}
+      {/*</div>*/}
+
+      <div className={`${style.leftRightContent}`}>
+        <div
+          className={classNames(style.left, {
+            [style.active]: !store.isFocusOnContent,
+          })}
+        >
+          <ContactList />
+        </div>
+        <div
+          className={classNames(style.right, {
+            [style.active]: store.isFocusOnContent,
+          })}
+        >
+          <div>{children}</div>
+        </div>
+      </div>
+    </ResponsiveLayout>
   );
 }

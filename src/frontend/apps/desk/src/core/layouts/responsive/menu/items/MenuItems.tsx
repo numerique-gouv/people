@@ -7,19 +7,21 @@ import { StyledLink } from '@/components';
 
 import styles from './menu-item.module.scss';
 
-export type MenuItemProps2 = {
+export type MenuItemProps = {
   icon: ReactNode;
   label: string;
   route: string;
   activePaths?: string[];
+  showLabelString?: boolean;
 };
 
 export const MenuItem = ({
   icon,
   label,
   route,
+  showLabelString = false,
   activePaths = [],
-}: MenuItemProps2) => {
+}: MenuItemProps) => {
   const pathname = usePathname();
 
   const isActive =
@@ -28,7 +30,7 @@ export const MenuItem = ({
     pathname.startsWith(`${route}/`) ||
     activePaths?.some((a) => pathname.startsWith(`${a}/`));
   return (
-    <StyledLink href={route}>
+    <StyledLink href={route} className="flex align-items ">
       <div
         className={classNames(`${styles.menuItemContainer}`, {
           [styles.active]: isActive,
@@ -44,6 +46,15 @@ export const MenuItem = ({
           </div>
         </Tooltip>
       </div>
+      {showLabelString && (
+        <span
+          className={classNames(`${styles.label}`, {
+            [styles.menuItemContentActive]: isActive,
+          })}
+        >
+          {label}
+        </span>
+      )}
     </StyledLink>
   );
 };

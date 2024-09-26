@@ -33,3 +33,16 @@
   }
 
 }
+
+.label {
+  margin-left: var(--c--theme--spacings--t);
+
+  &:not(.menuItemContentActive) {
+    color: #ECECFE80
+
+  }
+
+  &.menuItemContentActive {
+    color: white;
+  }
+}

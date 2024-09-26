@@ -79,9 +79,9 @@ export const ContactQuickSearch = ({ afterSelect }: Props) => {
         );
       });
 
-      const newOtherContact = other_contact.filter((element) => {
-        return element.toLowerCase().indexOf(str.toLowerCase()) > -1;
-      });
+      // const newOtherContact = other_contact.filter((element) => {
+      //   return element.toLowerCase().indexOf(str.toLowerCase()) > -1;
+      // });
 
       result[0].elements = newMyContact.splice(0, 5);
       result[1].elements = [];

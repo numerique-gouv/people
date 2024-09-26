@@ -1,5 +1,9 @@
 @import url('../cunningham/cunningham-style.css');
 
+:root {
+  --header-height: 60px
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -121,7 +125,7 @@ main ::-webkit-scrollbar-thumb:hover {
 .contact-list-container {
   display: flex;
   position: relative;
-  height: calc(100vh - 60px);
+  height: calc(100dvh - 60px);
 
 }
 
@@ -329,4 +333,27 @@ main ::-webkit-scrollbar-thumb:hover {
 
 .c__modal__scroller:has(.quick-search-container) {
     padding: 0 !important;
+}
+
+
+
+
+@media (min-width: 993px) {
+  .hideForMobile {
+    display: flex;
+  }
+
+  .showForMobile {
+    display: none;
+  }
+}
+
+@media (max-width: 992px) {
+  .hideForMobile {
+    display: none;
+  }
+
+  .showForMobile {
+    display: flex;
+  }
 }

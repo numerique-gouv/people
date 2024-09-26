@@ -13,6 +13,7 @@ import { RHFInput } from '@/components/form/hook-form/RHFInput';
 import { RHFProvider } from '@/components/form/hook-form/RHFProvider';
 import { RHFTextArea } from '@/components/form/hook-form/RHFTextArea';
 import { HorizontalSeparator } from '@/components/separator/HorizontalSeparator';
+import { useResponsive } from '@/hooks/useResponsive';
 import {
   useCreateContact,
   useUpdateContact,
@@ -36,6 +37,7 @@ type Props = {
   contact?: Contact;
 };
 export const ContactForm = ({ contact }: Props) => {
+  const responsive = useResponsive();
   const router = useRouter();
   const updateMutation = useUpdateContact(contact?.id);
   const createMutation = useCreateContact();
@@ -66,10 +68,17 @@ export const ContactForm = ({ contact }: Props) => {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = (values: DTOUpdateContact) => {
-    console.log(values);
+  const onCancel = () => {
     if (contact) {
-      updateMutation.mutate(values, { onSuccess: router.back });
+      router.back();
+    } else {
+      responsive.focusOnLeft();
+    }
+  };
+
+  const onSubmit = (values: DTOUpdateContact) => {
+    if (contact) {
+      updateMutation.mutate(values, { onSuccess: () => router.back() });
     } else {
       createMutation.mutate(values, {
         onSuccess: (contact) => router.push(`/contacts/${contact.id}`),
@@ -81,7 +90,7 @@ export const ContactForm = ({ contact }: Props) => {
     <RHFProvider showSubmit={false} methods={methods} id="contact-form">
       <div className={style.header}>
         <div className={`flex justify-between align-items pl-b pr-b `}>
-          <Button type="button" onClick={router.back} color="secondary">
+          <Button type="button" onClick={onCancel} color="secondary">
             {t('Cancel')}
           </Button>
           <p className="fw-bold fs-h3">
