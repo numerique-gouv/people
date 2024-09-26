@@ -8,7 +8,7 @@ test.beforeEach(async ({ page, browserName }) => {
 });
 
 test.describe('Header', () => {
-  test('checks all the elements are visible', async ({ page, browserName }) => {
+  test('checks all the elements are visible', async ({ page }) => {
     const header = page.locator('header').first();
 
     await expect(header.getByAltText('Marianne Logo')).toBeVisible();
@@ -37,15 +37,13 @@ test.describe('Header', () => {
     ).toBeVisible();
 
     await expect(header.getByRole('combobox').getByText('EN')).toBeVisible();
-    await expect(
-      header.getByText(new RegExp(`E2E ${browserName}`, 'i')),
-    ).toBeVisible();
+    await expect(header.getByText('My account')).toBeVisible();
   });
 
-  test('checks logout button', async ({ page, browserName }) => {
+  test('checks logout button', async ({ page }) => {
     await page
       .getByRole('button', {
-        name: new RegExp(`E2E ${browserName}`, 'i'),
+        name: 'My account',
       })
       .click();
 
