@@ -25,6 +25,7 @@ and this project adheres to
 ### Fixed
 
 - ♿️(frontend) fix left nav panel #396
+- 🔧(backend) fix configuration to avoid different ssl warning #432 
 
 ### Changed
 
