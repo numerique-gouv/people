@@ -48,16 +48,17 @@ class Command(BaseCommand):
             perms=["new_domain", "create_users", "manage_users"],
         )
 
-        # we create a dimail user for keycloak+regie user John Doe
-        # This way, la Régie will be able to make request in the name of
-        # this user
-        people_base_user = User.objects.get(name="John Doe")
-        self.create_user(name=people_base_user.sub, password="whatever")  # noqa S106
-
         # we create a domain and add John Doe to it
         domain_name = "test.domain.com"
         self.create_domain(domain_name)
-        self.create_allows(people_base_user.sub, domain_name)
+
+        # we create a dimail user for keycloak+regie user John Doe
+        # This way, la Régie will be able to make request in the name of
+        # this user
+        people_base_user = User.objects.filter(name="John Doe")
+        if people_base_user.exists():
+            self.create_user(name=people_base_user.sub, password="whatever")  # noqa S106
+            self.create_allows(people_base_user.sub, domain_name)
 
         self.stdout.write("DONE", ending="\n")
 
