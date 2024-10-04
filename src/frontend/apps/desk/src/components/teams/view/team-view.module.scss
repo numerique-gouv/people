@@ -1,0 +1,10 @@
+.teamViewHeader {
+  display: flex;
+  gap: 20px;
+
+  .teamViewHeaderDetails {
+    display: flex;
+    flex-direction: column;
+    flex: 1
+  }
+}
