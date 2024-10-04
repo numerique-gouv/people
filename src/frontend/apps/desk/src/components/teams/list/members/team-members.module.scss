@@ -1,0 +1,17 @@
+.teamMembersContainer {
+  table {
+    margin-top: -48px;
+  }
+  thead {
+    visibility: hidden;
+    //display: none;
+  }
+}
+
+.teamMembersListTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+}
+

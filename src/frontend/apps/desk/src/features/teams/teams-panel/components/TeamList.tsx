@@ -68,7 +68,6 @@ export const TeamList = () => {
     ordering,
   });
 
-  console.log(data);
   const containerRef = useRef<HTMLDivElement>(null);
   const teams = useMemo(() => {
     return data?.pages.reduce((acc, page) => {

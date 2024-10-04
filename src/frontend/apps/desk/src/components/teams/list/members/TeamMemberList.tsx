@@ -1,22 +1,23 @@
 import {
   Button,
+  Column,
   DataGrid,
   SortModel,
   usePagination,
 } from '@openfun/cunningham-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, TextErrors } from '@/components';
 import { ContactAvatar } from '@/components/avatar/ContactAvatar';
+import { PAGE_SIZE } from '@/features/mail-domains/conf';
 import { ModalAddMembers } from '@/features/teams/member-add';
+import { Access, useTeamAccesses } from '@/features/teams/member-management';
+import { MemberAction } from '@/features/teams/member-management/components/MemberAction';
 import { Role, Team } from '@/features/teams/team-management';
+import { Breakpoints, useBreakpoint } from '@/hooks/useBreakpoints';
 
-import { useTeamAccesses } from '../api';
-import { PAGE_SIZE } from '../conf';
-import { Access } from '../types';
-
-import { MemberAction } from './MemberAction';
+import styles from './team-members.module.scss';
 
 interface MemberGridProps {
   team: Team;
@@ -49,8 +50,11 @@ function formatSortModel(
   return sort === 'desc' ? `-${orderingField}` : orderingField;
 }
 
-export const MemberGrid = ({ team, currentRole }: MemberGridProps) => {
+export const TeamMemberList = ({ team, currentRole }: MemberGridProps) => {
+  const isMobile = useBreakpoint(Breakpoints.LG, false);
+
   const [isModalMemberOpen, setIsModalMemberOpen] = useState(false);
+  const { t: transTeam } = useTranslation('team');
   const { t } = useTranslation();
 
   const pagination = usePagination({
@@ -67,6 +71,54 @@ export const MemberGrid = ({ team, currentRole }: MemberGridProps) => {
     page,
     ordering,
   });
+
+  const columns: Column<Access>[] = useMemo(() => {
+    const result: Column<Access>[] = [
+      {
+        field: 'user.name',
+        // headerName: 'Name',
+        renderCell(context) {
+          const contact = context.row.user;
+          return (
+            <div>
+              <Box $display="flex" $direction="row" $align="center" $gap="10px">
+                <ContactAvatar letter={contact.name?.charAt(0)} />
+                <Box $display="flex" $direction="column">
+                  <span>{contact.name}&nbsp;</span>
+                  <span className="fs-s clr-greyscale-400">
+                    {contact.email}
+                  </span>
+                </Box>
+              </Box>
+            </div>
+          );
+        },
+      },
+
+      {
+        // headerName: 'Rôle',
+        field: 'localizedRole',
+        size: isMobile ? 50 : undefined,
+        renderCell: ({ row }) => {
+          if (isMobile) {
+            return row.role.charAt(0).toUpperCase();
+          }
+          return row.role;
+        },
+      },
+      {
+        // headerName: 'Actions',
+        id: 'actions',
+        size: 50,
+        renderCell: ({ row }) => {
+          return (
+            <MemberAction team={team} access={row} currentRole={currentRole} />
+          );
+        },
+      },
+    ];
+    return result;
+  }, [currentRole, isMobile]);
 
   useEffect(() => {
     if (isLoading) {
@@ -102,65 +154,28 @@ export const MemberGrid = ({ team, currentRole }: MemberGridProps) => {
   }, [data?.count, pageSize, setPagesCount]);
 
   return (
-    <>
+    <div className={styles.teamMembersContainer}>
       {currentRole !== Role.MEMBER && (
-        <Box $flex $align="space-between">
+        <div className={`${styles.teamMembersListTitle} mb-t`}>
           <span className="clr-greyscale-900 fs-h6 fw-bold">
-            Membres du groupes
+            {transTeam('teams.member.group.title')}
           </span>
           <Button
+            fullWidth={false}
             color="primary-text"
-            aria-label={t('Add members to the team')}
+            aria-label={transTeam('Add members to the team')}
             onClick={() => setIsModalMemberOpen(true)}
           >
-            {t('Add a member')}
+            {transTeam('teams.add.member')}
           </Button>
-        </Box>
+        </div>
       )}
 
       {error && <TextErrors causes={error.cause} />}
 
       <DataGrid
-        displayHeader={false}
-        columns={[
-          {
-            headerName: t('Names'),
-            field: 'user.name',
-            renderCell(context) {
-              const contact = context.row.user;
-              return (
-                <Box
-                  $display="flex"
-                  $direction="row"
-                  $align="center"
-                  $gap="10px"
-                >
-                  <ContactAvatar letter={contact.name?.charAt(0)} />
-                  <Box $display="flex" $direction="row">
-                    <span>{contact.name}&nbsp;</span>
-                  </Box>
-                </Box>
-              );
-            },
-          },
-          {
-            field: 'localizedRole',
-            headerName: t('Roles'),
-          },
-          {
-            id: 'column-actions',
-
-            renderCell: ({ row }) => {
-              return (
-                <MemberAction
-                  team={team}
-                  access={row}
-                  currentRole={currentRole}
-                />
-              );
-            },
-          },
-        ]}
+        displayHeader={true}
+        columns={columns}
         rows={accesses}
         isLoading={isLoading}
         pagination={pagination}
@@ -175,6 +190,6 @@ export const MemberGrid = ({ team, currentRole }: MemberGridProps) => {
           team={team}
         />
       )}
-    </>
+    </div>
   );
 };

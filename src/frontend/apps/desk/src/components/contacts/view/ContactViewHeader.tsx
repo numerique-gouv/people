@@ -16,7 +16,7 @@ import {
 } from '@/components/dropdown-menu/DropdownMenu';
 import { Icon } from '@/components/icons/Icon';
 import { FocusOnLeft } from '@/components/responsive/FocusOnLeft';
-import { useDeleteContact } from '@/services/apiHooks/useContact';
+import { useDeleteContact } from '@/services/api/useContact';
 import { Contact } from '@/types/contact';
 
 import style from './contact-view.module.scss';

@@ -1,21 +1,14 @@
+import * as React from 'react';
 import { PropsWithChildren } from 'react';
 
-import { Box } from '@/components';
-import { ContactLayoutLeft } from '@/components/contacts/layout/ContactLayoutLeft';
-import { MainLayout } from '@/core';
-import { useCunninghamTheme } from '@/cunningham';
-
-import style from './team-layout.module.scss';
+import { LeftRightContent } from '@/components/responsive/LeftRightContent';
+import { TeamList } from '@/components/teams/list/TeamList';
+import { ResponsiveLayout } from '@/core/layouts/responsive/ResponsiveLayout';
 
 export function TeamLayout({ children }: PropsWithChildren) {
-  const { colorsTokens } = useCunninghamTheme();
-
   return (
-    <MainLayout>
-      <Box $height="inherit" $direction="row">
-        <ContactLayoutLeft />
-        <Box className={style.mainContent}>{children}</Box>
-      </Box>
-    </MainLayout>
+    <ResponsiveLayout>
+      <LeftRightContent leftContent={<TeamList />}>{children}</LeftRightContent>
+    </ResponsiveLayout>
   );
 }

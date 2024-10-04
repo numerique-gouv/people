@@ -1,37 +1,4 @@
-.leftPanel {
-  width: 100%;
-  height: inherit;
 
-  border-right: 1px solid var(--c--theme--colors--greyscale-200);
-  position: relative;
-}
-
-@media (max-width: 992px) {
-  .leftPanel {
-    //display: none;
-  }
-}
-
-.mainContent {
-
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  background-color: var(--c--theme--colors--primary-bg);
-  overflow: auto;
-  padding: var(--c--theme--spacings--b);
-}
-
-.rightPanel {
-  width: 100%;
-  height: inherit;
-  max-width: 340px;
-  min-width: 340px;
-  overflow-y: auto;
-  border-left: 1px solid var(--c--theme--colors--primary-300);
-  position: relative;
-}
 
 @media screen and (max-width: 992px) {
   .leftRightContent {

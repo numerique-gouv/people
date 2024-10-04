@@ -3,27 +3,6 @@ import React, { ReactNode, useEffect } from 'react';
 
 import { FocusOnContent } from '@/components/responsive/FocusOnContent';
 
-const my_contacts = [
-  'Daniel Anatole',
-  'Émilien Arnoult',
-  'Magali Baud',
-  'Antoine Bedar',
-  'Thierry Breton',
-];
-
-const other_contact = [
-  'Anaële Cerf',
-  'Gérard Dramont',
-  'Raymond Dougs',
-  'Edgar Eddy',
-  'Steve Eistinger',
-  'Gabrielle Eudes',
-  'Damien Eudes',
-  'Julien Fourcat',
-  'Nathan Portefou',
-  'Robin Lecomte',
-];
-
 export type QuickSearchAction = {
   onSelect?: () => void;
   content: ReactNode;
@@ -32,6 +11,7 @@ export type QuickSearchAction = {
 export type QuickSearchData<T> = {
   groupName: string;
   elements: T[];
+  emptyString?: string;
   startActions?: QuickSearchAction[];
   endActions?: QuickSearchAction[];
 };
@@ -75,46 +55,53 @@ export function QuickSearch<T>({
           />
         </div>
         <Command.List>
-          {data.map((group) => {
-            return (
-              <Command.Group
-                key={group.groupName}
-                heading={group.groupName}
-                forceMount={true}
-              >
-                {group.startActions?.map((action, index) => {
-                  return (
-                    <Item
-                      key={`${group.groupName}-action-${index}`}
-                      onSelect={action.onSelect}
-                    >
-                      <FocusOnContent>{action.content}</FocusOnContent>
-                    </Item>
-                  );
-                })}
-                {group.elements.map((groupElement, index) => {
-                  return (
-                    <Item
-                      key={`${group.groupName}-element-${index}`}
-                      onSelect={() => onSelect?.(groupElement)}
-                    >
-                      {renderElement(groupElement)}
-                    </Item>
-                  );
-                })}
-                {group.endActions?.map((action, index) => {
-                  return (
-                    <Item
-                      key={`${group.groupName}-action-${index}`}
-                      onSelect={action.onSelect}
-                    >
-                      {action.content}
-                    </Item>
-                  );
-                })}
-              </Command.Group>
-            );
-          })}
+          <div>
+            {data.map((group) => {
+              return (
+                <Command.Group
+                  key={group.groupName}
+                  heading={group.groupName}
+                  forceMount={true}
+                >
+                  {group.startActions?.map((action, index) => {
+                    return (
+                      <Item
+                        key={`${group.groupName}-action-${index}`}
+                        onSelect={action.onSelect}
+                      >
+                        <FocusOnContent>{action.content}</FocusOnContent>
+                      </Item>
+                    );
+                  })}
+                  {group.elements.map((groupElement, index) => {
+                    return (
+                      <Item
+                        key={`${group.groupName}-element-${index}`}
+                        onSelect={() => onSelect?.(groupElement)}
+                      >
+                        {renderElement(groupElement)}
+                      </Item>
+                    );
+                  })}
+                  {group.endActions?.map((action, index) => {
+                    return (
+                      <Item
+                        key={`${group.groupName}-action-${index}`}
+                        onSelect={action.onSelect}
+                      >
+                        {action.content}
+                      </Item>
+                    );
+                  })}
+                  {group.emptyString && group.elements.length === 0 && (
+                    <span className="ml-b clr-greyscale-500">
+                      {group.emptyString}
+                    </span>
+                  )}
+                </Command.Group>
+              );
+            })}
+          </div>
         </Command.List>
       </Command>
     </div>

@@ -1,23 +1,27 @@
+import classNames from 'classnames';
 import * as React from 'react';
 
-import { Box, Text } from '@/components';
 import { ContactAvatar } from '@/components/avatar/ContactAvatar';
-import { FocusOnContent } from '@/components/responsive/FocusOnContent';
 import { Contact } from '@/types/contact';
+
+import style from './contact-list.module.scss';
 
 type Props = {
   contact: Contact;
+  isActive?: boolean;
 };
-export const ContactListItem = ({ contact }: Props) => {
+export const ContactListItem = ({ contact, isActive }: Props) => {
   return (
-    <FocusOnContent>
-      <Box $display="flex" $direction="row" $align="center" $gap="10px">
-        <ContactAvatar letter={contact.firstName.charAt(0)} />
-        <Box $display="flex" $direction="row">
-          <span>{contact.firstName}&nbsp;</span>
-          <Text $weight="bold">{contact.lastName} </Text>
-        </Box>
-      </Box>
-    </FocusOnContent>
+    <div
+      className={classNames(style.contactListItemContainer, {
+        [style.active]: isActive,
+      })}
+    >
+      <ContactAvatar letter={contact.firstName.charAt(0)} />
+      <div className="flex-center">
+        <span>{contact.firstName}&nbsp;</span>
+        <span className="fw-bold">{contact.lastName}</span>
+      </div>
+    </div>
   );
 };

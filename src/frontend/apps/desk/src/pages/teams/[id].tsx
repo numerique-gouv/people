@@ -5,13 +5,9 @@ import { ReactElement } from 'react';
 
 import { Box } from '@/components';
 import { TextErrors } from '@/components/TextErrors';
-import { MemberGrid } from '@/features/teams/member-management';
-import {
-  Role,
-  TeamInfo,
-  TeamLayout,
-  useTeam,
-} from '@/features/teams/team-management';
+import { TeamLayout } from '@/components/teams/layout/TeamLayout';
+import { TeamView } from '@/components/teams/view/TeamView';
+import { Role, useTeam } from '@/features/teams/team-management';
 import { NextPageWithLayout } from '@/types/next';
 
 const Page: NextPageWithLayout = () => {
@@ -32,6 +28,7 @@ interface TeamProps {
 
 const Team = ({ id }: TeamProps) => {
   const { data: team, isLoading, isError, error } = useTeam({ id });
+
   const navigate = useNavigate();
 
   if (isError && error) {
@@ -59,8 +56,9 @@ const Team = ({ id }: TeamProps) => {
 
   return (
     <>
-      <TeamInfo team={team} currentRole={currentRole} />
-      <MemberGrid team={team} currentRole={currentRole} />
+      <TeamView team={team} />
+      {/*<TeamInfo team={team} currentRole={currentRole} />*/}
+      {/*<MemberGrid team={team} currentRole={currentRole} />*/}
     </>
   );
 };

@@ -34,7 +34,7 @@ export const ResponsiveLayoutHeader = ({ toggleMenu }: Props) => {
             <Box $align="center" $gap="1rem" $direction="row">
               <Image height={30} priority src={HomeIcon} alt="" />
               <span className="fs-h3 fw-bold clr-primary-700">
-                {t('Régie')}
+                {t('La Régie')}
               </span>
             </Box>
           </StyledLink>

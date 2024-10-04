@@ -1,0 +1,24 @@
+.listContainer {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: inherit;
+
+  .infiniteScroll {
+    padding: 0;
+    margin-top: 0;
+  }
+}
+
+
+.listTeamItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: var(--c--theme--spacings--t);
+  padding: var(--c--theme--spacings--st) var(--c--theme--spacings--s);
+  &:hover {
+    background-color: var(--c--theme--colors--primary-300)
+  }
+
+}

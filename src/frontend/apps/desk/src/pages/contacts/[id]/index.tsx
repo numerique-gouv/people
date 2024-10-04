@@ -4,7 +4,7 @@ import { ReactElement } from 'react';
 import { ContactLayout } from '@/components/contacts/layout/ContactLayout';
 import { ContactView } from '@/components/contacts/view/ContactView';
 import { SimpleLoader } from '@/components/loader/SimpleLoader';
-import { useContact } from '@/services/apiHooks/useContact';
+import { useContact } from '@/services/api/useContact';
 import { NextPageWithLayout } from '@/types/next';
 
 const Page: NextPageWithLayout = () => {

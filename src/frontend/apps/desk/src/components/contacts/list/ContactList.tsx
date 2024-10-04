@@ -1,12 +1,13 @@
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { RefObject, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Box, StyledLink } from '@/components';
 import { ContactListItem } from '@/components/contacts/list/ContactListItem';
 import { ContactListHeader } from '@/components/contacts/list/header/ContactListHeader';
 import { FocusOnContent } from '@/components/responsive/FocusOnContent';
-import { useContacts } from '@/services/apiHooks/useContact';
+import { useContacts } from '@/services/api/useContact';
 import { Contact } from '@/types/contact';
 
 import styles from './contact-list.module.scss';
@@ -35,6 +36,7 @@ type ContactGroup = {
 };
 
 export const ContactList = () => {
+  const { t } = useTranslation('contact');
   const listQuery = useContacts();
 
   const {
@@ -105,27 +107,38 @@ export const ContactList = () => {
         {/*    })}*/}
         {/*  </div>*/}
         {/*</div>*/}
+        <p className="fs-h6 clr-primary-700 fw-bold pl-s">
+          {t('contact.list.title')}
+        </p>
         {groups.map((group, index) => {
           return (
-            <Box ref={refs[group.letter]} key={group.letter} $gap="10px">
+            <Box ref={refs[group.letter]} key={group.letter} $gap="16px">
               <div className="fs-l fw-bold pl-s clr-greyscale-500">
                 {group.letter}
               </div>
-              {group.contacts.map((contact) => (
-                <Box
-                  className={[
-                    styles.contactItem,
-                    id === contact.id ? styles.active : undefined,
-                  ].join(' ')}
-                  key={`${contact.id}-${index}`}
-                >
-                  <FocusOnContent>
-                    <StyledLink href={`/contacts/${contact.id}`}>
-                      <ContactListItem contact={contact} />
-                    </StyledLink>
-                  </FocusOnContent>
-                </Box>
-              ))}
+              {group.contacts.map((contact) => {
+                const isActive = id === contact.id;
+                return (
+                  <StyledLink
+                    key={`${contact.id}-${index}`}
+                    href={`/contacts/${contact.id}`}
+                  >
+                    <FocusOnContent>
+                      <Box
+                        className={[
+                          styles.contactItem,
+                          isActive ? styles.active : undefined,
+                        ].join(' ')}
+                      >
+                        <ContactListItem
+                          isActive={isActive}
+                          contact={contact}
+                        />
+                      </Box>
+                    </FocusOnContent>
+                  </StyledLink>
+                );
+              })}
             </Box>
           );
         })}

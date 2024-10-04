@@ -5,7 +5,7 @@ import { Card } from '@/components';
 import { ContactForm } from '@/components/contacts/form/ContactForm';
 import { ContactLayout } from '@/components/contacts/layout/ContactLayout';
 import { SimpleLoader } from '@/components/loader/SimpleLoader';
-import { useContact } from '@/services/apiHooks/useContact';
+import { useContact } from '@/services/api/useContact';
 import { NextPageWithLayout } from '@/types/next';
 
 const Page: NextPageWithLayout = () => {

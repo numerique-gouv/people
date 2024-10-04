@@ -12,5 +12,6 @@ export const StyledLink = styled(Link)<LinkProps>`
     color: #ffffff;
   }
   display: flex;
+
   ${({ $css }) => $css && `${$css};`}
 `;

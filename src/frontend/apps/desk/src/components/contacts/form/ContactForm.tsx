@@ -14,10 +14,7 @@ import { RHFProvider } from '@/components/form/hook-form/RHFProvider';
 import { RHFTextArea } from '@/components/form/hook-form/RHFTextArea';
 import { HorizontalSeparator } from '@/components/separator/HorizontalSeparator';
 import { useResponsive } from '@/hooks/useResponsive';
-import {
-  useCreateContact,
-  useUpdateContact,
-} from '@/services/apiHooks/useContact';
+import { useCreateContact, useUpdateContact } from '@/services/api/useContact';
 import { Contact, DTOUpdateContact } from '@/types/contact';
 
 import style from './contact-form.module.scss';

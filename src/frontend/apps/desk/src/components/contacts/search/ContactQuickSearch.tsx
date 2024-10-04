@@ -1,45 +1,26 @@
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ContactListItem } from '@/components/contacts/list/ContactListItem';
 import { CreateNewContactSearchShortcut } from '@/components/contacts/search/CreateNewContactSearchShortcut';
 import { QuickSearch, QuickSearchData } from '@/components/search/QuickSearch';
-import { useContacts } from '@/services/apiHooks/useContact';
+import { useContacts } from '@/services/api/useContact';
 import { Contact } from '@/types/contact';
-
-const my_contacts = [
-  'Daniel Anatole',
-  'Émilien Arnoult',
-  'Magali Baud',
-  'Antoine Bedar',
-  'Thierry Breton',
-];
-
-const other_contact = [
-  'Anaële Cerf',
-  'Gérard Dramont',
-  'Raymond Dougs',
-  'Edgar Eddy',
-  'Steve Eistinger',
-  'Gabrielle Eudes',
-  'Damien Eudes',
-  'Julien Fourcat',
-  'Nathan Portefou',
-  'Robin Lecomte',
-];
 
 type Props = {
   afterSelect?: () => void;
 };
 export const ContactQuickSearch = ({ afterSelect }: Props) => {
+  const { t } = useTranslation('contact');
   const router = useRouter();
   const contacts = useContacts();
 
   const getDefaultData = (): QuickSearchData<Contact>[] => {
     return [
       {
-        groupName: "Carnet d'adresse",
+        groupName: t('contact.search.my_contact.title'),
         elements: contacts.data ? [...contacts.data] : [],
         startActions: [
           {
@@ -52,8 +33,9 @@ export const ContactQuickSearch = ({ afterSelect }: Props) => {
         ],
       },
       {
-        groupName: 'Autre contacts',
+        groupName: t('contact.search.other_contact.title'),
         elements: [],
+        emptyString: t('contact.search.other_contact.empty.label'),
       },
     ];
   };

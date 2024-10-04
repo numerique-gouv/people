@@ -220,70 +220,7 @@ input:-webkit-autofill:focus {
   display: none;
 }
 
-/**
- * DataGrid
-*/
-.c__datagrid__table__container {
-  overflow: auto;
-}
 
-.c__datagrid__table__container > table th .c__datagrid__header {
-  color: var(--c--components--datagrid--header--color);
-  font-weight: var(--c--components--datagrid--header--weight);
-  font-size: var(--c--components--datagrid--header--size);
-  padding-block: 2rem;
-}
-
-.c__datagrid__table__container > table tbody tr {
-  border: none;
-  border-top: 1px var(--c--theme--colors--greyscale-300) solid;
-  border-bottom: 1px var(--c--theme--colors--greyscale-300) solid;
-}
-
-.c__datagrid__table__container > table tbody {
-  background-color: var(--c--components--datagrid--body--background-color);
-}
-
-.c__datagrid__table__container > table tbody tr:hover {
-  background-color: var(
-    --c--components--datagrid--body--background-color-hover
-  );
-}
-
-.c__datagrid__table__container > table th:first-child,
-.c__datagrid__table__container > table td:first-child {
-  padding-left: 2rem;
-}
-
-.c__datagrid > .c__pagination {
-  padding-right: 1rem;
-  justify-content: flex-end;
-}
-
-.c__pagination__list {
-  gap: 3px;
-  border-radius: 4px;
-  background: var(--c--components--datagrid--pagination--background-color);
-}
-
-.c__pagination__list .c__button--tertiary-text.c__button--active {
-  background-color: var(
-    --c--components--datagrid--pagination--background-color-active
-  );
-  color: var(--c--theme--colors--greyscale-800);
-}
-
-.c__pagination__list .c__button--tertiary-text:disabled {
-  display: none;
-}
-
-@media (width <= 380px) {
-  .c__datagrid > .c__pagination {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-}
 
 /**
  * Date picker

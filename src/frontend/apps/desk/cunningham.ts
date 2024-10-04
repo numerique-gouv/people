@@ -17,7 +17,7 @@ const config = {
           },
           sizes: {
             ml: '0.938rem',
-            xl: '1.50rem',
+            xl: '1.25rem',
             t: '0.6875rem',
             s: '0.75rem',
             h1: '2.2rem',

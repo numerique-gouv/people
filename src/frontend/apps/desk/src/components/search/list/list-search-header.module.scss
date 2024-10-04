@@ -1,0 +1,24 @@
+.listHeader {
+  padding: var(--c--theme--spacings--st) var(--c--theme--spacings--s);
+  padding-bottom: var(--c--theme--spacings--s) ;
+  border-bottom: 1px solid var(--c--theme--colors--greyscale-100);
+
+  .headerInput {
+    display: flex;
+    cursor: pointer;
+    justify-content: space-between;
+    padding: 8px;
+    align-items: center;
+    background-color:  var(--c--theme--colors--greyscale-100);;
+
+    .kbd {
+      padding: 3px 8px;
+
+      background-color: var(--c--theme--colors--greyscale-300);;
+      color: var(--c--theme--colors--greyscale-400);
+      border-radius: 5px;
+    }
+  }
+
+
+}

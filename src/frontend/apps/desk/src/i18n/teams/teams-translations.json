@@ -1,0 +1,18 @@
+{
+  "en": {
+    "translation": {
+      "teams.add.member": "Add a member",
+      "teams.member.group.title": "Members",
+      "teams.unslected.title": "No group selected",
+      "teams.unslected.subTitle": "Select a group from the sidebar."
+    }
+  },
+  "fr": {
+    "translation": {
+      "teams.add.member": "Ajouter un membre",
+      "teams.member.group.title": "Membres",
+      "teams.unslected.title": "Aucun groupe sélectionné",
+      "teams.unslected.subTitle": "Sélectionnez un groupe dans la barre latérale."
+    }
+  }
+}

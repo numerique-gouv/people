@@ -23,7 +23,7 @@ export class ContactRepository {
       const contacts = [...ContactRepository.DATA];
       const toUpdate = contacts.findIndex((contact) => contact.id === id);
       if (toUpdate < 0) {
-        reject();
+        reject(new Error());
       }
 
       contacts[toUpdate] = { ...contacts[toUpdate], ...payload };
@@ -33,7 +33,7 @@ export class ContactRepository {
   }
 
   static async add(payload: DTOUpdateContact): Promise<Contact> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const contacts = [...ContactRepository.DATA];
 
       const newContact: Contact = { id: randAwsRequestId(), ...payload };
@@ -48,7 +48,7 @@ export class ContactRepository {
       const contacts = [...ContactRepository.DATA];
       const toUpdate = contacts.findIndex((contact) => contact.id === id);
       if (toUpdate < 0) {
-        reject();
+        reject(new Error());
       }
 
       const contact = contacts.splice(toUpdate, 1);
