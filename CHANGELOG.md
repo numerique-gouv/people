@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- 🛂(backend) match email if no existing user matches the sub
+
 ## [1.2.1] - 2024-10-03
 
 ### Fixed
