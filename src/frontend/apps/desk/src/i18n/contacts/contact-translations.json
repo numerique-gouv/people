@@ -6,7 +6,8 @@
       "contact.search.other_contact.empty.label": "No contacts found",
       "contact.search.other_contact.title": "Other contacts",
       "contact.home.unselected.title": "No contacts selected",
-      "contact.home.unselected.subTitle": "Select a contact from your address book or search the database."
+      "contact.home.unselected.subTitle": "Select a contact from your address book or search the database.",
+      "contact.search.add_new_contact": "Add new contact"
     }
   },
   "fr": {
@@ -14,6 +15,7 @@
       "contact.search.my_contact.title": "Carnet d'adresse",
       "contact.search.other_contact.title": "Autres contacts",
       "contact.search.other_contact.empty.label": "Aucun contact trouvé",
+      "contact.search.add_new_contact": "Créer un nouveau contact",
       "contact.list.title": "Mon carnet d'adresse",
       "contact.home.unselected.title": "Aucun contact sélectionné",
       "contact.home.unselected.subTitle": "Sélectionnez un contact de votre carnet d’adresses ou recherchez dans la base de données."

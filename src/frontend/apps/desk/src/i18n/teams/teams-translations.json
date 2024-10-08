@@ -4,7 +4,9 @@
       "teams.add.member": "Add a member",
       "teams.member.group.title": "Members",
       "teams.unslected.title": "No group selected",
-      "teams.unslected.subTitle": "Select a group from the sidebar."
+      "teams.unslected.subTitle": "Select a group from the sidebar.",
+      "teams.search.my_groups.label": "Your groups",
+      "teams.search.new_group.label": "New group"
     }
   },
   "fr": {
@@ -12,7 +14,9 @@
       "teams.add.member": "Ajouter un membre",
       "teams.member.group.title": "Membres",
       "teams.unslected.title": "Aucun groupe sélectionné",
-      "teams.unslected.subTitle": "Sélectionnez un groupe dans la barre latérale."
+      "teams.unslected.subTitle": "Sélectionnez un groupe dans la barre latérale.",
+      "teams.search.my_groups.label": "Vos groupes",
+      "teams.search.new_group.label": "Nouveau groupe"
     }
   }
 }
