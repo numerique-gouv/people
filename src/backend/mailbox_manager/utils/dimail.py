@@ -1,5 +1,6 @@
 """A minimalist client to synchronize with mailbox provisioning API."""
 
+import ast
 import smtplib
 from logging import getLogger
 
@@ -12,6 +13,8 @@ from django.utils.translation import gettext_lazy as _
 import requests
 from rest_framework import status
 from urllib3.util import Retry
+
+from mailbox_manager import models
 
 logger = getLogger(__name__)
 
@@ -163,3 +166,52 @@ class DimailAPIClient:
                 recipient,
                 exception,
             )
+
+    def synchronize_dimail_mailboxes(self, domain_name):
+        """Synchronize mailboxes from dimail - open xchange to our database.
+        This is useful in case of acquisition of a pre-existing mail domain.
+        This is not considered a new email and will not trigger any mail notification."""
+
+        domain = models.MailDomain.objects.get(name=domain_name)
+        people_mailboxes = models.Mailbox.objects.filter(domain=domain)
+
+        headers = self.get_headers()
+
+        try:
+            response = session.get(
+                f"{self.API_URL}/domains/{domain_name}/mailboxes/",
+                headers=headers,
+                verify=True,
+                timeout=10,
+            )
+        except requests.exceptions.ConnectionError as error:
+            logger.error(
+                "Connection error while trying to reach %s.",
+                self.API_URL,
+                exc_info=error,
+            )
+            raise error
+
+        if response.status_code != status.HTTP_200_OK:
+            return self.pass_dimail_unexpected_response(response)
+
+        content = ast.literal_eval(
+            response.content.decode("utf-8")
+        )  # format output str to proper list
+
+        for mailbox in content:
+            local_part = mailbox["email"].split("@")[0]
+            if not mailbox["email"] in [str(mailbox) for mailbox in people_mailboxes]:
+                # creates a mailbox on our end
+                models.Mailbox.objects.create(
+                    first_name=mailbox["givenName"],
+                    last_name=mailbox["surName"],
+                    local_part=local_part,
+                    domain=domain,
+                    secondary_email=mailbox[
+                        "email"
+                    ],  # secondary email is mandatory. Unfortunately, dimail doesn't store any.
+                    # We temporarily give current email as secondary email.
+                )
+
+        return None
