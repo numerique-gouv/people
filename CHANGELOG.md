@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- ✨(dimail) synchronize mailboxes from dimail to our db #453
+
 ### Fixed
 
 - 🐛(frontend) fix update accesses form #448
