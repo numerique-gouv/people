@@ -2,7 +2,12 @@
 Tests for MailDomains API endpoint in People's app mailbox_manager. Focus on "create" action.
 """
 
+import re
+from logging import Logger
+from unittest import mock
+
 import pytest
+import responses
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -56,13 +61,26 @@ def test_api_mail_domains__create_authenticated():
 
     client = APIClient()
     client.force_login(user)
-    response = client.post(
-        "/api/v1.0/mail-domains/",
-        {
-            "name": "mydomain.com",
-        },
-        format="json",
-    )
+
+    domain_name = "test.domain.fr"
+
+    with responses.RequestsMock() as rsps:
+        rsps.add(
+            rsps.POST,
+            re.compile(r".*/domains/"),
+            body=str(
+                {
+                    "name": domain_name,
+                }
+            ),
+            status=status.HTTP_201_CREATED,
+            content_type="application/json",
+        )
+        response = client.post(
+            "/api/v1.0/mail-domains/",
+            {"name": domain_name, "context": "null", "features": ["webmail"]},
+            format="json",
+        )
     assert response.status_code == status.HTTP_201_CREATED
     domain = models.MailDomain.objects.get()
 
@@ -79,5 +97,51 @@ def test_api_mail_domains__create_authenticated():
 
     # a new domain with status "pending" is created and authenticated user is the owner
     assert domain.status == enums.MailDomainStatusChoices.PENDING
-    assert domain.name == "mydomain.com"
+    assert domain.name == domain_name
     assert domain.accesses.filter(role="owner", user=user).exists()
+
+
+## SYNC TO DIMAIL
+@mock.patch.object(Logger, "info")
+def test_api_mail_domains__create_dimail_domain(mock_info):
+    """
+    Creating a domain should trigger a call to create a domain on dimail too.
+    """
+    user = core_factories.UserFactory()
+
+    client = APIClient()
+    client.force_login(user)
+    domain_name = "test.fr"
+
+    with responses.RequestsMock() as rsps:
+        rsp = rsps.add(
+            rsps.POST,
+            re.compile(r".*/domains/"),
+            body=str(
+                {
+                    "name": domain_name,
+                }
+            ),
+            status=status.HTTP_201_CREATED,
+            content_type="application/json",
+        )
+        response = client.post(
+            "/api/v1.0/mail-domains/",
+            {
+                "name": domain_name,
+            },
+            format="json",
+        )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    # make sure domain creation endpoint was called
+    assert rsp.call_count == 1
+
+    # Logger
+    assert mock_info.call_count == 2
+    assert mock_info.call_args_list[0][0] == (
+        "Domain %s successfully created on dimail by user %s",
+        domain_name,
+        user.sub,
+    )
+    # a new empty info has been added. To be investigated

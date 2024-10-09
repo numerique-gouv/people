@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+- ✨(dimail) send domain creation requests to dimail #454
+
 ## [1.3.1] - 2024-10-18
 
 ## [1.3.0] - 2024-10-18
