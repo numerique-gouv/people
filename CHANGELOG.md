@@ -10,6 +10,7 @@ and this project adheres to
 
 ### Added
 
+- ✨(dimail) send domain creation requests to dimail #454 
 - ✨(api) add RELEASE version on config endpoint #459
 - ✨(backend) manage roles on domain admin view
 - ✨(frontend) show version number in footer #369
