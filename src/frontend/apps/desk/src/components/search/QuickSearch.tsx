@@ -1,7 +1,8 @@
 import { Command } from 'cmdk';
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 
 import { FocusOnContent } from '@/components/responsive/FocusOnContent';
+import { HorizontalSeparator } from '@/components/separator/HorizontalSeparator';
 
 export type QuickSearchAction = {
   onSelect?: () => void;
@@ -21,39 +22,36 @@ type Props<T> = {
   onFilter?: (str: string) => void;
   renderElement: (element: T) => ReactNode;
   onSelect?: (element: T) => void;
+  inputContent?: ReactNode;
 };
 export function QuickSearch<T>({
   onSelect,
   onFilter,
+  inputContent,
   data,
   renderElement,
 }: Props<T>) {
   const ref = React.useRef<HTMLDivElement | null>(null);
-
-  const [inputValue, setInputValue] = React.useState('');
-
-  useEffect(() => {
-    onFilter?.(inputValue);
-  }, [inputValue]);
 
   return (
     <div className="quick-search-container">
       <Command
         label="Recherche rapide de contact"
         shouldFilter={false}
-        onValueChange={() => console.log('ici')}
         ref={ref}
       >
-        <div className="flex">
-          <Command.Input
-            /* eslint-disable-next-line jsx-a11y/no-autofocus */
-            autoFocus={true}
-            placeholder="Rechercher"
-            onValueChange={(value) => {
-              setInputValue(value);
-            }}
-          />
-        </div>
+        {inputContent ?? (
+          <div className="flex">
+            <Command.Input
+              /* eslint-disable-next-line jsx-a11y/no-autofocus */
+              autoFocus={true}
+              placeholder="Rechercher"
+              onValueChange={onFilter}
+            />
+          </div>
+        )}
+
+        <HorizontalSeparator />
         <Command.List>
           <div>
             {data.map((group) => {

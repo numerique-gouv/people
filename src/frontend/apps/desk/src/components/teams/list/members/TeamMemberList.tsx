@@ -2,8 +2,11 @@ import {
   Button,
   Column,
   DataGrid,
+  ModalSize,
   SortModel,
+  useModal,
   usePagination,
+  useToastProvider,
 } from '@openfun/cunningham-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +14,8 @@ import { useTranslation } from 'react-i18next';
 import { Box, TextErrors } from '@/components';
 import { ContactAvatar } from '@/components/avatar/ContactAvatar';
 import { PAGE_SIZE } from '@/features/mail-domains/conf';
-import { ModalAddMembers } from '@/features/teams/member-add';
+import { useCreateTeamAccess } from '@/features/teams/member-add/api';
+import { InviteMemberTeamModal } from '@/features/teams/member-add/components/InviteMemberTeamModal';
 import { Access, useTeamAccesses } from '@/features/teams/member-management';
 import { MemberAction } from '@/features/teams/member-management/components/MemberAction';
 import { Role, Team } from '@/features/teams/team-management';
@@ -52,6 +56,9 @@ function formatSortModel(
 
 export const TeamMemberList = ({ team, currentRole }: MemberGridProps) => {
   const isMobile = useBreakpoint(Breakpoints.LG, false);
+  const { toast } = useToastProvider();
+  const addAccess = useCreateTeamAccess();
+  const memberInviteModal = useModal();
 
   const [isModalMemberOpen, setIsModalMemberOpen] = useState(false);
   const { t: transTeam } = useTranslation('team');
@@ -160,11 +167,12 @@ export const TeamMemberList = ({ team, currentRole }: MemberGridProps) => {
           <span className="clr-greyscale-900 fs-h6 fw-bold">
             {transTeam('teams.member.group.title')}
           </span>
+
           <Button
             fullWidth={false}
             color="primary-text"
             aria-label={transTeam('Add members to the team')}
-            onClick={() => setIsModalMemberOpen(true)}
+            onClick={memberInviteModal.open}
           >
             {transTeam('teams.add.member')}
           </Button>
@@ -183,13 +191,11 @@ export const TeamMemberList = ({ team, currentRole }: MemberGridProps) => {
         sortModel={sortModel}
       />
 
-      {isModalMemberOpen && (
-        <ModalAddMembers
-          currentRole={currentRole}
-          onClose={() => setIsModalMemberOpen(false)}
-          team={team}
-        />
-      )}
+      <InviteMemberTeamModal
+        {...memberInviteModal}
+        size={ModalSize.LARGE}
+        team={team}
+      />
     </div>
   );
 };

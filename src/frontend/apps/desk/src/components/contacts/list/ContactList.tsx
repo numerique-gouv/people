@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { RefObject, useMemo } from 'react';
@@ -11,24 +12,6 @@ import { useContacts } from '@/services/api/useContact';
 import { Contact } from '@/types/contact';
 
 import styles from './contact-list.module.scss';
-
-export const contacts = [
-  'Daniel Anatole',
-  'Émilien Arnoult',
-  'Magali Baud',
-  'Antoine Bedar',
-  'Thierry Breton',
-  'Anaële Cerf',
-  'Gérard Dramont',
-  'Raymond Dougs',
-  'Edgar Eddy',
-  'Steve Eistinger',
-  'Gabrielle Eudes',
-  'Damien Eudes',
-  'Julien Fourcat',
-  'Nathan Portefou',
-  'Robin Lecomte',
-];
 
 type ContactGroup = {
   letter: string;
@@ -112,7 +95,7 @@ export const ContactList = () => {
         </p>
         {groups.map((group, index) => {
           return (
-            <Box ref={refs[group.letter]} key={group.letter} $gap="16px">
+            <Box ref={refs[group.letter]} key={group.letter} $gap="6px">
               <div className="fs-l fw-bold pl-s clr-greyscale-500">
                 {group.letter}
               </div>
@@ -125,10 +108,9 @@ export const ContactList = () => {
                   >
                     <FocusOnContent>
                       <Box
-                        className={[
-                          styles.contactItem,
-                          isActive ? styles.active : undefined,
-                        ].join(' ')}
+                        className={classNames(styles.contactItem, {
+                          [styles.active]: isActive,
+                        })}
                       >
                         <ContactListItem
                           isActive={isActive}

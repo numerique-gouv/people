@@ -11,19 +11,21 @@ import {
   TeamsOrdering,
   useTeams,
 } from '@/features/teams/team-management';
-import { Contact } from '@/types/contact';
 
 type Props = {
   afterSelect?: () => void;
 };
 export const TeamQuickSearch = ({ afterSelect }: Props) => {
-  const { t } = useTranslation('contact');
+  const { t } = useTranslation('team');
   const router = useRouter();
   const teams = useTeams({ ordering: TeamsOrdering.BY_CREATED_ON });
 
   const getDefaultData = (): QuickSearchData<Team>[] => {
-    const data: Team[] = [];
-    teams.data?.pages.forEach((result) => data.concat(result.results));
+    let data: Team[] = [];
+    teams.data?.pages.forEach((result) => {
+      data = data.concat(result.results);
+    });
+
     return [
       {
         groupName: t('teams.search.my_groups.label'),
@@ -31,7 +33,7 @@ export const TeamQuickSearch = ({ afterSelect }: Props) => {
         startActions: [
           {
             onSelect: () => {
-              router.push('/contacts/create');
+              router.push('/teams/create');
               afterSelect?.();
             },
             content: <CreateNewTeamSearchShortcut />,
@@ -48,31 +50,21 @@ export const TeamQuickSearch = ({ afterSelect }: Props) => {
 
   const onFilter = (str: string) => {
     const result = getDefaultData();
-    const myContacts = teams.data ?? [];
+    const myTeams = [...result[0].elements];
 
     if (str === '') {
-      result[0].elements = result[0].elements.splice(0, 5);
       setData(result);
     } else {
-      // const newMyContact = myContacts.filter((element) => {
-      //   return (
-      //     element..toLowerCase().indexOf(str.toLowerCase()) > -1 ||
-      //     element.lastName.toLowerCase().indexOf(str.toLowerCase()) > -1
-      //   );
-      // });
-      //
-      // // const newOtherContact = other_contact.filter((element) => {
-      // //   return element.toLowerCase().indexOf(str.toLowerCase()) > -1;
-      // // });
-      //
-      // result[0].elements = newMyContact.splice(0, 5);
+      result[0].elements = myTeams.filter((element) => {
+        return element.name.toLowerCase().indexOf(str.toLowerCase()) > 0;
+      });
 
       setData(result);
     }
   };
 
-  const onSelect = (contact: Contact) => {
-    router.push(`/contacts/` + contact.id);
+  const onSelect = (team: Team) => {
+    router.push(`/teams/` + team.id);
     afterSelect?.();
   };
 

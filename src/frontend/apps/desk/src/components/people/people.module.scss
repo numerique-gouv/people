@@ -1,0 +1,12 @@
+.container {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+  gap: 10px;
+  color: var(--c--theme--colors--greyscale-900);
+
+  &.active {
+    color: var(--c--theme--colors--primary-700) !important;
+  }
+
+}

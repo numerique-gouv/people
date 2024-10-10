@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import * as React from 'react';
 
 import { TeamAvatar } from '@/components/avatar/TeamAvatar';
@@ -7,10 +8,15 @@ import style from './contact-list.module.scss';
 
 type Props = {
   team: Team;
+  isActive?: boolean;
 };
-export const TeamListItem = ({ team }: Props) => {
+export const TeamListItem = ({ team, isActive }: Props) => {
   return (
-    <div className={style.listTeamItem}>
+    <div
+      className={classNames(style.listTeamItem, {
+        [style.active]: isActive,
+      })}
+    >
       <TeamAvatar />
       <span className="fs-h6 clr-greyscale-900">{team.name}</span>
     </div>

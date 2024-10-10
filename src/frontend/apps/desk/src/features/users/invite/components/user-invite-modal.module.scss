@@ -1,0 +1,31 @@
+.inputContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.input {
+
+  color: var(--c--theme--colors--primary-700);
+}
+.selectedItemsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+  gap: 8px;
+  background-color: white;
+
+  .userSelectedItem {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    background-color: var(--c--theme--colors--greyscale-200);
+
+    .deleteIcon {
+      cursor: pointer;
+      margin-left: 5px;
+      color: var(--c--theme--colors--greyscale-600);
+      font-size: 15px;
+    }
+  }
+}

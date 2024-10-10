@@ -1,72 +1,96 @@
-import { Button } from '@openfun/cunningham-react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
-import IconGroup from '@/assets/icons/icon-group2.svg';
-import { Box, Card, Text } from '@/components';
-import { useCunninghamTheme } from '@/cunningham';
+import { Card } from '@/components';
+import { CardHeaderFormSection } from '@/components/cards/CardHeaderFormSection';
+import { CardSection } from '@/components/cards/CardSection';
+import { RHFInput } from '@/components/form/hook-form/RHFInput';
+import { RHFProvider } from '@/components/form/hook-form/RHFProvider';
+import { RHFTextArea } from '@/components/form/hook-form/RHFTextArea';
+import { Team, useUpdateTeam } from '@/features/teams/team-management';
 
 import { useCreateTeam } from '../api';
 
-import { InputTeamName } from './InputTeamName';
+export type TeamFormValues = {
+  name: string;
+  description?: string;
+};
 
-export const CardCreateTeam = () => {
-  const { t } = useTranslation();
+type Props = {
+  team?: Team;
+};
+
+export const TeamForm = ({ team }: Props) => {
+  const { t } = useTranslation('team');
   const router = useRouter();
 
   const {
+    mutate: updateTeam,
+
+    isPending: isPendingUpdate,
+  } = useUpdateTeam({
+    onSuccess: (team) => {
+      router.push(`/teams/${team.id}`);
+    },
+  });
+
+  const {
     mutate: createTeam,
-    isError,
+
     isPending,
-    error,
   } = useCreateTeam({
     onSuccess: (team) => {
       router.push(`/teams/${team.id}`);
     },
   });
 
-  const [teamName, setTeamName] = useState('');
-  const { colorsTokens } = useCunninghamTheme();
+  const schema = z.object({
+    name: z.string().min(1),
+    description: z.string().optional(),
+  });
+
+  const methods = useForm<TeamFormValues>({
+    delayError: 0,
+    defaultValues: {
+      name: team?.name ?? '',
+      description: '',
+    },
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit = (values: TeamFormValues) => {
+    if (team) {
+      updateTeam({ id: team.id, name: values.name });
+    } else {
+      createTeam(values.name);
+    }
+  };
 
   return (
-    <Card
-      $padding="big"
-      $height="70%"
-      $justify="space-between"
-      $width="100%"
-      $maxWidth="24rem"
-      $minWidth="22rem"
-      aria-label={t('Create new team card')}
-    >
-      <Box $gap="1rem">
-        <Box $align="center">
-          <IconGroup
-            aria-hidden="true"
-            width={44}
-            color={colorsTokens()['primary-text']}
-          />
-          <Text as="h3" $textAlign="center">
-            {t('Create a new group')}
-          </Text>
-        </Box>
-        <InputTeamName
-          label={t('Team name')}
-          {...{ error, isError, isPending, setTeamName }}
+    <Card>
+      <RHFProvider showSubmit={false} methods={methods} id="team-form">
+        <CardHeaderFormSection
+          sticky={true}
+          isLoading={isPending || isPendingUpdate}
+          formId="team-form"
+          title="Ajouter"
+          onSubmit={methods.handleSubmit(onSubmit)}
+          onCancel={router.back}
         />
-      </Box>
-      <Box $justify="space-between" $direction="row" $align="center">
-        <Button color="secondary" onClick={() => router.push('/')}>
-          {t('Cancel')}
-        </Button>
-
-        <Button
-          onClick={() => createTeam(teamName)}
-          disabled={!teamName || isPending}
-        >
-          {t('Create the team')}
-        </Button>
-      </Box>
+        <CardSection>
+          <RHFInput name="name" label={t('teams.form.name.label')} fullWidth />
+          <RHFTextArea
+            rows={5}
+            name="description"
+            label={t('teams.form.description.label')}
+            fullWidth
+          />
+        </CardSection>
+      </RHFProvider>
     </Card>
   );
 };

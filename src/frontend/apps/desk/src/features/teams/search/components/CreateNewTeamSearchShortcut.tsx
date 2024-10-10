@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const CreateNewTeamSearchShortcut = () => {
-  const { t } = useTranslation('contact');
+  const { t } = useTranslation('team');
   const router = useRouter();
   return (
     <div
