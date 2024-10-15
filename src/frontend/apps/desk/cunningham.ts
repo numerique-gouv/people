@@ -8,11 +8,16 @@ const config = {
           'primary-100': '#EDF5FA',
           'primary-150': '#E5EEFA',
           'info-150': '#E5EEFA',
+          'grey-400': '#929292',
+          'grey-800': '#2A2A2A',
         },
         font: {
+          letterSpacings: {
+            h5: 'normal',
+          },
           sizes: {
             ml: '0.938rem',
-            xl: '1.50rem',
+            xl: '1.25rem',
             t: '0.6875rem',
             s: '0.75rem',
             h1: '2.2rem',
@@ -28,205 +33,40 @@ const config = {
             black: 900,
           },
         },
-        spacings: {
-          '0': '0',
-          none: '0',
-          auto: 'auto',
-          bx: '2.2rem',
-          full: '100%',
-        },
-        breakpoints: {
-          xxs: '320px',
-          xs: '480px',
-        },
-      },
-      components: {
-        datagrid: {
-          header: {
-            weight: 'var(--c--theme--font--weights--extrabold)',
-            size: 'var(--c--theme--font--sizes--ml)',
-          },
-          cell: {
-            color: 'var(--c--theme--colors--primary-500)',
-            size: 'var(--c--theme--font--sizes--ml)',
-          },
-        },
-        'forms-checkbox': {
-          'background-color': {
-            hover: '#055fd214',
-          },
-          color: 'var(--c--theme--colors--primary-500)',
-          'font-size': 'var(--c--theme--font--sizes--ml)',
-        },
-        'forms-datepicker': {
-          'border-color': 'var(--c--theme--colors--primary-500)',
-          'value-color': 'var(--c--theme--colors--primary-500)',
-          'border-radius': {
-            hover: 'var(--c--components--forms-datepicker--border-radius)',
-            focus: 'var(--c--components--forms-datepicker--border-radius)',
-          },
-        },
-        'forms-field': {
-          color: 'var(--c--theme--colors--primary-500)',
-          'value-color': 'var(--c--theme--colors--primary-500)',
-          width: 'auto',
-        },
-        'forms-input': {
-          'value-color': 'var(--c--theme--colors--primary-500)',
-          'border-color': 'var(--c--theme--colors--primary-500)',
-          color: {
-            error: 'var(--c--theme--colors--danger-500)',
-            'error-hover': 'var(--c--theme--colors--danger-500)',
-            'box-shadow-error-hover': 'var(--c--theme--colors--danger-500)',
-          },
-        },
-        'forms-labelledbox': {
-          'label-color': {
-            small: 'var(--c--theme--colors--primary-500)',
-            'small-disabled': 'var(--c--theme--colors--greyscale-400)',
-            big: {
-              disabled: 'var(--c--theme--colors--greyscale-400)',
-            },
-          },
-        },
-        'forms-select': {
-          'border-color': 'var(--c--theme--colors--primary-500)',
-          'border-color-disabled-hover':
-            'var(--c--theme--colors--greyscale-200)',
-          'border-radius': {
-            hover: 'var(--c--components--forms-select--border-radius)',
-            focus: 'var(--c--components--forms-select--border-radius)',
-          },
-          'font-size': 'var(--c--theme--font--sizes--ml)',
-          'menu-background-color': '#ffffff',
-          'item-background-color': {
-            hover: 'var(--c--theme--colors--primary-300)',
-          },
-        },
-        'forms-switch': {
-          'accent-color': 'var(--c--theme--colors--primary-400)',
-        },
-        'forms-textarea': {
-          'border-color': 'var(--c--components--forms-textarea--border-color)',
-          'border-color-hover':
-            'var(--c--components--forms-textarea--border-color)',
-          'border-radius': {
-            hover: 'var(--c--components--forms-textarea--border-radius)',
-            focus: 'var(--c--components--forms-textarea--border-radius)',
-          },
-          color: 'var(--c--theme--colors--primary-500)',
-          disabled: {
-            'border-color-hover': 'var(--c--theme--colors--greyscale-200)',
-          },
-        },
-        modal: {
-          'background-color': '#ffffff',
-        },
-        button: {
-          'border-radius': {
-            active: 'var(--c--components--button--border-radius)',
-          },
-          'medium-height': 'auto',
-          'small-height': 'auto',
-          success: {
-            color: 'white',
-            'color-disabled': 'white',
-            'color-hover': 'white',
-            background: {
-              color: 'var(--c--theme--colors--success-600)',
-              'color-disabled': 'var(--c--theme--colors--greyscale-300)',
-              'color-hover': 'var(--c--theme--colors--success-800)',
-            },
-          },
-          danger: {
-            'color-hover': 'white',
-            background: {
-              color: 'var(--c--theme--colors--danger-400)',
-              'color-hover': 'var(--c--theme--colors--danger-500)',
-              'color-disabled': 'var(--c--theme--colors--danger-100)',
-            },
-          },
-          primary: {
-            color: 'var(--c--theme--colors--primary-text)',
-            'color-active': 'var(--c--theme--colors--primary-text)',
-            background: {
-              color: 'var(--c--theme--colors--primary-400)',
-              'color-active': 'var(--c--theme--colors--primary-500)',
-            },
-            border: {
-              'color-active': 'transparent',
-            },
-          },
-          secondary: {
-            color: 'var(--c--theme--colors--primary-500)',
-            'color-hover': 'var(--c--theme--colors--primary-text)',
-            background: {
-              color: 'white',
-              'color-hover': 'var(--c--theme--colors--primary-700)',
-            },
-            border: {
-              color: 'var(--c--theme--colors--primary-200)',
-            },
-          },
-          tertiary: {
-            color: 'var(--c--theme--colors--primary-text)',
-            'color-disabled': 'var(--c--theme--colors--greyscale-600)',
-            background: {
-              'color-hover': 'var(--c--theme--colors--primary-100)',
-              'color-disabled': 'var(--c--theme--colors--greyscale-200)',
-            },
-          },
-          disabled: {
-            color: 'white',
-            background: {
-              color: '#b3cef0',
-            },
-          },
-        },
       },
     },
     dsfr: {
       theme: {
         colors: {
-          'card-border': '#DDDDDD',
-          'primary-text': '#000091',
-          'primary-100': '#f5f5fe',
-          'primary-150': '#F4F4FD',
-          'primary-200': '#ececfe',
-          'primary-300': '#e3e3fd',
-          'primary-400': '#cacafb',
-          'primary-500': '#6a6af4',
-          'primary-600': '#000091',
-          'primary-700': '#272747',
-          'primary-800': '#21213f',
-          'primary-900': '#1c1a36',
-          'secondary-text': '#FFFFFF',
-          'secondary-100': '#fee9ea',
-          'secondary-200': '#fedfdf',
-          'secondary-300': '#fdbfbf',
-          'secondary-400': '#e1020f',
-          'secondary-500': '#c91a1f',
-          'secondary-600': '#5e2b2b',
-          'secondary-700': '#3b2424',
-          'secondary-800': '#341f1f',
-          'secondary-900': '#2b1919',
-          'greyscale-text': '#303C4B',
-          'greyscale-000': '#f6f6f6',
-          'greyscale-100': '#eeeeee',
-          'greyscale-200': '#e5e5e5',
-          'greyscale-300': '#e1e1e1',
-          'greyscale-400': '#dddddd',
-          'greyscale-500': '#cecece',
-          'greyscale-600': '#7b7b7b',
-          'greyscale-700': '#666666',
-          'greyscale-800': '#2a2a2a',
-          'greyscale-900': '#1e1e1e',
+          'primary-50': '#F5F5FE',
+          'primary-100': '#ECECFE',
+          'primary-150': '#410093',
+          'primary-200': '#E3E3FD',
+          'primary-300': '#CACAFB',
+          'primary-400': '#6A6AF4',
+          'primary-500': '#000091',
+          'secondary-050': '#FEF4F4',
+          'secondary-100': '#FEE9E9',
+          'secondary-200': '#FDDEDE',
+          'secondary-300': '#FCBFBF',
+          'secondary-400': '#E1000F',
+          'secondary-500': '#C9191E',
+          'greyscale-000': '#FFFFFF',
+          'greyscale-050': '#F6F6F6',
+          'greyscale-100': '#EEEEEE',
+          'greyscale-200': '#E5E5E5',
+          'greyscale-250': '#DDDDDD',
+          'greyscale-300': '#CECECE',
+          'greyscale-400': '#929292',
+          'greyscale-500': '#666666',
+          'greyscale-700': '#3A3A3A',
+          'greyscale-1000': '#161616',
           'success-text': '#1f8d49',
-          'success-100': '#dffee6',
+          'success-100': '#B8FEC9',
           'success-200': '#b8fec9',
           'success-300': '#88fdaa',
           'success-400': '#3bea7e',
-          'success-500': '#1f8d49',
+          'success-500': '#18753C',
           'success-600': '#18753c',
           'success-700': '#204129',
           'success-800': '#1e2e22',
@@ -272,13 +112,18 @@ const config = {
       components: {
         alert: {
           'border-radius': '0',
+          'background-color': 'var(--c--theme--colors--greyscale-000)',
+        },
+        modal: {
+          'box-shadow': '0px 6px 18px 0px rgba(0, 0, 18, 0.16);',
         },
         button: {
           'medium-height': '48px',
-          'border-radius': '4px',
+          'border-radius': '0',
+          'medium-text-height': '48px',
           primary: {
             background: {
-              color: 'var(--c--theme--colors--primary-text)',
+              color: 'var(--c--theme--colors--primary-500)',
               'color-hover': '#1212ff',
               'color-active': '#2323ff',
             },
@@ -291,7 +136,8 @@ const config = {
               'color-hover': 'var(--c--theme--colors--primary-100)',
               'color-active': 'var(--c--theme--colors--primary-100)',
             },
-            'color-hover': 'var(--c--theme--colors--primary-text)',
+
+            'color-hover': 'var(--c--theme--colors--primary-500)',
           },
           secondary: {
             background: {
@@ -299,10 +145,11 @@ const config = {
               'color-active': '#EDEDED',
             },
             border: {
-              color: 'var(--c--theme--colors--primary-600)',
-              'color-hover': 'var(--c--theme--colors--primary-600)',
+              color: 'var(--c--theme--colors--primary-500)',
+              'color-hover': 'var(--c--theme--colors--greyscale-250)',
             },
-            color: 'var(--c--theme--colors--primary-text)',
+            color: 'var(--c--theme--colors--primary-500)',
+            ['color-hover']: 'var(--c--theme--colors--primary-600)',
           },
           'tertiary-text': {
             background: {
@@ -313,7 +160,7 @@ const config = {
         },
         datagrid: {
           header: {
-            color: 'var(--c--theme--colors--primary-text)',
+            color: 'var(--c--theme--colors--primary-500)',
             size: 'var(--c--theme--font--sizes--s)',
           },
           body: {
@@ -325,45 +172,48 @@ const config = {
             'background-color-active': 'var(--c--theme--colors--primary-300)',
           },
         },
-        'forms-checkbox': {
-          'border-radius': '0',
-          color: 'var(--c--theme--colors--primary-text)',
-        },
         'forms-datepicker': {
           'border-radius': '0',
         },
         'forms-fileuploader': {
           'border-radius': '0',
         },
-        'forms-field': {
-          color: 'var(--c--theme--colors--primary-text)',
-        },
         'forms-input': {
-          'border-radius': '4px',
-          'background-color': '#ffffff',
-          'border-color': 'var(--c--theme--colors--primary-text)',
-          'box-shadow-color': 'var(--c--theme--colors--primary-text)',
-          'value-color': 'var(--c--theme--colors--primary-text)',
-        },
-        'forms-labelledbox': {
-          'label-color': {
-            big: 'var(--c--theme--colors--primary-text)',
-          },
-        },
-        'forms-select': {
-          'border-radius': '4px',
-          'border-radius-hover': '4px',
-          'background-color': '#ffffff',
-          'border-color': 'var(--c--theme--colors--primary-text)',
-          'border-color-hover': 'var(--c--theme--colors--primary-text)',
-          'box-shadow-color': 'var(--c--theme--colors--primary-text)',
-        },
-        'forms-switch': {
-          'handle-border-radius': '2px',
-          'rail-border-radius': '4px',
+          'background-color': 'var(--c--theme--colors--greyscale-050)',
+          'border-radius': '5px 5px 0 0',
+
+          'border-color': 'var(--c--theme--colors--greyscale-100)',
+
+          'border-color--focus': 'var(--c--theme--colors--greyscale-1000)',
+          'border-width': '0 0 2px 0',
+          'label-color--focus':
+            'var(--c--components--forms-labelledbox--label-color--small)',
         },
         'forms-textarea': {
+          'background-color': 'var(--c--theme--colors--greyscale-050)',
+          'border-radius': '5px 5px 0 0',
+          'border-color': 'var(--c--theme--colors--greyscale-100)',
+          'border-color--focus': 'var(--c--theme--colors--greyscale-1000)',
+          'border-width': '0 0 2px 0',
+          'border-color--hover': 'var(--c--theme--colors--greyscale-1000)',
+          'label-color--focus':
+            'var(--c--components--forms-labelledbox--label-color--small)',
+        },
+        'forms-select': {
+          'background-color': 'var(--c--theme--colors--greyscale-100)',
           'border-radius': '0',
+          'border-color': 'var(--c--theme--colors--greyscale-1000)',
+          'border-width': '0 0 2px 0',
+          'border-color--focus': '#0974F6',
+          'border-color--hover': 'var(--c--theme--colors--greyscale-1000)',
+          'label-color--focus':
+            'var(--c--components--forms-labelledbox--label-color--big)',
+        },
+        'forms-switch': {
+          'accent-color': '#2323ff',
+        },
+        'forms-checkbox': {
+          'accent-color': '#2323ff',
         },
       },
     },
