@@ -1,0 +1,35 @@
+.teamAvatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(179deg, #929292 -10.75%, #CECECE 126.68%);
+
+  .teamIcon {
+    color: #FFFFFFBF;
+    &.small {
+      font-size: 12px;
+    }
+
+    &.large {
+
+      font-size: 30px;
+    }
+  }
+
+  &.small {
+    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #FFFFFFBF;
+    font-size: 24px;
+  }
+
+  &.large {
+    border-radius: 18px;
+    width: 75px;
+    height: 75px;
+    border: 4px solid #FFFFFFBF;
+    font-size: 48px;
+  }
+
+}

@@ -1,0 +1,32 @@
+.teamViewHeader {
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .teamViewHeaderDetails {
+    display: flex;
+    flex-direction: column;
+    flex: 1
+  }
+
+  .teamViewOptions {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  .teamInfo {
+    display: flex;
+    gap: 20px;
+  }
+
+
+}
+.backMobile {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+
+}

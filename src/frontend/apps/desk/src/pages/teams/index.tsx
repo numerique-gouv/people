@@ -1,27 +1,29 @@
-import { Button } from '@openfun/cunningham-react';
-import { useRouter as useNavigate } from 'next/navigation';
-import type { ReactElement } from 'react';
+import * as React from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
-import { Box } from '@/components';
-import { TeamLayout } from '@/features/teams/team-management';
+import { Icon } from '@/components/icons/Icon';
+import { FocusOnLeft } from '@/components/layouts/responsive/FocusOnLeft';
+import styles from '@/features/contacts/compontents/view/unselected-contact.module.scss';
+import HomeIcon from '@/features/teams/assets/home-group.svg';
+import { TeamLayout } from '@/features/teams/components/layout/TeamLayout';
 import { NextPageWithLayout } from '@/types/next';
 
-const StyledButton = styled(Button)`
-  width: fit-content;
-`;
-
 const Page: NextPageWithLayout = () => {
-  const { t } = useTranslation();
-  const router = useNavigate();
-
+  const { t } = useTranslation('team');
   return (
-    <Box $align="center" $justify="center" $height="inherit">
-      <StyledButton onClick={() => void router.push('/teams/create')}>
-        {t('Create a new team')}
-      </StyledButton>
-    </Box>
+    <div className={styles.container}>
+      <HomeIcon />
+      <span className="fs-ml fw-bold clr-greyscale-700">
+        {t('teams.unslected.title')}
+      </span>
+      <span className="fs-s clr-greyscale-500 text-center">
+        {t('teams.unslected.subTitle')}
+      </span>
+      <FocusOnLeft>
+        <Icon icon="visibility" />
+      </FocusOnLeft>
+    </div>
   );
 };
 

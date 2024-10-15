@@ -1,0 +1,36 @@
+{
+  "en": {
+    "translation": {
+      "teams.add.member": "Add a member",
+      "teams.title": "Groups",
+      "teams.list.title": "My groups",
+      "teams.member.group.title": "Members",
+      "teams.unslected.title": "No group selected",
+      "teams.unslected.subTitle": "Select a group from the sidebar.",
+      "teams.search.my_groups.label": "Your groups",
+      "teams.search.new_group.label": "New group",
+      "teams.form.name.label": "Group name",
+      "teams.form.description.label": "Group informations",
+      "teams.invite.modal.title": "Add member to the group {{groupName}}",
+      "teams.members.add.success": "Members have been added successfully",
+      "teams.members.add.error": "An error occurred while adding members"
+    }
+  },
+  "fr": {
+    "translation": {
+      "teams.add.member": "Ajouter un membre",
+      "teams.title": "Groupes",
+      "teams.list.title": "Mes groupes",
+      "teams.member.group.title": "Membres",
+      "teams.unslected.title": "Aucun groupe sélectionné",
+      "teams.unslected.subTitle": "Sélectionnez un groupe dans la barre latérale.",
+      "teams.search.my_groups.label": "Vos groupes",
+      "teams.search.new_group.label": "Nouveau groupe",
+      "teams.invite.modal.title": "Ajouter des membres au groupe {{groupName}}",
+      "teams.form.name.label": "Nom du groupe",
+      "teams.form.description.label": "Information sur le groupe",
+      "teams.members.add.success": "Les membres ont été ajoutés avec succès",
+      "teams.members.add.error": "une erreur est survenue lors de l'ajout des membres"
+    }
+  }
+}

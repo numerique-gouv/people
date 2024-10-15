@@ -1,15 +1,11 @@
 import { ReactElement } from 'react';
 
-import { Box } from '@/components';
-import { CardCreateTeam, TeamLayout } from '@/features/teams/team-management';
+import { TeamForm } from '@/features/teams/components/form/TeamForm';
+import { TeamLayout } from '@/features/teams/components/layout/TeamLayout';
 import { NextPageWithLayout } from '@/types/next';
 
 const Page: NextPageWithLayout = () => {
-  return (
-    <Box $padding="large" $justify="center" $align="start" $height="inherit">
-      <CardCreateTeam />
-    </Box>
-  );
+  return <TeamForm />;
 };
 
 Page.getLayout = function getLayout(page: ReactElement) {

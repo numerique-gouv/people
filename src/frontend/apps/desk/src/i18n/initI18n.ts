@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next';
 
 import { LANGUAGES_ALLOWED, LANGUAGE_LOCAL_STORAGE } from './conf';
 import resourcesContact from './contacts/contact-translations.json';
+import resourcesTeam from './teams/teams-translations.json';
 import resources from './translations.json';
 import { getLanguage } from './utils';
 
@@ -10,17 +11,19 @@ i18n
   .use(initReactI18next)
 
   .init({
-    ns: ['common', 'contact'],
+    ns: ['common', 'contact', 'team'],
     defaultNS: 'common',
 
     resources: {
       en: {
         common: resources.en.translation,
         contact: resourcesContact.en.translation,
+        team: resourcesTeam.en.translation,
       },
       fr: {
         common: resources.fr.translation,
         contact: resourcesContact.fr.translation,
+        team: resourcesTeam.fr.translation,
       },
     },
     lng: getLanguage(),

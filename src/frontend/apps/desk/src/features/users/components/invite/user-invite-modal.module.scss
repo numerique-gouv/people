@@ -1,0 +1,37 @@
+.inputContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.input {
+  color: var(--c--theme--colors--primary-500);
+}
+
+
+.headerTitle {
+  padding: var(--c--theme--spacings--s) var(--c--theme--spacings--s) var(--c--theme--spacings--st) var(--c--theme--spacings--s);
+  color: var(--c--theme--colors--greyscale-400)
+}
+
+.selectedItemsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+  gap: 8px;
+  background-color: white;
+
+  .userSelectedItem {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    background-color: var(--c--theme--colors--greyscale-050);
+
+    .deleteIcon {
+      cursor: pointer;
+      margin-left: 5px;
+      color: var(--c--theme--colors--greyscale-300);
+      font-size: 15px;
+    }
+  }
+}

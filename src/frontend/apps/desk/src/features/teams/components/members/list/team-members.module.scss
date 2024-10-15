@@ -1,0 +1,30 @@
+.teamMembersContainer {
+  table {
+    margin-top: -48px;
+  }
+
+  thead {
+    visibility: hidden;
+
+  }
+}
+
+.teamMembersListTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--c--theme--spacings--t);
+}
+
+.teamMembersListActions {
+  display: flex;
+  align-items: center;
+  gap: var(--c--theme--spacings--s);
+}
+
+.roleColumnContent {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
