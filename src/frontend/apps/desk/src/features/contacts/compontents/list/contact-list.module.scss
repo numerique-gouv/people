@@ -1,0 +1,74 @@
+.listContainer {
+  position: relative;
+  height: calc(100dvh - 60px - 139px);
+  padding-top: var(--c--theme--spacings--s) ;
+  scrollbar-width: thin;
+  overflow-y: auto;
+
+}
+
+
+
+.fixedElement {
+
+  position:fixed;
+  top:calc(60px + 139px);
+  bottom: 0;
+  margin-left: 275px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index:100;
+  width:max-content;
+
+}
+
+.test {
+  position: absolute;
+  top: 0;
+  background-color: #A0E659;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
+.letterShortcutsList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 98;
+  overflow-y: auto;
+  gap: 5px;
+}
+
+.letterShortcut {
+  user-select: none;
+  cursor: pointer;
+}
+
+.contactItem {
+  width: 100%;
+  cursor: pointer;
+  padding: 3px 12px 5px 24px;
+  &:hover, &.active {
+    background-color: var(--c--theme--colors--greyscale-050);
+  }
+
+
+}
+
+.contactListItemContainer {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+  gap: 10px;
+  color: var(--c--theme--colors--greyscale-1000);
+
+  &.active {
+    //color: var(--c--theme--colors--primary-500) !important;
+  }
+
+}

@@ -1,0 +1,38 @@
+{
+  "en": {
+    "translation": {
+      "contact.list.title": "My address book",
+      "contact.search.my_contact.title": "Address book",
+      "contact.search.other_contact.empty.label": "No contacts found",
+      "contact.search.other_contact.title": "Other contacts",
+      "contact.home.unselected.title": "No contacts selected",
+      "contact.home.unselected.subTitle": "Select a contact from your address book or search the database.",
+      "contact.search.add_new_contact": "Add new contact",
+      "form.contact.information.label": "Information",
+      "form.contact.phone.label": "Phone",
+      "form.contact.header.create.title": "New",
+      "form.contact.moreInfo.title": "Additional information",
+      "form.contact.contact.title": "Data from your address book",
+      "form.contact.publicData.title": "Données de l'annuaire",
+      "delete.contact.modal.title": "Voulez vous supprimer le contact : {{contact}}"
+    }
+  },
+  "fr": {
+    "translation": {
+      "contact.search.my_contact.title": "Carnet d'adresse",
+      "contact.search.other_contact.title": "Autres contacts",
+      "contact.search.other_contact.empty.label": "Aucun contact trouvé",
+      "contact.search.add_new_contact": "Créer un nouveau contact",
+      "contact.list.title": "Mon carnet d'adresse",
+      "contact.home.unselected.title": "Aucun contact sélectionné",
+      "contact.home.unselected.subTitle": "Sélectionnez un contact de votre carnet d’adresses ou recherchez dans la base de données.",
+      "form.contact.information.label": "Information",
+      "form.contact.phone.label": "Téléphone",
+      "form.contact.header.create.title": "Nouveau",
+      "form.contact.publicData.title": "Données de l'annuaire",
+      "form.contact.moreInfo.title": "Informations complémentaires",
+      "form.contact.contact.title": "Données de votre carnet d’adresses ",
+      "delete.contact.modal.title": "Voulez vous supprimer le contact : {{contact}}"
+    }
+  }
+}

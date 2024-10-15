@@ -2,13 +2,22 @@
   "de": { "translation": {} },
   "en": {
     "translation": {
+      "form.dirty.modal": "Are you sure you want to exit, your form has been modified",
       "{{count}} member_many": "{{count}} members",
       "{{count}} member_one": "{{count}} member",
-      "{{count}} member_other": "{{count}} members"
+      "{{count}} member_other": "{{count}} members",
+      "form.url.label": "URL",
+      "form.mail.label": "Email",
+      "form.address.label": "Address",
+      "form.notes.label": "Notes",
+      "form.update.mode.title": "Update",
+      "common.action.edit": "Edit",
+      "common.action.delete": "Delete"
     }
   },
   "fr": {
     "translation": {
+      "Remove contact": "Supprimer du carnet d'adresse",
       "0 group to display.": "0 groupe à afficher.",
       "Access icon": "Icône d'accès",
       "Accesses list card": "Carte de la liste des accès",
@@ -201,7 +210,22 @@
       "{{count}} member_many": "{{count}} membres",
       "{{count}} member_one": "{{count}} membre",
       "{{count}} member_other": "{{count}} membres",
-      "{{label}} button": "Bouton {{label}}"
+      "{{label}} button": "Bouton {{label}}",
+      "Contacts": "Contacts",
+      "Submit": "Envoyer",
+      "Update": "Modifier",
+      "Firstname": "Prénom",
+      "Lastname": "Nom",
+      "Informations": "Informations",
+      "Search": "Rechercher",
+      "form.url.label": "URL",
+      "form.mail.label": "Email",
+      "form.address.label": "Adresse",
+      "form.notes.label": "Notes",
+      "form.update.mode.title": "Édition",
+      "form.dirty.modal": "Êtes-vous sûr de vouloir quitter, votre formulaire a été modifié",
+      "common.action.edit": "Editer",
+      "common.action.delete": "Supprimer"
     }
   }
 }

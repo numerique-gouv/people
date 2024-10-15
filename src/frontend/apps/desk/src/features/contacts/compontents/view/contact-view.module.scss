@@ -1,0 +1,65 @@
+.contactHeader {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.informationText {
+  text-align: center;
+}
+
+.back {
+  margin: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+.moreActions {
+  margin: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.shortcutsList {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+
+}
+
+.shortcutContainer {
+  cursor: pointer;
+  margin: 0 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+.shortcutIconContainer {
+  width: 42px;
+  height: 42px;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--c--theme--colors--primary-500);
+}
+
+
+.informationContainer {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 2px solid var(--c--theme--colors--greyscale-100);
+  background-color:  var(--c--theme--colors--greyscale-050);
+  padding: var(--c--theme--spacings--s);
+}
