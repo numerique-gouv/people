@@ -2,6 +2,11 @@ import { useAuthStore } from '@/core/auth';
 
 import { baseApiUrl } from './conf';
 
+interface CheckStatusOptions {
+  fallbackValue: unknown;
+  ignoredErrorStatus: number[];
+}
+
 /**
  * Retrieves the CSRF token from the document's cookies.
  *
@@ -41,3 +46,37 @@ export const fetchAPI = async (
 
   return response;
 };
+
+export async function checkStatus<T>(
+  response: Response,
+  options: CheckStatusOptions = { fallbackValue: null, ignoredErrorStatus: [] },
+): Promise<T> {
+  if (response.ok) {
+    if (response.headers.get('Content-Type') === 'application/json') {
+      return response.json() as Promise<T>;
+    }
+    if (response.headers.get('Content-Type') === 'application/pdf') {
+      return response.blob() as Promise<T>;
+    }
+    return response.text() as Promise<T>;
+  }
+
+  if (options.ignoredErrorStatus.includes(response.status)) {
+    return Promise.resolve(options.fallbackValue) as Promise<T>;
+  }
+
+  const data: T = (await response.json()) as T;
+
+  throw new HttpError(response.status, response.statusText, data);
+}
+
+export class HttpError extends Error {
+  code: number;
+  data: unknown;
+
+  constructor(status: number, statusText: string, data: unknown) {
+    super(statusText);
+    this.code = status;
+    this.data = data;
+  }
+}
