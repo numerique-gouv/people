@@ -49,7 +49,7 @@ export const Panel = () => {
             ? t(`Close the mail domains panel`)
             : t(`Open the mail domains panel`)
         }
-        $color={colorsTokens()['primary-600']}
+        $color={colorsTokens()['primary-500']}
         $css={`
           position: absolute;
           right: -1.2rem;

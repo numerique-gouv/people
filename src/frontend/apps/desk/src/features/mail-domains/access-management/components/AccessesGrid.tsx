@@ -105,11 +105,11 @@ export const AccessesGrid = ({
   }, [data?.count, pageSize, setPagesCount]);
 
   return (
-    <Card
-      $padding={{ bottom: 'small' }}
-      $margin={{ all: 'big', top: 'none' }}
-      $overflow="auto"
-      $css={`
+    <Box $padding={{ horizontal: 'big' }}>
+      <Card
+        size="full"
+        $overflow="auto"
+        $css={`
           & .c__pagination__goto {
             display: none;
           }
@@ -122,56 +122,57 @@ export const AccessesGrid = ({
             text-align: right;
           }
       `}
-      aria-label={t('Accesses list card')}
-    >
-      {error && <TextErrors causes={error.cause} />}
+        aria-label={t('Accesses list card')}
+      >
+        {error && <TextErrors causes={error.cause} />}
 
-      <DataGrid
-        columns={[
-          {
-            id: 'icon-user',
-            renderCell() {
-              return (
-                <Box $direction="row" $align="center">
-                  <IconUser
-                    aria-label={t('Access icon')}
-                    width={20}
-                    height={20}
-                    color={colorsTokens()['primary-600']}
-                  />
-                </Box>
-              );
+        <DataGrid
+          columns={[
+            {
+              id: 'icon-user',
+              renderCell() {
+                return (
+                  <Box $direction="row" $align="center">
+                    <IconUser
+                      aria-label={t('Access icon')}
+                      width={20}
+                      height={20}
+                      color={colorsTokens()['primary-500']}
+                    />
+                  </Box>
+                );
+              },
             },
-          },
-          {
-            headerName: t('Names'),
-            field: 'user.name',
-          },
-          {
-            field: 'user.email',
-            headerName: t('Emails'),
-          },
-          {
-            field: 'localizedRole',
-            headerName: t('Roles'),
-          },
-          {
-            id: 'column-actions',
-            renderCell: ({ row }) => (
-              <AccessAction
-                mailDomain={mailDomain}
-                access={row}
-                currentRole={currentRole}
-              />
-            ),
-          },
-        ]}
-        rows={accesses}
-        isLoading={isLoading}
-        pagination={pagination}
-        onSortModelChange={setSortModel}
-        sortModel={sortModel}
-      />
-    </Card>
+            {
+              headerName: t('Names'),
+              field: 'user.name',
+            },
+            {
+              field: 'user.email',
+              headerName: t('Emails'),
+            },
+            {
+              field: 'localizedRole',
+              headerName: t('Roles'),
+            },
+            {
+              id: 'column-actions',
+              renderCell: ({ row }) => (
+                <AccessAction
+                  mailDomain={mailDomain}
+                  access={row}
+                  currentRole={currentRole}
+                />
+              ),
+            },
+          ]}
+          rows={accesses}
+          isLoading={isLoading}
+          pagination={pagination}
+          onSortModelChange={setSortModel}
+          sortModel={sortModel}
+        />
+      </Card>
+    </Box>
   );
 };

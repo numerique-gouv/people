@@ -40,7 +40,7 @@ export const PanelActions = () => {
         onClick={changeOrdering}
         $radius="100%"
         $background={isSortAsc ? colorsTokens()['primary-200'] : 'transparent'}
-        $color={colorsTokens()['primary-600']}
+        $color={colorsTokens()['primary-500']}
       >
         <IconSort width={30} height={30} aria-hidden="true" />
       </BoxButton>

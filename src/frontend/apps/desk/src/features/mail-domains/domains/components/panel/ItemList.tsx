@@ -44,7 +44,6 @@ export const ItemList = () => {
           void fetchNextPage();
         }}
         scrollContainer={containerRef.current}
-        as="ul"
         $margin={{ top: 'none' }}
         $padding="none"
         role="listbox"

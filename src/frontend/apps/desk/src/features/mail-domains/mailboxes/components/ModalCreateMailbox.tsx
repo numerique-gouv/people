@@ -262,7 +262,6 @@ const Form = ({
           </Box>
 
           <Text
-            $theme="primary"
             $size="1rem"
             $display="inline-block"
             $css={`
@@ -309,6 +308,7 @@ const FieldMailBox = ({ name, label, methods, text }: FieldMailBoxProps) => {
           state={fieldState.error ? 'error' : 'default'}
           text={fieldState?.error?.message ? fieldState.error.message : text}
           {...methods.register(name)}
+          fullWidth
         />
       )}
     />

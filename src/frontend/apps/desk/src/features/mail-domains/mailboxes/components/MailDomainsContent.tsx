@@ -99,49 +99,50 @@ export function MailDomainsContent({ mailDomain }: { mailDomain: MailDomain }) {
         showMailBoxCreationForm={setIsCreateMailboxFormVisible}
       />
 
-      <Card
-        $padding={{ bottom: 'small' }}
-        $margin={{ all: 'big', top: 'none' }}
-        $overflow="auto"
-        aria-label={t('Mailboxes list card')}
-      >
-        {error && <TextErrors causes={error.cause} />}
+      <Box $padding="small">
+        <Card
+          size="full"
+          $overflow="auto"
+          aria-label={t('Mailboxes list card')}
+        >
+          {error && <TextErrors causes={error.cause} />}
 
-        <DataGrid
-          columns={[
-            {
-              field: 'name',
-              headerName: t('Names'),
-              renderCell: ({ row }) => (
-                <Text
-                  $weight="bold"
-                  $theme="primary"
-                  $css="text-transform: capitalize;"
-                >
-                  {row.name}
-                </Text>
-              ),
-            },
-            {
-              field: 'email',
-              headerName: t('Emails'),
-            },
-          ]}
-          rows={viewMailboxes}
-          isLoading={isLoading}
-          onSortModelChange={setSortModel}
-          sortModel={sortModel}
-          pagination={{
-            ...pagination,
-            displayGoto: false,
-          }}
-          aria-label={t('Mailboxes list')}
-          hideEmptyPlaceholderImage={true}
-          emptyPlaceholderLabel={t(
-            'No mail box was created with this mail domain.',
-          )}
-        />
-      </Card>
+          <DataGrid
+            columns={[
+              {
+                field: 'name',
+                headerName: t('Names'),
+                renderCell: ({ row }) => (
+                  <Text
+                    $weight="bold"
+                    $theme="primary"
+                    $css="text-transform: capitalize;"
+                  >
+                    {row.name}
+                  </Text>
+                ),
+              },
+              {
+                field: 'email',
+                headerName: t('Emails'),
+              },
+            ]}
+            rows={viewMailboxes}
+            isLoading={isLoading}
+            onSortModelChange={setSortModel}
+            sortModel={sortModel}
+            pagination={{
+              ...pagination,
+              displayGoto: false,
+            }}
+            aria-label={t('Mailboxes list')}
+            hideEmptyPlaceholderImage={true}
+            emptyPlaceholderLabel={t(
+              'No mail box was created with this mail domain.',
+            )}
+          />
+        </Card>
+      </Box>
     </>
   );
 }

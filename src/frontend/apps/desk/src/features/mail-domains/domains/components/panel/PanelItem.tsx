@@ -35,7 +35,7 @@ export const PanelMailDomains = ({ mailDomain }: MailDomainProps) => {
   };
 
   const activeStyle = `
-    border-right: 4px solid ${colorsTokens()['primary-600']};
+    border-right: 4px solid ${colorsTokens()['primary-500']};
     background: ${colorsTokens()['primary-400']};
      span {
       color: ${colorsTokens()['primary-text']};
@@ -92,7 +92,7 @@ export const PanelMailDomains = ({ mailDomain }: MailDomainProps) => {
             />
             <Text
               $weight="bold"
-              $color={colorsTokens()['greyscale-600']}
+              $color={colorsTokens()['greyscale-500']}
               $css={`
               display: inline-block;
               width: 10rem;

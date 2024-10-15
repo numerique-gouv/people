@@ -2,7 +2,7 @@ import { Button } from '@openfun/cunningham-react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, DropButton, IconOptions, Text } from '@/components';
+import { Box, DropButton, IconOptions } from '@/components';
 
 import { MailDomain, Role } from '../../domains/types';
 import { Access } from '../types';
@@ -60,7 +60,7 @@ export const AccessAction = ({
                 </span>
               }
             >
-              <Text $theme="primary">{t('Update role')}</Text>
+              {t('Update role')}
             </Button>
           )}
           {mailDomain.abilities.delete && (
@@ -77,7 +77,7 @@ export const AccessAction = ({
                 </span>
               }
             >
-              <Text $theme="primary">{t('Remove from domain')}</Text>
+              {t('Remove from domain')}
             </Button>
           )}
         </Box>
