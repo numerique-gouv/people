@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  align-items: center;
+  background-color: var(--c--theme--colors--greyscale-100);
+  border-radius: 4px;
+  color: var(--c--theme--colors--greyscale-500);
+  padding: 7px 10px;
+  gap: var(--c--theme--spacings--t);
+  height: 32px;
+
+}
+
+.icon {
+  color: var(--c--theme--colors--greyscale-500);
+  font-size: 24px;
+}
+
+.input {
+  border: none;
+  color: var(--c--theme--colors--greyscale-500);
+  background-color: var(--c--theme--colors--greyscale-100);
+}

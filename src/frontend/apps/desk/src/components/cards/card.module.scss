@@ -1,0 +1,25 @@
+.card {
+  width: 100%;
+}
+
+.medium {
+  max-width: 600px;
+
+}
+
+@media screen and (max-width: 992px) {
+  .medium {
+    max-width: 100vw;
+  }
+}
+
+.cardSectionHeader {
+  &.sticky {
+    position: sticky;
+    background-color: white;
+    top: -30px;
+    z-index: 9;
+
+  }
+}
+

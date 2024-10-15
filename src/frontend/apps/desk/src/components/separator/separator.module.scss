@@ -1,0 +1,14 @@
+.horizontal {
+  width: 100%;
+  height: 1px;
+
+
+  &.light {
+    background-color: var(--c--theme--colors--greyscale-100);
+  }
+
+  &.dark {
+    background-color: #E5E5E533
+  }
+
+}

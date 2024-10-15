@@ -1,6 +1,6 @@
 export * from './Box';
 export * from './BoxButton';
-export * from './Card';
+export * from './cards/Card';
 export * from './DropButton';
 export * from './IconOptions';
 export * from './Link';

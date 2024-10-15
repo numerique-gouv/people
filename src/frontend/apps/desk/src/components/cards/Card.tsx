@@ -2,17 +2,25 @@ import { PropsWithChildren } from 'react';
 
 import { useCunninghamTheme } from '@/cunningham';
 
-import { Box, BoxType } from '.';
+import { Box, BoxType } from '../index';
+
+import style from './card.module.scss';
+
+export type CardProps = BoxType & {
+  size?: 'small' | 'medium' | 'large' | 'full';
+};
 
 export const Card = ({
   children,
   $css,
+  size = 'medium',
   ...props
-}: PropsWithChildren<BoxType>) => {
+}: PropsWithChildren<CardProps>) => {
   const { colorsTokens } = useCunninghamTheme();
 
   return (
     <Box
+      className={`${style.card} ${style[size]}`}
       $background="white"
       $radius="4px"
       $css={`

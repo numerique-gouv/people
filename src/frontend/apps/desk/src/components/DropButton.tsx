@@ -36,7 +36,7 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-interface DropButtonProps {
+export interface DropButtonProps {
   button: ReactNode;
   isOpen?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
@@ -77,7 +77,7 @@ export const DropButton = ({
       <DialogTrigger onOpenChange={onOpenChangeHandler} isOpen={isLocalOpen}>
         <StyledButton>{button}</StyledButton>
         <StyledPopover
-          style={{ opacity: opacity ? 1 : 0 }}
+          style={{ padding: 0, opacity: opacity ? 1 : 0 }}
           isOpen={isLocalOpen}
           onOpenChange={onOpenChangeHandler}
         >
