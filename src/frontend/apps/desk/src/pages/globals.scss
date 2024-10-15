@@ -1,5 +1,9 @@
 @import url('../cunningham/cunningham-style.css');
 
+:root {
+  --header-height: 60px
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -26,4 +30,107 @@ main ::-webkit-scrollbar-thumb {
 
 main ::-webkit-scrollbar-thumb:hover {
   background-color: #a8bbbf;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-h-center {
+  display: flex;
+  justify-content: center;
+
+}
+.flex-v-center {
+  display: flex;
+  align-items: center;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.align-items {
+  align-items: center;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.gap-xl {
+  > *:not(:first-child) {
+    margin: var(--c--theme--spacings--xl) 0;
+  }
+}
+.gap-l {
+  > *:not(:first-child) {
+    margin: var(--c--theme--spacings--l) 0;
+  }
+}
+
+.gap-b {
+  > *:not(:first-child) {
+    margin: var(--c--theme--spacings--b) 0;
+  }
+
+}
+
+.gap-s {
+  > *:not(:first-child) {
+    margin: var(--c--theme--spacings--s) 0;
+  }
+}
+
+.gap-t {
+  > *:not(:first-child) {
+    margin: var(--c--theme--spacings--t) 0;
+  }
+}
+
+
+.gap-st {
+  > *:not(:first-child) {
+    margin: var(--c--theme--spacings--st) 0;
+  }
+}
+
+
+.text-center {
+  text-align: center;
+}
+
+
+@media (min-width: 993px) {
+  .hideForMobile {
+    display: flex;
+  }
+
+  .showForMobile {
+    display: none;
+  }
+}
+
+@media (max-width: 992px) {
+  .hideForMobile {
+    display: none;
+  }
+
+  .showForMobile {
+    display: flex;
+  }
 }
