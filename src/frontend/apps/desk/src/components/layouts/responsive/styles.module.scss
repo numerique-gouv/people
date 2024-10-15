@@ -1,0 +1,85 @@
+.focusButton {
+  width: 100%;
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+
+@media screen and (max-width: 992px) {
+  .focusOnLeft {
+    display: flex !important;
+  }
+}
+
+.focusOnLeft {
+  display: none;
+}
+
+
+
+
+@media screen and (max-width: 992px) {
+  .leftRightContent {
+
+    .left, .right {
+      position: fixed;
+      height: calc(100dvh - var(--header-height));
+      width: 100vw;
+      transition: 0.1s;
+    }
+
+    .right {
+      right: -100vw;
+      overflow-y: auto !important;
+
+      &.active {
+        right: 0;
+      }
+    }
+
+    .left {
+      left: -100vw;
+      &.active {
+        left: 0;
+      }
+    }
+
+  }
+}
+
+@media screen and (min-width: 993px) {
+  .leftRightContent {
+    display: flex;
+    height: inherit;
+    flex:1;
+
+    .right {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      overflow-y: auto;
+      background-color: var(--c--theme--colors--primary-bg);
+      padding: var(--c--theme--spacings--b);
+    }
+
+    .left {
+      width: 100%;
+      height: inherit;
+      max-width: 300px;
+      min-width: 300px;
+      border-right: 1px solid var(--c--theme--colors--greyscale-200);
+      position: relative;
+    }
+
+  }
+}
+
+
+
+
+
+

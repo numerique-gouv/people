@@ -1,41 +1,29 @@
-import { Button } from '@openfun/cunningham-react';
+import classNames from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, DropButton, Text } from '@/components';
+import { DropdownMenu } from '@/components/dropdown-menu/DropdownMenu';
 import { useAuthStore } from '@/core/auth';
+import { Breakpoints, useBreakpoint } from '@/hooks/useBreakpoints';
 
 export const AccountDropdown = () => {
+  const isMobile = useBreakpoint(Breakpoints.LG, false);
   const { t } = useTranslation();
   const { userData, logout } = useAuthStore();
 
   const userName = userData?.name || t('No Username');
+  const classNamesColors = classNames('', {
+    ['clr-primary-500']: !isMobile,
+    ['clr-greyscale-000']: isMobile,
+  });
+
   return (
-    <DropButton
-      button={
-        <Box $flex $direction="row" $align="center">
-          <Text $theme="primary">{userName}</Text>
-          <Text className="material-icons" $theme="primary" aria-hidden="true">
-            arrow_drop_down
-          </Text>
-        </Box>
-      }
+    <DropdownMenu
+      showArrow
+      arrowClassname={classNamesColors}
+      options={[{ icon: 'logout', label: t('Logout'), callback: logout }]}
     >
-      <Box $css="display: flex; direction: column; gap: 0.5rem">
-        <Button
-          onClick={logout}
-          key="logout"
-          color="primary-text"
-          icon={
-            <span className="material-icons" aria-hidden="true">
-              logout
-            </span>
-          }
-          aria-label={t('Logout')}
-        >
-          <Text $weight="normal">{t('Logout')}</Text>
-        </Button>
-      </Box>
-    </DropButton>
+      <span className={classNamesColors}>{userName}</span>
+    </DropdownMenu>
   );
 };

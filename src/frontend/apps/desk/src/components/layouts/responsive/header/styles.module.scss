@@ -1,0 +1,25 @@
+.responsiveLayoutContainer {
+  height: 100dvh;
+}
+
+.responsiveLayoutHeader {
+  height: var(--header-height);
+  width: 100%;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.125rem;
+  border-bottom: 1px solid var(--c--theme--colors--greyscale-300);
+}
+
+
+@media screen and (max-width: 992px) {
+  .responsiveLayoutHeader {
+    padding: 0 0.5rem;
+  }
+}
+
+
+
+
