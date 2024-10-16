@@ -1,4 +1,5 @@
 @import url('../cunningham/cunningham-style.css');
+@import url('../styles/tabs.css');
 
 body {
   margin: 0;
