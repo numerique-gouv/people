@@ -71,6 +71,44 @@ class DimailAPIClient:
 
         return self.pass_dimail_unexpected_response(response)
 
+    def post_domain_creation_request(self, domain_name, request_user):
+        """Send a domain creation request to dimail API."""
+
+        payload = {"domain": domain_name, "context": "null", "features": ["webmail"]}
+        try:
+            response = session.post(
+                f"{self.API_URL}/domains/",
+                json=payload,
+                headers={"Authorization": f"Basic {self.API_CREDENTIALS}"},
+                verify=True,
+                timeout=10,
+            )
+        except requests.exceptions.ConnectionError as error:
+            logger.error(
+                "Connection error while trying to reach %s.",
+                self.API_URL,
+                exc_info=error,
+            )
+            raise error
+
+        if response.status_code == status.HTTP_201_CREATED:
+            logger.info(
+                "Domain %s successfully created on dimail by user %s",
+                domain_name,
+                request_user,
+            )
+            return response
+
+        if response.status_code == status.HTTP_409_CONFLICT:
+            logger.info(
+                "User %s tried to create domain %s already existing.",
+                request_user,
+                domain_name,
+            )
+            return response
+
+        return self.pass_dimail_unexpected_response(response)
+
     def send_mailbox_request(self, mailbox, user_sub=None):
         """Send a CREATE mailbox request to mail provisioning API."""
 
