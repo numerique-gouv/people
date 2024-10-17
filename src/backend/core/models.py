@@ -12,8 +12,10 @@ from logging import getLogger
 from django.conf import settings
 from django.contrib.auth import models as auth_models
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.sites.models import Site
 from django.core import exceptions, mail, validators
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -42,6 +44,17 @@ class RoleChoices(models.TextChoices):
     MEMBER = "member", _("Member")
     ADMIN = "administrator", _("Administrator")
     OWNER = "owner", _("Owner")
+
+
+class OrganizationRoleChoices(models.TextChoices):
+    """
+    Defines the possible roles a user can have in an organization.
+    For now, we only have one role, but we might add more in the future.
+
+    administrator: The user can manage the organization: change name, add/remove users.
+    """
+
+    ADMIN = "administrator", _("Administrator")
 
 
 class BaseModel(models.Model):
@@ -158,6 +171,116 @@ class Contact(BaseModel):
             raise exceptions.ValidationError({"data": [error_message]}) from e
 
 
+class OrganizationManager(models.Manager):
+    """
+    Custom manager for the Organization model, to manage complexity/automation.
+    """
+
+    def get_or_create(self, siret: str = None, domain: str = None, **kwargs):
+        """
+        Get or create an organization.
+
+        We expect to have only one organization per SIRET, but the SIRET might not be provided.
+        When the SIRET is not provided, we use the domain to identify the organization.
+        If both are provided, we use the SIRET first.
+        """
+        if not any([siret, domain]):
+            raise ValueError("You must provide either a siret or a domain.")
+
+        filters = models.Q()
+        if siret:
+            filters |= models.Q(sirets__icontains=siret)
+        if domain:
+            filters |= models.Q(domains__icontains=domain)
+
+        try:
+            organization = self.get(filters, **kwargs)
+            # If there are several organizations, we must raise an error and fix the data
+        except self.model.DoesNotExist:
+            organization = None
+
+        if organization:
+            return organization, False
+
+        # Manage the case where the organization does not exist
+        if siret:
+            return self.create(name=siret, sirets=[siret], **kwargs), True
+
+        if domain:
+            return self.create(name=domain, domains=[domain], **kwargs), True
+
+        raise ValueError("Should never reach this point.")
+
+
+def validate_unique_siret(value):
+    """
+    Validate that the SIRET values in an array field are unique across all instances.
+    """
+    if Organization.objects.filter(sirets__overlap=value).exists():
+        raise ValidationError("sirets value must be unique across all instances.")
+
+
+def validate_unique_domain(value):
+    """
+    Validate that the domain values in an array field are unique across all instances.
+    """
+    if Organization.objects.filter(domains__overlap=value).exists():
+        raise ValidationError("domains value must be unique across all instances.")
+
+
+class Organization(BaseModel):
+    """
+    Organization model used to regroup Teams.
+
+    Each User have an Organization, which corresponds actually to a default organization
+    because a user can belong to a Team from another organization.
+    Each Team have an Organization, which is the Organization from the User who created
+    the Team.
+
+    Organization is managed automatically, the User should never choose their Organization.
+    When creating a User, you must use the `get_or_create` method from the
+    OrganizationManager to find the proper Organization.
+    """
+
+    name = models.CharField(_("name"), max_length=100)
+    sirets = ArrayField(
+        models.CharField(max_length=14),
+        verbose_name=_("SIRET list"),
+        default=list,
+        blank=True,
+        validators=[validate_unique_siret],
+    )
+    domains = ArrayField(
+        models.CharField(max_length=256),
+        verbose_name=_("domains"),
+        default=list,
+        blank=True,
+        validators=[validate_unique_domain],
+    )
+
+    objects = OrganizationManager()
+
+    class Meta:
+        db_table = "people_organization"
+        verbose_name = _("organization")
+        verbose_name_plural = _("organizations")
+        constraints = [
+            models.CheckConstraint(
+                name="siret_or_domain",
+                condition=models.Q(sirets__len__gt=0) | models.Q(domains__len__gt=0),
+                violation_error_message=_(
+                    "An organization must have a SIRET or a domain."
+                ),
+            ),
+            # Check a SIRET str can only be present in one organization SIRET list
+            # Check a domain str can only be present in one organization domain list
+            # Those checks cannot be done with Django constraints
+        ]
+
+    def __str__(self):
+        return f"{self.name} (# {self.pk})"
+
+
 class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
     """User model to work with OIDC only authentication."""
 
@@ -217,6 +340,13 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
             "Whether this user should be treated as active. "
             "Unselect this instead of deleting accounts."
         ),
+    )
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.PROTECT,
+        related_name="users",
+        null=True,  # Need to be set to False when everything is migrated
+        blank=True,  # Need to be set to False when everything is migrated
     )
 
     objects = auth_models.UserManager()
@@ -285,6 +415,44 @@ class User(AbstractBaseUser, BaseModel, auth_models.PermissionsMixin):
         mail.send_mail(subject, message, from_email, [self.email], **kwargs)
 
 
+class OrganizationAccess(BaseModel):
+    """
+    Link table between organization and users,
+    only for user with specific rights on Organization.
+    """
+
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name="organization_accesses",
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="organization_accesses",
+    )
+    role = models.CharField(
+        max_length=20,
+        choices=OrganizationRoleChoices.choices,
+        default=OrganizationRoleChoices.ADMIN,
+    )
+
+    class Meta:
+        db_table = "people_organization_access"
+        verbose_name = _("Organization/user relation")
+        verbose_name_plural = _("Organization/user relations")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "organization"],
+                name="unique_organization_user",
+                violation_error_message=_("This user is already in this organization."),
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.user!s} is {self.role:s} in organization {self.organization!s}"
+
+
 class Team(BaseModel):
     """
     Represents the link between teams and users, specifying the role a user has in a team.
@@ -298,6 +466,13 @@ class Team(BaseModel):
         through="TeamAccess",
         through_fields=("team", "user"),
         related_name="teams",
+    )
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.PROTECT,
+        related_name="teams",
+        null=True,  # Need to be set to False when everything is migrated
+        blank=True,  # Need to be set to False when everything is migrated
     )
 
     class Meta:
