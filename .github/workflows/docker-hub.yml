@@ -8,14 +8,17 @@ on:
     tags:
       - 'v*'
   pull_request:
+    types:
+      - closed
     branches:
-      - 'main'
+      - 'release/'
 
 env:
   DOCKER_USER: 1001:127
 
 jobs:
   build-and-push-backend:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       -
@@ -60,6 +63,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   build-and-push-frontend:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       -
@@ -104,11 +108,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   notify-argocd:
+    if: github.event.pull_request.merged == true
     needs:
       - build-and-push-frontend
       - build-and-push-backend
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     steps:
       -
         uses: actions/create-github-app-token@v1
