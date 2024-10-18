@@ -15,6 +15,7 @@ As dimail's primary goal is to act as an interface between People and OX, its ar
 
 Upon creating a domain on People, the same domain is created on dimail and will undergo a series of checks. When all checks have passed, the domain is considered valid and mailboxes can be created on it. 
 
+The "context" of the domain is a shared space between domains, allowing users to discover not only other users on their domain but on their entire context. 
 ### Users
 
 The ones issuing requests. Dimail users will reflect domains owners and administrators on People, for logging purposes and to allow direct use of dimail, if desired. User reconciliation is made on user uuid provided by ProConnect.
