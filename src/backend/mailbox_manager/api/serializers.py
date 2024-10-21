@@ -2,7 +2,7 @@
 
 import json
 
-from rest_framework import exceptions, serializers
+from rest_framework import exceptions, serializers, status
 
 from core.api.serializers import UserSerializer
 from core.models import User
@@ -76,6 +76,22 @@ class MailDomainSerializer(serializers.ModelSerializer):
         if request:
             return domain.get_abilities(request.user)
         return {}
+
+    def create(self, validated_data):
+        """
+        Override create function to fire a request to dimail upon domain creation.
+        """
+        # send new domain request to dimail
+        client = DimailAPIClient()
+        response = client.post_domain_creation_request(
+            validated_data["name"], self.context["request"].user.sub
+        )
+
+        if response.status_code == status.HTTP_201_CREATED:
+            # actually save mailbox on our database
+            return models.MailDomain.objects.create(**validated_data)
+
+        return response
 
 
 class MailDomainAccessSerializer(serializers.ModelSerializer):
