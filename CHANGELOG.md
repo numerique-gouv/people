@@ -40,6 +40,7 @@ and this project adheres to
 
 ### Added
 
+- ✨(ci) add security scan #429
 - ✨(ci) add helmfile linter and fix argocd sync #424 
 - ✨(domains) add endpoint to list and retrieve domain accesses #404
 - 🍱(dev) embark dimail-api as container #366
