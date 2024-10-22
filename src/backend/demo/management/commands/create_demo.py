@@ -128,6 +128,21 @@ def create_demo(stdout):
                     language=random.choice(settings.LANGUAGES)[0],
                 )
             )
+        # this is a quick fix to fix e2e tests
+        # tests needs some no random data
+        queue.push(
+            models.User(
+                sub=uuid4(),
+                email="monique.test@example.com",
+                name="Monique Test",
+                password="!",
+                is_superuser=False,
+                is_active=True,
+                is_staff=False,
+                language=random.choice(settings.LANGUAGES)[0],
+            )
+        )
+
         queue.flush()
 
     with Timeit(stdout, "Creating teams"):
