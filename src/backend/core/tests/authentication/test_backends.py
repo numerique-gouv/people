@@ -286,6 +286,72 @@ def test_authentication_getter_existing_disabled_user_via_email(
     assert models.User.objects.count() == 1
 
 
+def test_authentication_getter_new_user_with_email_new_organization(monkeypatch):
+    """
+    If no user matches the user's info sub, a user should be created.
+    If the corresponding organization doesn't exist, it should be created.
+    """
+    klass = OIDCAuthenticationBackend()
+    email = "people@example.com"
+
+    def get_userinfo_mocked(*args):
+        return {"sub": "123", "email": email, "first_name": "John", "last_name": "Doe"}
+
+    monkeypatch.setattr(OIDCAuthenticationBackend, "get_userinfo", get_userinfo_mocked)
+
+    user = klass.get_or_create_user(
+        access_token="test-token", id_token=None, payload=None
+    )
+
+    assert user.organization is not None
+    assert user.organization.domain_list == ["example.com"]
+    assert user.organization.registration_id_list == []
+
+
+@pytest.mark.parametrize(
+    "registration_id_setting,expected_registration_id_list,expected_domain_list",
+    [
+        (None, [], ["example.com"]),
+        ("missing-claim", [], ["example.com"]),
+        ("registration_number", ["12345678901234"], []),
+    ],
+)
+def test_authentication_getter_new_user_with_registration_id_new_organization(
+    monkeypatch,
+    settings,
+    registration_id_setting,
+    expected_registration_id_list,
+    expected_domain_list,
+):
+    """
+    If no user matches the user's info sub, a user should be created.
+    If the corresponding organization doesn't exist, it should be created.
+    """
+    settings.OIDC_ORGANIZATION_REGISTRATION_ID_FIELD = registration_id_setting
+
+    klass = OIDCAuthenticationBackend()
+    email = "people@example.com"
+
+    def get_userinfo_mocked(*args):
+        return {
+            "sub": "123",
+            "email": email,
+            "first_name": "John",
+            "last_name": "Doe",
+            "registration_number": "12345678901234",
+        }
+
+    monkeypatch.setattr(OIDCAuthenticationBackend, "get_userinfo", get_userinfo_mocked)
+
+    user = klass.get_or_create_user(
+        access_token="test-token", id_token=None, payload=None
+    )
+
+    assert user.organization is not None
+    assert user.organization.domain_list == expected_domain_list
+    assert user.organization.registration_id_list == expected_registration_id_list
+
+
 def test_authentication_getter_existing_user_via_email_update_organization(
     django_assert_num_queries, monkeypatch
 ):
@@ -313,4 +379,4 @@ def test_authentication_getter_existing_user_via_email_update_organization(
 
     assert user == db_user
     assert user.organization is not None
-    assert user.organization.domains == ["my-domain.com"]
+    assert user.organization.domain_list == ["my-domain.com"]

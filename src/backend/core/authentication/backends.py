@@ -98,6 +98,10 @@ class OIDCAuthenticationBackend(MozillaOIDCAuthenticationBackend):
             "email": email,
             "name": full_name,
         }
+        if settings.OIDC_ORGANIZATION_REGISTRATION_ID_FIELD:
+            claims[settings.OIDC_ORGANIZATION_REGISTRATION_ID_FIELD] = user_info.get(
+                settings.OIDC_ORGANIZATION_REGISTRATION_ID_FIELD
+            )
 
         # if sub is absent, try matching on email
         user = self.get_existing_user(sub, email)
@@ -112,17 +116,26 @@ class OIDCAuthenticationBackend(MozillaOIDCAuthenticationBackend):
         # Data cleaning, to be removed when user organization is null=False
         # or all users have an organization.
         if not user.organization_id:
+            organization_registration_id = claims.get(
+                settings.OIDC_ORGANIZATION_REGISTRATION_ID_FIELD
+            )
             domain = get_domain_from_email(email)
             try:
                 organization, organization_created = Organization.objects.get_or_create(
-                    siret=claims.get("siret"),
+                    registration_id=organization_registration_id,
                     domain=domain,
                 )
                 if organization_created:
                     logger.info("Organization %s created", organization)
                     # For this case, we don't create an OrganizationAccess we will
-                    # manage this later.
+                    # manage this manually later, because we don't want the first
+                    # user who log in after the release to be the admin of their
+                    # organization. We will keep organization without admin, and
+                    # we will have to manually clean things up (while there is
+                    # not that much organization in the database).
             except ValueError as exc:
+                # Raised when there is no recognizable organization
+                # identifier (domain or registration_id)
                 logger.warning("Unable to update user organization: %s", exc)
             else:
                 user.organization = organization
@@ -144,10 +157,13 @@ class OIDCAuthenticationBackend(MozillaOIDCAuthenticationBackend):
         name = claims.get("name")
 
         # Extract or create the organization from the data
+        organization_registration_id = claims.get(
+            settings.OIDC_ORGANIZATION_REGISTRATION_ID_FIELD
+        )
         domain = get_domain_from_email(email)
         try:
             organization, organization_created = Organization.objects.get_or_create(
-                siret=claims.get("siret"),
+                registration_id=organization_registration_id,
                 domain=domain,
             )
         except ValueError as exc:
@@ -168,6 +184,8 @@ class OIDCAuthenticationBackend(MozillaOIDCAuthenticationBackend):
             name=name,
         )
         if organization_created:
+            # Warning: we may remove this behavior in the near future when we
+            # add a feature to claim the organization ownership.
             OrganizationAccess.objects.create(
                 organization=organization,
                 user=user,

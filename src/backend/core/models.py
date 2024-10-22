@@ -6,8 +6,10 @@ import json
 import os
 import smtplib
 import uuid
+from contextlib import suppress
 from datetime import timedelta
 from logging import getLogger
+from typing import Tuple
 
 from django.conf import settings
 from django.contrib.auth import models as auth_models
@@ -29,6 +31,7 @@ from timezone_field import TimeZoneField
 
 from core.enums import WebhookStatusChoices
 from core.utils.webhooks import scim_synchronizer
+from core.validators import get_field_validators_from_setting
 
 logger = getLogger(__name__)
 
@@ -176,56 +179,60 @@ class OrganizationManager(models.Manager):
     Custom manager for the Organization model, to manage complexity/automation.
     """
 
-    def get_or_create(self, siret: str = None, domain: str = None, **kwargs):
+    def get_or_create(
+        self, registration_id: str = None, domain: str = None, **kwargs
+    ) -> Tuple["Organization", bool]:
         """
         Get or create an organization.
 
-        We expect to have only one organization per SIRET, but the SIRET might not be provided.
-        When the SIRET is not provided, we use the domain to identify the organization.
-        If both are provided, we use the SIRET first.
+        We expect to have only one organization per registration_id, but
+        the registration_id might not be provided.
+        When the registration_id is not provided, we use the domain to identify the organization.
+
+        If both are provided, we use the registration_id first to create missing organization.
         """
-        if not any([siret, domain]):
-            raise ValueError("You must provide either a siret or a domain.")
+        if not any([registration_id, domain]):
+            raise ValueError("You must provide either a registration_id or a domain.")
 
         filters = models.Q()
-        if siret:
-            filters |= models.Q(sirets__icontains=siret)
+        if registration_id:
+            filters |= models.Q(registration_id_list__icontains=registration_id)
         if domain:
-            filters |= models.Q(domains__icontains=domain)
+            filters |= models.Q(domain_list__icontains=domain)
 
-        try:
-            organization = self.get(filters, **kwargs)
+        with suppress(self.model.DoesNotExist):
             # If there are several organizations, we must raise an error and fix the data
-        except self.model.DoesNotExist:
-            organization = None
+            # If there is an organization, we return it
+            return self.get(filters, **kwargs), False
 
-        if organization:
-            return organization, False
-
-        # Manage the case where the organization does not exist
-        if siret:
-            return self.create(name=siret, sirets=[siret], **kwargs), True
+        # Manage the case where the organization does not exist: we create one
+        if registration_id:
+            return self.create(
+                name=registration_id, registration_id_list=[registration_id], **kwargs
+            ), True
 
         if domain:
-            return self.create(name=domain, domains=[domain], **kwargs), True
+            return self.create(name=domain, domain_list=[domain], **kwargs), True
 
         raise ValueError("Should never reach this point.")
 
 
-def validate_unique_siret(value):
+def validate_unique_registration_id(value):
     """
-    Validate that the SIRET values in an array field are unique across all instances.
+    Validate that the registration ID values in an array field are unique across all instances.
     """
-    if Organization.objects.filter(sirets__overlap=value).exists():
-        raise ValidationError("sirets value must be unique across all instances.")
+    if Organization.objects.filter(registration_id_list__overlap=value).exists():
+        raise ValidationError(
+            "registration_id_list value must be unique across all instances."
+        )
 
 
 def validate_unique_domain(value):
     """
     Validate that the domain values in an array field are unique across all instances.
     """
-    if Organization.objects.filter(domains__overlap=value).exists():
-        raise ValidationError("domains value must be unique across all instances.")
+    if Organization.objects.filter(domain_list__overlap=value).exists():
+        raise ValidationError("domain_list value must be unique across all instances.")
 
 
 class Organization(BaseModel):
@@ -240,19 +247,30 @@ class Organization(BaseModel):
     Organization is managed automatically, the User should never choose their Organization.
     When creating a User, you must use the `get_or_create` method from the
     OrganizationManager to find the proper Organization.
+
+    An Organization can have several registration IDs and domains but during automatic
+    creation process, only one will be used. We may want to allow (manual) organization merge
+    later, to regroup several registration IDs or domain in the same Organization.
     """
 
     name = models.CharField(_("name"), max_length=100)
-    sirets = ArrayField(
-        models.CharField(max_length=14),
-        verbose_name=_("SIRET list"),
+    registration_id_list = ArrayField(
+        models.CharField(
+            max_length=128,
+            validators=get_field_validators_from_setting(
+                "ORGANIZATION_REGISTRATION_ID_VALIDATORS"
+            ),
+        ),
+        verbose_name=_("registration ID list"),
         default=list,
         blank=True,
-        validators=[validate_unique_siret],
+        validators=[
+            validate_unique_registration_id,
+        ],
     )
-    domains = ArrayField(
+    domain_list = ArrayField(
         models.CharField(max_length=256),
-        verbose_name=_("domains"),
+        verbose_name=_("domain list"),
         default=list,
         blank=True,
         validators=[validate_unique_domain],
@@ -266,13 +284,15 @@ class Organization(BaseModel):
         verbose_name_plural = _("organizations")
         constraints = [
             models.CheckConstraint(
-                name="siret_or_domain",
-                condition=models.Q(sirets__len__gt=0) | models.Q(domains__len__gt=0),
+                name="registration_id_or_domain",
+                condition=models.Q(registration_id_list__len__gt=0)
+                | models.Q(domain_list__len__gt=0),
                 violation_error_message=_(
-                    "An organization must have a SIRET or a domain."
+                    "An organization must have at least a registration ID or a domain."
                 ),
             ),
-            # Check a SIRET str can only be present in one organization SIRET list
+            # Check a registration ID str can only be present in one
+            # organization registration ID list
             # Check a domain str can only be present in one organization domain list
             # Those checks cannot be done with Django constraints
         ]

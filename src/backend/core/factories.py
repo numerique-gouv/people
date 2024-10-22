@@ -129,10 +129,12 @@ class OrganizationFactory(factory.django.DjangoModelFactory):
 
     class Params:  # pylint: disable=missing-class-docstring
         with_siret = factory.Trait(
-            sirets=factory.List([factory.Sequence(lambda n: f"{n:014d}")]),
+            registration_id_list=factory.List(
+                [factory.Sequence(lambda n: f"{n:014d}")]
+            ),
         )
         with_domain = factory.Trait(
-            domains=factory.List([factory.Faker("domain_name")]),
+            domain_list=factory.List([factory.Faker("domain_name")]),
         )
 
 
