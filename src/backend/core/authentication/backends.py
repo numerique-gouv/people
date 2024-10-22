@@ -1,6 +1,7 @@
 """Authentication Backends for the People core app."""
 
 import logging
+from email.headerregistry import Address
 from typing import Optional
 
 from django.conf import settings
@@ -23,8 +24,8 @@ User = get_user_model()
 def get_domain_from_email(email: Optional[str]) -> Optional[str]:
     """Extract domain from email."""
     try:
-        return email.split("@")[1].lower()
-    except (IndexError, AttributeError):
+        return Address(addr_spec=email).domain
+    except (ValueError, AttributeError):
         return None
 
 
