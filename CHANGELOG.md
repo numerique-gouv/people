@@ -13,6 +13,10 @@ and this project adheres to
 - 🐛(sentry) fix duplicated sentry errors #479
 - 🐛(script) improve and fix release script
 
+### Changed
+
+- 🗃️(teams) remove `slug` field
+
 ## [1.3.1] - 2024-10-18
 
 ## [1.3.0] - 2024-10-18
