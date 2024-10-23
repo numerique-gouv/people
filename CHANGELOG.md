@@ -8,7 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
-- 👷(ci) add sharding e2e tests  #467
+### Added
+
+- ✨(dimail) send domain creation requests to dimail #454
+- 👷(ci) add sharding e2e tests #467
 
 ## [1.4.1] - 2024-10-23
 
