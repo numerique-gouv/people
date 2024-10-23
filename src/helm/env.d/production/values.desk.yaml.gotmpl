@@ -54,7 +54,7 @@ backend:
     OIDC_RP_SCOPES: "openid email siret"
     OIDC_REDIRECT_ALLOWED_HOSTS: https://regie.numerique.gouv.fr
     OIDC_AUTH_REQUEST_EXTRA_PARAMS: "{'acr_values': 'eidas1'}"
-    ORGANIZATION_REGISTRATION_ID_VALIDATORS: "[{'NAME': 'django.core.validators.RegexValidator', 'OPTIONS': {'regex': '[a-z][0-9]{14}'}}]"
+    ORGANIZATION_REGISTRATION_ID_VALIDATORS: '[{"NAME": "django.core.validators.RegexValidator", "OPTIONS": {"regex": "[a-z][0-9]{14}"}}]'
     LOGIN_REDIRECT_URL: https://regie.numerique.gouv.fr
     LOGIN_REDIRECT_URL_FAILURE: https://regie.numerique.gouv.fr
     LOGOUT_REDIRECT_URL: https://regie.numerique.gouv.fr
