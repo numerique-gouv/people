@@ -1,5 +1,6 @@
 """A minimalist client to synchronize with mailbox provisioning API."""
 
+import json
 import smtplib
 from logging import getLogger
 
@@ -10,6 +11,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
 import requests
+from requests.exceptions import HTTPError
 from rest_framework import status
 from urllib3.util import Retry
 
@@ -152,14 +154,15 @@ class DimailAPIClient:
 
     def pass_dimail_unexpected_response(self, response):
         """Raise error when encountering an unexpected error in dimail."""
-        error_content = response.content.decode("utf-8")
+        error_content = json.loads(response.content.decode("utf-8").replace("'", '"'))
 
-        logger.error(
-            "[DIMAIL] unexpected error : %s %s", response.status_code, error_content
-        )
-        raise SystemError(
-            f"Unexpected response from dimail: {response.status_code} {error_content}"
-        )
+        # catch error just to add failing interop name
+        try:
+            response.raise_for_status()
+        except HTTPError as error:
+            raise HTTPError(
+                f"[DIMAIL] {response.status_code}: {error_content['detail']}"
+            ) from error
 
     def send_new_mailbox_notification(self, recipient, mailbox_data):
         """

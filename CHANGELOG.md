@@ -13,6 +13,10 @@ and this project adheres to
 - ✨(dimail) send domain creation requests to dimail #454
 - 👷(ci) add sharding e2e tests #467
 
+### Fixed
+
+- 🐛(dimail) fix unexpected status_code for proper debug #454
+
 ## [1.4.1] - 2024-10-23
 
 ### Fixed
