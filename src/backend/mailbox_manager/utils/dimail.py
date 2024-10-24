@@ -1,5 +1,6 @@
 """A minimalist client to synchronize with mailbox provisioning API."""
 
+import json
 import smtplib
 from logging import getLogger
 
@@ -10,6 +11,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
 import requests
+from requests.exceptions import HTTPError
 from rest_framework import status
 from urllib3.util import Retry
 
@@ -71,6 +73,40 @@ class DimailAPIClient:
 
         return self.pass_dimail_unexpected_response(response)
 
+    def send_domain_creation_request(self, domain_name, request_user):
+        """Send a domain creation request to dimail API."""
+
+        payload = {
+            "domain": domain_name,
+            "context": domain_name,  # for now, we put each domain on its own context
+            "features": ["webmail", "mailboxes"],
+        }
+        try:
+            response = session.post(
+                f"{self.API_URL}/domains/",
+                json=payload,
+                headers={"Authorization": f"Basic {self.API_CREDENTIALS}"},
+                verify=True,
+                timeout=10,
+            )
+        except requests.exceptions.ConnectionError as error:
+            logger.error(
+                "Connection error while trying to reach %s.",
+                self.API_URL,
+                exc_info=error,
+            )
+            raise error
+
+        if response.status_code == status.HTTP_201_CREATED:
+            logger.info(
+                "Domain %s successfully created on dimail by user %s",
+                domain_name,
+                request_user,
+            )
+            return response
+
+        return self.pass_dimail_unexpected_response(response)
+
     def send_mailbox_request(self, mailbox, user_sub=None):
         """Send a CREATE mailbox request to mail provisioning API."""
 
@@ -118,14 +154,15 @@ class DimailAPIClient:
 
     def pass_dimail_unexpected_response(self, response):
         """Raise error when encountering an unexpected error in dimail."""
-        error_content = response.content.decode("utf-8")
+        error_content = json.loads(response.content.decode("utf-8").replace("'", '"'))
 
-        logger.error(
-            "[DIMAIL] unexpected error : %s %s", response.status_code, error_content
-        )
-        raise SystemError(
-            f"Unexpected response from dimail: {response.status_code} {error_content}"
-        )
+        # catch error just to add failing interop name
+        try:
+            response.raise_for_status()
+        except HTTPError as error:
+            raise HTTPError(
+                f"[DIMAIL] {response.status_code}: {error_content['detail']}"
+            ) from error
 
     def send_new_mailbox_notification(self, recipient, mailbox_data):
         """
