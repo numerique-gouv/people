@@ -67,24 +67,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-
-      - name: Restore the frontend cache
-        uses: actions/cache@v4
-        id: front-node_modules
-        with:
-          path: 'src/frontend/**/node_modules'
-          key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
-
-      - name: Install dependencies
-        if: steps.front-node_modules.outputs.cache-hit != 'true'
-        run: cd src/frontend/ && yarn install --frozen-lockfile
-
-      - name: Cache install frontend
-        if: steps.front-node_modules.outputs.cache-hit != 'true'
-        uses: actions/cache@v4
-        with:
-          path: 'src/frontend/**/node_modules'
-          key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
+          cache: 'yarn'
+          cache-dependency-path: '**/package.json'
 
   build-front:
     runs-on: ubuntu-latest
@@ -93,21 +77,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Restore the frontend cache
-        uses: actions/cache@v4
-        id: front-node_modules
-        with:
-          path: 'src/frontend/**/node_modules'
-          key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
-
       - name: Build CI App
         run: cd src/frontend/ && yarn ci:build
-
-      - name: Cache build frontend
-        uses: actions/cache@v4
-        with:
-          path: src/frontend/apps/desk/out/
-          key: build-front-${{ github.run_id }}
 
   test-front:
     runs-on: ubuntu-latest
@@ -115,13 +86,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Restore the frontend cache
-        uses: actions/cache@v4
-        id: front-node_modules
-        with:
-          path: 'src/frontend/**/node_modules'
-          key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
 
       - name: Test App
         run: cd src/frontend/ && yarn app:test
@@ -132,13 +96,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Restore the frontend cache
-        uses: actions/cache@v4
-        id: front-node_modules
-        with:
-          path: 'src/frontend/**/node_modules'
-          key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
 
       - name: Check linting
         run: cd src/frontend/ && yarn lint
@@ -166,13 +123,6 @@ jobs:
         with:
           name: mails-templates
           path: src/backend/core/templates/mail
-
-      - name: Restore the frontend cache
-        uses: actions/cache@v4
-        id: front-node_modules
-        with:
-          path: 'src/frontend/**/node_modules'
-          key: front-node_modules-${{ hashFiles('src/frontend/**/yarn.lock') }}
 
       - name: Restore the build cache
         uses: actions/cache@v4
