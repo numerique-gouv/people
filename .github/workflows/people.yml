@@ -63,12 +63,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js and cache
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
+          # Per the documentation, this "caches global cache on the machine instead of node_modules"
+          # This means that a 'yarn install' is still required before using cache in subsequent jobs
           cache: 'yarn'
           cache-dependency-path: '**/package.json'
+
+      - name: Checkout repository
+        run: cd src/frontend/ && yarn install
+
 
   build-front:
     runs-on: ubuntu-latest
@@ -77,8 +83,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Retrieve cache
+        uses: actions/setup-node@v4
+        with:
+          cache: 'yarn'
+          cache-dependency-path: '**/package.json'
+
       - name: Build CI App
-        run: cd src/frontend/ && yarn ci:build
+        run: cd src/frontend/ && yarn install && yarn ci:build
 
   test-front:
     runs-on: ubuntu-latest
@@ -87,8 +99,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Retrieve cache
+        uses: actions/setup-node@v4
+        with:
+          cache: 'yarn'
+          cache-dependency-path: '**/package.json'
+
       - name: Test App
-        run: cd src/frontend/ && yarn app:test
+        run: cd src/frontend/ && yarn install && yarn app:test
 
   lint-front:
     runs-on: ubuntu-latest
@@ -97,8 +115,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Retrieve cache
+        uses: actions/setup-node@v4
+        with:
+          cache: 'yarn'
+          cache-dependency-path: '**/package.json'
+
       - name: Check linting
-        run: cd src/frontend/ && yarn lint
+        run: cd src/frontend/ && yarn install && yarn lint
 
   test-e2e:
     runs-on: ubuntu-latest
@@ -112,6 +136,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Retrieve cache
+        uses: actions/setup-node@v4
+        with:
+          cache: 'yarn'
+          cache-dependency-path: '**/package.json'
 
       - name: Set services env variables
         run: |
