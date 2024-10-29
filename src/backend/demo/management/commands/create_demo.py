@@ -134,7 +134,7 @@ def create_demo(stdout):
             models.User(
                 sub=uuid4(),
                 email="monique.test@example.com",
-                name="Monique Test",
+                name="Monique test",
                 password="!",
                 is_superuser=False,
                 is_active=True,
