@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- 🐛(mail) fix display button on outlook
+
 ## [1.4.1] - 2024-10-23
 
 ### Fixed
