@@ -22,6 +22,7 @@ and this project adheres to
 
 ### Fixed
 
+- 🐛(debug) fix version data generation and display
 - 🐛(mail) fix display button on outlook
 - 💚(ci) improve E2E tests #492
 - 🔧(sentry) restore default integrations

@@ -39,7 +39,10 @@ def get_release():
     # CI during the Docker image build
     try:
         with open(os.path.join(BASE_DIR, "version.json"), encoding="utf8") as version:
-            return json.load(version)["version"]
+            verdict = json.load(version)
+            v = verdict["version"]
+            h = verdict["commit"]
+            return f"{v} - {h}"
     except FileNotFoundError:
         return "NA"  # Default: not available
 

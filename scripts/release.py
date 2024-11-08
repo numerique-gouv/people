@@ -5,7 +5,9 @@ import os
 import re
 import sys
 
-from utils import run_command
+import json
+
+from utils import run_command, capture_shell
 
 
 RELEASE_KINDS = {'p': 'patch', 'm': 'minor', 'mj': 'major'}
@@ -52,6 +54,18 @@ def update_files(version):
                     lines[index] = re.sub(r'"version": \"(.*?)\"', f'"version": "{version}"', line)
         with open(path, 'w+') as file:
             file.writelines(lines)
+
+    # Footer - hardcode version directly in the component - this serves as a sanity check
+    # (e.g. against a failure to build the frontend image… scar of past trauma)
+    path = "src/frontend/apps/desk/src/features/footer/Footer.tsx"
+    with open(path, 'r') as file:
+        lines = file.readlines()
+        for index, line in enumerate(lines):
+            if "<<" in line:
+                lines[index] = re.sub(r'<<(.*?)>>', f"<<{hash}>>", line)
+    with open(path, 'w+') as file:
+        file.writelines(lines)
+
     return
 
 
@@ -82,6 +96,11 @@ def prepare_release(version, kind):
     branch_to_release = f"release/{version}"
     run_command(f"git checkout -b {branch_to_release}", shell=True)
     run_command("git pull --rebase origin main", shell=True)
+
+    hash = capture_shell("git rev-parse HEAD | cut -c 1-6").decode().strip()
+    verdict = {'source':'https://github.com/numerique-gouv/people/', 'version':version, 'commit':hash, 'build': 'NA'}
+    with open('src/backend/version.json', 'w') as fp:
+        json.dump(verdict, fp)
 
     update_changelog("CHANGELOG.md", version)
     update_files(version)

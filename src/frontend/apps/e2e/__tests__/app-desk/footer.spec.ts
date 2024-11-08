@@ -90,10 +90,6 @@ test.describe('Footer', () => {
 
   test('check if the app version is visible', async ({ page }) => {
     const footer = page.locator('footer').first();
-    await expect(
-      footer.getByText(
-        'Version: NA • Unless otherwise stated, all content on this site is under',
-      ),
-    ).toBeVisible();
+    await expect(footer.getByText('Version:')).toBeVisible();
   });
 });

@@ -150,7 +150,8 @@ export const Footer = () => {
         >
           {config?.RELEASE && (
             <>
-              {t(`Version: {{release}}`, { release: config?.RELEASE })} •&nbsp;
+              {t(`Version: {{release}}`, { release: config?.RELEASE })}
+              {'<<>>'} •&nbsp;
             </>
           )}
 
