@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [1.4.3] - 2024-11-12
+
 ### Added
 
 - ✨(dimail) synchronize mailboxes from dimail to our db #453
@@ -134,7 +136,8 @@ and this project adheres to
 - ✨(domains) create and manage domains on admin + API
 - ✨(domains) mailbox creation + link to email provisioning API
 
-[unreleased]: https://github.com/numerique-gouv/people/compare/v1.4.2...main
+[unreleased]: https://github.com/numerique-gouv/people/compare/v1.4.3...main
+[1.4.3]: https://github.com/numerique-gouv/people/releases/v1.4.3
 [1.4.2]: https://github.com/numerique-gouv/people/releases/v1.4.2
 [1.4.1]: https://github.com/numerique-gouv/people/releases/v1.4.1
 [1.4.0]: https://github.com/numerique-gouv/people/releases/v1.4.0
