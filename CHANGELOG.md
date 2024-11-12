@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [1.4.2] - 2024-11-12
+
 ### Fixed
 
 - 🐛(mail) fix display button on outlook
@@ -128,7 +130,8 @@ and this project adheres to
 - ✨(domains) create and manage domains on admin + API
 - ✨(domains) mailbox creation + link to email provisioning API
 
-[unreleased]: https://github.com/numerique-gouv/people/compare/v1.4.1...main
+[unreleased]: https://github.com/numerique-gouv/people/compare/v1.4.2...main
+[1.4.2]: https://github.com/numerique-gouv/people/releases/v1.4.2
 [1.4.1]: https://github.com/numerique-gouv/people/releases/v1.4.1
 [1.4.0]: https://github.com/numerique-gouv/people/releases/v1.4.0
 [1.3.1]: https://github.com/numerique-gouv/people/releases/v1.3.1
