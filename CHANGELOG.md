@@ -22,7 +22,6 @@ and this project adheres to
 
 ### Fixed
 
-- 🐛(mail) fix display button on outlook
 - 💚(ci) improve E2E tests #492
 - 🔧(sentry) restore default integrations
 - 🔇(backend) remove Sentry duplicated warning/errors
@@ -31,6 +30,10 @@ and this project adheres to
 ### Removed
 
 - 🗃️(teams) remove `slug` field
+
+## [1.4.2] - 2024-11-12
+
+- 🐛(mail) fix display button on outlook
 
 ## [1.4.1] - 2024-10-23
 
@@ -149,7 +152,8 @@ and this project adheres to
 - ✨(domains) create and manage domains on admin + API
 - ✨(domains) mailbox creation + link to email provisioning API
 
-[unreleased]: https://github.com/numerique-gouv/people/compare/v1.4.1...main
+[unreleased]: https://github.com/numerique-gouv/people/compare/v1.4.2...main
+[1.4.2]: https://github.com/numerique-gouv/people/releases/v1.4.2
 [1.4.1]: https://github.com/numerique-gouv/people/releases/v1.4.1
 [1.4.0]: https://github.com/numerique-gouv/people/releases/v1.4.0
 [1.3.1]: https://github.com/numerique-gouv/people/releases/v1.3.1
