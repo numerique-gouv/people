@@ -236,6 +236,43 @@ def test_api_mailboxes__create_administrator_missing_fields():
     assert response.json() == {"secondary_email": ["This field is required."]}
 
 
+@pytest.mark.parametrize(
+    "domain_status",
+    [
+        enums.MailDomainStatusChoices.PENDING,
+        enums.MailDomainStatusChoices.FAILED,
+        enums.MailDomainStatusChoices.DISABLED,
+    ],
+)
+def test_api_mailboxes__create_on_inactive_domain(domain_status):
+    """
+    Admin and owner users should be able to create mailboxes, including on pending domains
+    Mailboxes created on inactive domains should have the "pending" status
+    """
+    mail_domain = factories.MailDomainFactory(status=domain_status)
+    access = factories.MailDomainAccessFactory(
+        role=enums.MailDomainRoleChoices.ADMIN, domain=mail_domain
+    )
+
+    client = APIClient()
+    client.force_login(access.user)
+
+    mailbox_values = serializers.MailboxSerializer(
+        factories.MailboxFactory.build()
+    ).data
+    with responses.RequestsMock():
+        # We add no response in RequestsMock
+        # because we expect no outside calls to be made
+        response = client.post(
+            f"/api/v1.0/mail-domains/{mail_domain.slug}/mailboxes/",
+            mailbox_values,
+            format="json",
+        )
+    assert response.status_code == status.HTTP_201_CREATED
+    mailbox = models.Mailbox.objects.get()
+    assert mailbox.status == "pending"
+
+
 ### REACTING TO DIMAIL-API
 ### We mock dimail's responses to avoid testing dimail's container too
 
