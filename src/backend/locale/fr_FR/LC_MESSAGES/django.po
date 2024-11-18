@@ -19,27 +19,27 @@ msgstr ""
 
 #: core/admin.py:55
 msgid "Personal info"
-msgstr ""
+msgstr "Informations personnelles"
 
 #: core/admin.py:57
 msgid "Permissions"
-msgstr ""
+msgstr "Permissions"
 
 #: core/admin.py:69
 msgid "Important dates"
-msgstr ""
+msgstr "Dates importantes"
 
 #: core/admin.py:108
 msgid "User"
-msgstr ""
+msgstr "Utilisateur"
 
 #: core/authentication/backends.py:89
 msgid "User info contained no recognizable user identification"
-msgstr ""
+msgstr "Les informations sur l'utilisateur ne contenaient aucun identifiant d'utilisateur reconnaissable"
 
 #: core/authentication/backends.py:111
 msgid "User account is disabled"
-msgstr ""
+msgstr "Le compte utilisateur est désactivé"
 
 #: core/authentication/backends.py:157
 msgid "Claims contained no recognizable user identification"
@@ -51,7 +51,7 @@ msgstr ""
 
 #: core/enums.py:23
 msgid "Failure"
-msgstr ""
+msgstr "Échec"
 
 #: core/enums.py:24 mailbox_manager/enums.py:21 mailbox_manager/enums.py:30
 msgid "Pending"
@@ -59,23 +59,23 @@ msgstr "En attente"
 
 #: core/enums.py:25
 msgid "Success"
-msgstr ""
+msgstr "Succès"
 
 #: core/models.py:46
 msgid "Member"
-msgstr ""
+msgstr "Membre"
 
 #: core/models.py:47 core/models.py:59 mailbox_manager/enums.py:14
 msgid "Administrator"
-msgstr ""
+msgstr "Administrateur"
 
 #: core/models.py:48 mailbox_manager/enums.py:15
 msgid "Owner"
-msgstr ""
+msgstr "Propriétaire"
 
 #: core/models.py:71
 msgid "id"
-msgstr ""
+msgstr "identifiant"
 
 #: core/models.py:72
 msgid "primary key for the record as UUID"
@@ -83,7 +83,7 @@ msgstr ""
 
 #: core/models.py:78
 msgid "created at"
-msgstr ""
+msgstr "créé le"
 
 #: core/models.py:79
 msgid "date and time at which a record was created"
@@ -91,7 +91,7 @@ msgstr ""
 
 #: core/models.py:84
 msgid "updated at"
-msgstr ""
+msgstr "mis à jour le"
 
 #: core/models.py:85
 msgid "date and time at which a record was last updated"
@@ -99,7 +99,7 @@ msgstr ""
 
 #: core/models.py:116
 msgid "full name"
-msgstr ""
+msgstr "nom complet"
 
 #: core/models.py:117
 msgid "short name"
@@ -107,23 +107,23 @@ msgstr ""
 
 #: core/models.py:122
 msgid "contact information"
-msgstr ""
+msgstr "information de contact"
 
 #: core/models.py:123
 msgid "A JSON object containing the contact information"
-msgstr ""
+msgstr "Un objet JSON contenant les informations de contact"
 
 #: core/models.py:137
 msgid "contact"
-msgstr ""
+msgstr "contact"
 
 #: core/models.py:138
 msgid "contacts"
-msgstr ""
+msgstr "contacts"
 
 #: core/models.py:262 core/models.py:331 mailbox_manager/models.py:24
 msgid "name"
-msgstr ""
+msgstr "nom"
 
 #: core/models.py:270
 msgid "registration ID list"
@@ -163,19 +163,19 @@ msgstr ""
 
 #: core/models.py:330 core/models.py:737
 msgid "email address"
-msgstr ""
+msgstr "adresse email"
 
 #: core/models.py:343
 msgid "language"
-msgstr ""
+msgstr "langue"
 
 #: core/models.py:344
 msgid "The language in which the user wants to see the interface."
-msgstr ""
+msgstr "La langue dans laquelle l'utilisateur veut voir l'interface"
 
 #: core/models.py:350
 msgid "The timezone in which the user wants to see times."
-msgstr ""
+msgstr "La timezone dans laquelle l'utilisateur veut voir l'heure."
 
 #: core/models.py:353
 msgid "device"
@@ -205,11 +205,11 @@ msgstr ""
 
 #: core/models.py:385
 msgid "user"
-msgstr ""
+msgstr "utilisateur"
 
 #: core/models.py:386
 msgid "users"
-msgstr ""
+msgstr "utilisateurs"
 
 #: core/models.py:525
 msgid "Organization/user relation"
@@ -225,23 +225,23 @@ msgstr ""
 
 #: core/models.py:563
 msgid "Team"
-msgstr ""
+msgstr "Équipe"
 
 #: core/models.py:564
 msgid "Teams"
-msgstr ""
+msgstr "Équipes"
 
 #: core/models.py:615
 msgid "Team/user relation"
-msgstr ""
+msgstr "Relation équipe/utilisateur"
 
 #: core/models.py:616
 msgid "Team/user relations"
-msgstr ""
+msgstr "Relations équipe/utilisateur"
 
 #: core/models.py:621
 msgid "This user is already in this team."
-msgstr ""
+msgstr "L'utilisateur est déjà dans l'équipe"
 
 #: core/models.py:710
 msgid "url"
