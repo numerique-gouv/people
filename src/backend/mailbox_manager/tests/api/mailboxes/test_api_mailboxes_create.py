@@ -237,17 +237,47 @@ def test_api_mailboxes__create_administrator_missing_fields():
 
 
 @pytest.mark.parametrize(
+    "role",
+    [
+        enums.MailDomainRoleChoices.OWNER,
+        enums.MailDomainRoleChoices.ADMIN,
+    ],
+)
+def test_api_mailboxes__cannot_create_on_disabled_domain(role):
+    """Admin and owner users should not be able to create mailboxes for a disabled domain"""
+    mail_domain = factories.MailDomainFactory(
+        status=enums.MailDomainStatusChoices.DISABLED
+    )
+    access = factories.MailDomainAccessFactory(role=role, domain=mail_domain)
+
+    client = APIClient()
+    client.force_login(access.user)
+
+    mailbox_values = serializers.MailboxSerializer(
+        factories.MailboxFactory.build()
+    ).data
+    response = client.post(
+        f"/api/v1.0/mail-domains/{mail_domain.slug}/mailboxes/",
+        mailbox_values,
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert not models.Mailbox.objects.exists()
+    assert response.json() == ["You can't create a mailbox for a domain disabled."]
+
+
+@pytest.mark.parametrize(
     "domain_status",
     [
         enums.MailDomainStatusChoices.PENDING,
         enums.MailDomainStatusChoices.FAILED,
-        enums.MailDomainStatusChoices.DISABLED,
     ],
 )
-def test_api_mailboxes__create_on_inactive_domain(domain_status):
+def test_api_mailboxes__create_pending_mailboxes(domain_status):
     """
-    Admin and owner users should be able to create mailboxes, including on pending domains
-    Mailboxes created on inactive domains should have the "pending" status
+    Admin and owner users should be able to create mailboxes, including on pending and failed
+    domains.
+    Mailboxes created on pending and failed domains should have the "pending" status
     """
     mail_domain = factories.MailDomainFactory(status=domain_status)
     access = factories.MailDomainAccessFactory(

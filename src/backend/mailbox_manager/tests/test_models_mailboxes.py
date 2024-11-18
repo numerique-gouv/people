@@ -7,7 +7,7 @@ from django.test.utils import override_settings
 
 import pytest
 
-from mailbox_manager import enums, factories
+from mailbox_manager import enums, factories, models
 
 pytestmark = pytest.mark.django_db
 
@@ -98,18 +98,32 @@ def test_models_mailboxes__secondary_email_cannot_be_null():
     [
         enums.MailDomainStatusChoices.PENDING,
         enums.MailDomainStatusChoices.FAILED,
-        enums.MailDomainStatusChoices.DISABLED,
     ],
 )
 def test_models_mailboxes__can_create_pending_mailboxes_on_non_enabled_domain(
     domain_status,
 ):
-    """Mailbox creation is allowed only for a domain enabled.
-    A disabled status for the mail domain raises an error."""
+    """Mailbox creation is allowed for a domain pending and failed.
+    A pending mailbox is created."""
     mailbox = factories.MailboxFactory(
         domain=factories.MailDomainFactory(status=domain_status)
     )
     assert mailbox.status == enums.MailboxStatusChoices.PENDING
+
+
+def test_models_mailboxes__cannot_create_mailboxes_on_disabled_domain():
+    """Mailbox creation is not allowed for a domain disabled.
+    A disabled status for the mail domain raises an error."""
+    with pytest.raises(
+        exceptions.ValidationError,
+        match="You can't create a mailbox for a domain disabled.",
+    ):
+        mailbox = factories.MailboxFactory(
+            domain=factories.MailDomainFactory(
+                status=enums.MailDomainStatusChoices.DISABLED
+            )
+        )
+        assert not models.Mailbox.objects.exist()
 
 
 ### REACTING TO DIMAIL-API

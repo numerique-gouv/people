@@ -219,6 +219,11 @@ class Mailbox(BaseModel):
         """
         self.full_clean()
 
+        if self.domain.status == MailDomainStatusChoices.DISABLED:
+            raise exceptions.ValidationError(
+                _("You can't create a mailbox for a domain disabled.")
+            )
+
         if self._state.adding:
             return super().save(*args, **kwargs)
 
