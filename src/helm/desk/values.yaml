@@ -14,7 +14,7 @@
 image:
   repository: lasuite/people-backend
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "main"
 
 ## @param nameOverride Override the chart name
 ## @param fullnameOverride Override the full application name
