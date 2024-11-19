@@ -230,6 +230,12 @@ class MailBoxViewSet(
             )
         super().perform_create(serializer)
 
+    def get_serializer_context(self):
+        """Extra context provided to the serializer class."""
+        context = super().get_serializer_context()
+        context["domain_slug"] = self.kwargs["domain_slug"]
+        return context
+
     @action(detail=True, methods=["post"])
     def disable(self, request, domain_slug, pk=None):  # pylint: disable=unused-argument
         """Disable mailbox. Send a request to dimail and change status in our DB"""

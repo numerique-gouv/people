@@ -10,7 +10,8 @@ and this project adheres to
 
 ### Added
 
-- ✨(dimail) automate allows requests to dimail
+- 🐛(mailboxes) fix logic when attempting to duplicate mailboxes #534
+- ✨(dimail) automate allows requests to dimail #544
 -  ✨(contacts) add notes & force full_name #565
 
 ### Changed

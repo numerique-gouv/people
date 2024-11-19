@@ -306,10 +306,97 @@ def test_api_mailboxes__create_pending_mailboxes(domain_status):
     assert mailbox.status == "pending"
 
 
+def test_api_mailboxes__should_not_create_duplicate_mailbox():
+    """
+    Should return a clear error when attempting to create duplicate mailbox.
+    """
+    access = factories.MailDomainAccessFactory(
+        role=enums.MailDomainRoleChoices.ADMIN,
+        domain=factories.MailDomainEnabledFactory(),
+    )
+    existing_mailbox = factories.MailboxFactory(domain=access.domain)
+
+    client = APIClient()
+    client.force_login(access.user)
+
+    # create dict with exactly the same data as existing mailbox
+    mailbox_values = serializers.MailboxSerializer(existing_mailbox).data
+
+    with responses.RequestsMock():
+        # No call expected
+        response = client.post(
+            f"/api/v1.0/mail-domains/{access.domain.slug}/mailboxes/",
+            mailbox_values,
+            format="json",
+        )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "non_field_errors": ["Mailbox with this Local_part and Domain already exists."]
+    }
+    assert (
+        len(
+            models.Mailbox.objects.filter(
+                local_part=existing_mailbox.local_part, domain=access.domain
+            )
+        )
+        == 1
+    )
+
+
+def test_api_mailboxes__same_local_part_on_different_domains():
+    """A domain admin should be able to create a mailbox with the same local part
+    of another mailbox, on different domain."""
+    # a mailbox exists on another domain
+    existing_mailbox = factories.MailboxFactory()
+
+    access = factories.MailDomainAccessFactory(
+        role=enums.MailDomainRoleChoices.ADMIN,
+        domain=factories.MailDomainEnabledFactory(),
+    )
+    client = APIClient()
+    client.force_login(access.user)
+
+    # create a full dict with same local part as another existing mailbox
+    mailbox_values = serializers.MailboxSerializer(
+        factories.MailboxFactory.build(local_part=existing_mailbox.local_part)
+    ).data
+
+    with responses.RequestsMock() as rsps:
+        rsps.add(
+            rsps.GET,
+            re.compile(r".*/token/"),
+            body='{"access_token": "domain_owner_token"}',
+            status=status.HTTP_200_OK,
+            content_type="application/json",
+        )
+        rsps.add(
+            rsps.POST,
+            re.compile(rf".*/domains/{access.domain.name}/mailboxes/"),
+            body=str(
+                {
+                    "email": f"{mailbox_values['local_part']}@{access.domain.name}",
+                    "password": "newpass",
+                    "uuid": "uuid",
+                }
+            ),
+            status=status.HTTP_201_CREATED,
+            content_type="application/json",
+        )
+        response = client.post(
+            f"/api/v1.0/mail-domains/{access.domain.slug}/mailboxes/",
+            mailbox_values,
+            format="json",
+        )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert (
+        len(models.Mailbox.objects.filter(local_part=existing_mailbox.local_part)) == 2
+    )
+
+
 ### REACTING TO DIMAIL-API
 ### We mock dimail's responses to avoid testing dimail's container too
-
-
 def test_api_mailboxes__unrelated_user_provisioning_api_not_called():
     """
     Provisioning API should not be called if an user tries
@@ -490,7 +577,7 @@ def test_api_mailboxes__domain_owner_or_admin_successful_creation_and_provisioni
 
 
 @override_settings(MAIL_PROVISIONING_API_CREDENTIALS="wrongCredentials")
-def test_api_mailboxes__dimail_token_permission_denied():
+def test_api_mailboxes__dimail_token_permission_denied(caplog):
     """
     API should raise a clear "permission denied" error
     when receiving a permission denied from dimail upon requesting token.
@@ -519,19 +606,29 @@ def test_api_mailboxes__dimail_token_permission_denied():
             mailbox_data,
             format="json",
         )
-
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json() == {
             "detail": "Token denied. Please check your MAIL_PROVISIONING_API_CREDENTIALS."
         }
-        assert not models.Mailbox.objects.exists()
+
+        # Mailbox created locally, with 'pending' status
+        assert models.Mailbox.objects.exists()
+        assert models.Mailbox.objects.get().status == enums.MailboxStatusChoices.PENDING
+
+        # Check error logger was called
+        assert caplog.records[0].levelname == "ERROR"
+        assert (
+            caplog.records[0].message
+            == "[DIMAIL] 403 Forbidden: Could not retrieve a token,"
+            "please check 'MAIL_PROVISIONING_API_CREDENTIALS' setting."
+        )
 
 
 def test_api_mailboxes__user_unrelated_to_domain():
     """
     API should raise a clear "permission denied" when dimail returns a permission denied
     on mailbox creation. This means token was granted for this user
-    but user is not allowed to modify this domain (i.e. not owner)
+    but user is not allowed to modify this domain (i.e. does not have a allow)
     """
     # creating all needed objects
     access = factories.MailDomainAccessFactory(role=enums.MailDomainRoleChoices.OWNER)
@@ -569,7 +666,10 @@ def test_api_mailboxes__user_unrelated_to_domain():
         assert response.json() == {
             "detail": "Permission denied. Please check your MAIL_PROVISIONING_API_CREDENTIALS."
         }
-        assert not models.Mailbox.objects.exists()
+
+        # Mailbox created locally, with 'pending' status
+        assert models.Mailbox.objects.exists()
+        assert models.Mailbox.objects.get().status == enums.MailboxStatusChoices.PENDING
 
 
 def test_api_mailboxes__handling_dimail_unexpected_error(caplog):
@@ -612,7 +712,10 @@ def test_api_mailboxes__handling_dimail_unexpected_error(caplog):
             assert response.json() == {
                 "detail": "Unexpected response from dimail: {'details': 'Internal server error'}"
             }
-        assert not models.Mailbox.objects.exists()
+
+        # Mailbox created locally, with 'pending' status
+        assert models.Mailbox.objects.exists()
+        assert models.Mailbox.objects.get().status == enums.MailboxStatusChoices.PENDING
 
         # Check error logger was called
         assert caplog.records[0].levelname == "ERROR"

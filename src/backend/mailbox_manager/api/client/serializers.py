@@ -31,7 +31,7 @@ class MailboxSerializer(serializers.ModelSerializer):
         """
         Override create function to fire a request on mailbox creation.
         """
-        mailbox_status = enums.MailDomainStatusChoices.PENDING
+        instance = super().create(validated_data)
 
         if validated_data["domain"].status == enums.MailDomainStatusChoices.ENABLED:
             client = DimailAPIClient()
@@ -46,15 +46,25 @@ class MailboxSerializer(serializers.ModelSerializer):
             )
             del mailbox_data["uuid"]
 
-            mailbox_status = enums.MailDomainStatusChoices.ENABLED
+            instance.status = enums.MailDomainStatusChoices.ENABLED
+            instance.save()
 
             # send confirmation email
             client.notify_mailbox_creation(
                 recipient=validated_data["secondary_email"], mailbox_data=mailbox_data
             )
 
-        # actually save mailbox on our database
-        return models.Mailbox.objects.create(**validated_data, status=mailbox_status)
+        return instance
+
+    def validate(self, attrs):
+        """Validate unique together constraint between domain and local part."""
+        if models.Mailbox.objects.filter(
+            local_part=attrs["local_part"], domain__slug=self.context["domain_slug"]
+        ).exists():
+            raise exceptions.ValidationError(
+                "Mailbox with this Local_part and Domain already exists."
+            )
+        return super().validate(attrs)
 
 
 class MailDomainSerializer(serializers.ModelSerializer):
