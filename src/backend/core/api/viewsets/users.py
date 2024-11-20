@@ -489,3 +489,4 @@ class ConfigView(views.APIView):
             dict_settings[setting] = getattr(settings, setting)
 
         return response.Response(dict_settings)
+ 
