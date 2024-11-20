@@ -10,7 +10,8 @@ from rest_framework import (
 
 from core import models
 
-from .. import permissions, serializers
+from .. import permissions
+from ..serializers.contacts import ContactSerializer
 from .base import BurstRateThrottle, SustainedRateThrottle
 
 
@@ -26,7 +27,7 @@ class ContactViewSet(
 
     permission_classes = [permissions.IsOwnedOrPublic]
     queryset = models.Contact.objects.all()
-    serializer_class = serializers.ContactSerializer
+    serializer_class = ContactSerializer
     throttle_classes = [BurstRateThrottle, SustainedRateThrottle]
 
     def list(self, request, *args, **kwargs):

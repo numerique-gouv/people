@@ -12,7 +12,13 @@ from rest_framework import (
 
 from core import models
 
-from .. import permissions, serializers
+from .. import permissions
+from ..serializers.teams import (
+    InvitationSerializer,
+    TeamAccessReadOnlySerializer,
+    TeamAccessSerializer,
+    TeamSerializer,
+)
 from .base import Pagination
 
 
@@ -28,7 +34,7 @@ class TeamViewSet(
     """Team ViewSet"""
 
     permission_classes = [permissions.AccessPermission]
-    serializer_class = serializers.TeamSerializer
+    serializer_class = TeamSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["created_at"]
     ordering = ["-created_at"]
@@ -92,8 +98,8 @@ class TeamAccessViewSet(
     queryset = (
         models.TeamAccess.objects.all().select_related("user").order_by("-created_at")
     )
-    list_serializer_class = serializers.TeamAccessReadOnlySerializer
-    detail_serializer_class = serializers.TeamAccessSerializer
+    list_serializer_class = TeamAccessReadOnlySerializer
+    detail_serializer_class = TeamAccessSerializer
 
     filter_backends = [filters.OrderingFilter]
     ordering = ["role"]
@@ -220,7 +226,7 @@ class InvitationViewset(
     queryset = (
         models.Invitation.objects.all().select_related("team").order_by("-created_at")
     )
-    serializer_class = serializers.InvitationSerializer
+    serializer_class = InvitationSerializer
 
     def get_permissions(self):
         """User only needs to be authenticated to list invitations"""

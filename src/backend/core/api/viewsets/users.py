@@ -11,7 +11,8 @@ from rest_framework import (
 
 from core import models
 
-from .. import permissions, serializers
+from .. import permissions
+from ..serializers.users import UserMeSerializer, UserSerializer
 from .base import (
     BurstRateThrottle,
     Pagination,
@@ -36,8 +37,8 @@ class UserViewSet(
 
     permission_classes = [permissions.IsSelf]
     queryset = models.User.objects.all().order_by("-created_at")
-    serializer_class = serializers.UserSerializer
-    get_me_serializer_class = serializers.UserMeSerializer
+    serializer_class = UserSerializer
+    get_me_serializer_class = UserMeSerializer
     throttle_classes = [BurstRateThrottle, SustainedRateThrottle]
     pagination_class = Pagination
 

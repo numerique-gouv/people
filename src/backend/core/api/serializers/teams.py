@@ -1,9 +1,10 @@
 """Teams serializers for the People core app."""
 
 from rest_framework import exceptions, serializers
-from timezone_field.rest_framework import TimeZoneSerializerField
 
 from core import models
+
+from .users import UserSerializer
 
 
 class TeamAccessSerializer(serializers.ModelSerializer):
@@ -175,4 +176,3 @@ class InvitationSerializer(serializers.ModelSerializer):
         attrs["team_id"] = team_id
         attrs["issuer"] = user
         return attrs
- 
