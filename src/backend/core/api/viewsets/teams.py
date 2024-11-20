@@ -1,27 +1,22 @@
-"""API endpoints"""
+"""Teams API endpoints"""
 
-from django.conf import settings
 from django.db.models import OuterRef, Q, Subquery
 
 from rest_framework import (
-    decorators,
     exceptions,
     filters,
     mixins,
-    pagination,
     response,
-    throttling,
-    views,
     viewsets,
 )
-from rest_framework.permissions import AllowAny
 
 from core import models
-from .base import Pagination
 
 from .. import permissions, serializers
+from .base import Pagination
 
 
+# pylint: disable=too-many-ancestors
 class TeamViewSet(
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
@@ -264,22 +259,3 @@ class InvitationViewset(
                 .distinct()
             )
         return queryset
-
-
-class ConfigView(views.APIView):
-    """API ViewSet for sharing some public settings."""
-
-    permission_classes = [AllowAny]
-
-    def get(self, request):
-        """
-        GET /api/v1.0/config/
-            Return a dictionary of public settings.
-        """
-        array_settings = ["LANGUAGES", "FEATURES", "RELEASE", "COMMIT"]
-        dict_settings = {}
-        for setting in array_settings:
-            dict_settings[setting] = getattr(settings, setting)
-
-        return response.Response(dict_settings)
- 

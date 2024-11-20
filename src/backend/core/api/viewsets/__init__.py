@@ -1,0 +1,1 @@
+"""People core API endpoints"""
