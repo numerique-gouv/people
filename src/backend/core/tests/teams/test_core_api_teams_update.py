@@ -14,7 +14,7 @@ from rest_framework.status import (
 from rest_framework.test import APIClient
 
 from core import factories
-from core.api import serializers
+from core.api.serializers.teams import TeamSerializer
 
 pytestmark = pytest.mark.django_db
 
@@ -22,9 +22,9 @@ pytestmark = pytest.mark.django_db
 def test_api_teams_update_anonymous():
     """Anonymous users should not be allowed to update a team."""
     team = factories.TeamFactory()
-    old_team_values = serializers.TeamSerializer(instance=team).data
+    old_team_values = TeamSerializer(instance=team).data
 
-    new_team_values = serializers.TeamSerializer(instance=factories.TeamFactory()).data
+    new_team_values = TeamSerializer(instance=factories.TeamFactory()).data
     response = APIClient().put(
         f"/api/v1.0/teams/{team.id!s}/",
         new_team_values,
@@ -36,7 +36,7 @@ def test_api_teams_update_anonymous():
     }
 
     team.refresh_from_db()
-    team_values = serializers.TeamSerializer(instance=team).data
+    team_values = TeamSerializer(instance=team).data
     assert team_values == old_team_values
 
 
@@ -50,9 +50,9 @@ def test_api_teams_update_authenticated_unrelated():
     client.force_login(user)
 
     team = factories.TeamFactory()
-    old_team_values = serializers.TeamSerializer(instance=team).data
+    old_team_values = TeamSerializer(instance=team).data
 
-    new_team_values = serializers.TeamSerializer(instance=factories.TeamFactory()).data
+    new_team_values = TeamSerializer(instance=factories.TeamFactory()).data
     response = client.put(
         f"/api/v1.0/teams/{team.id!s}/",
         new_team_values,
@@ -63,7 +63,7 @@ def test_api_teams_update_authenticated_unrelated():
     assert response.json() == {"detail": "No Team matches the given query."}
 
     team.refresh_from_db()
-    team_values = serializers.TeamSerializer(instance=team).data
+    team_values = TeamSerializer(instance=team).data
     assert team_values == old_team_values
 
 
@@ -78,9 +78,9 @@ def test_api_teams_update_authenticated_members():
     client.force_login(user)
 
     team = factories.TeamFactory(users=[(user, "member")])
-    old_team_values = serializers.TeamSerializer(instance=team).data
+    old_team_values = TeamSerializer(instance=team).data
 
-    new_team_values = serializers.TeamSerializer(instance=factories.TeamFactory()).data
+    new_team_values = TeamSerializer(instance=factories.TeamFactory()).data
     response = client.put(
         f"/api/v1.0/teams/{team.id!s}/",
         new_team_values,
@@ -93,7 +93,7 @@ def test_api_teams_update_authenticated_members():
     }
 
     team.refresh_from_db()
-    team_values = serializers.TeamSerializer(instance=team).data
+    team_values = TeamSerializer(instance=team).data
     assert team_values == old_team_values
 
 
@@ -105,10 +105,10 @@ def test_api_teams_update_authenticated_administrators():
     client.force_login(user)
 
     team = factories.TeamFactory(users=[(user, "administrator")])
-    initial_values = serializers.TeamSerializer(instance=team).data
+    initial_values = TeamSerializer(instance=team).data
 
     # generate new random values
-    new_values = serializers.TeamSerializer(instance=factories.TeamFactory.build()).data
+    new_values = TeamSerializer(instance=factories.TeamFactory.build()).data
     response = client.put(
         f"/api/v1.0/teams/{team.id!s}/",
         new_values,
@@ -117,7 +117,7 @@ def test_api_teams_update_authenticated_administrators():
     assert response.status_code == HTTP_200_OK
 
     team.refresh_from_db()
-    final_values = serializers.TeamSerializer(instance=team).data
+    final_values = TeamSerializer(instance=team).data
     for key, value in final_values.items():
         if key in ["id", "accesses", "created_at"]:
             assert value == initial_values[key]
@@ -137,11 +137,9 @@ def test_api_teams_update_authenticated_owners():
     client.force_login(user)
 
     team = factories.TeamFactory(users=[(user, "owner")])
-    old_team_values = serializers.TeamSerializer(instance=team).data
+    old_team_values = TeamSerializer(instance=team).data
 
-    new_team_values = serializers.TeamSerializer(
-        instance=factories.TeamFactory.build()
-    ).data
+    new_team_values = TeamSerializer(instance=factories.TeamFactory.build()).data
     response = client.put(
         f"/api/v1.0/teams/{team.id!s}/",
         new_team_values,
@@ -150,7 +148,7 @@ def test_api_teams_update_authenticated_owners():
     assert response.status_code == HTTP_200_OK
 
     team.refresh_from_db()
-    team_values = serializers.TeamSerializer(instance=team).data
+    team_values = TeamSerializer(instance=team).data
     for key, value in team_values.items():
         if key in ["id", "accesses", "created_at"]:
             assert value == old_team_values[key]
@@ -173,9 +171,9 @@ def test_api_teams_update_administrator_or_owner_of_another():
 
     factories.TeamFactory(users=[(user, random.choice(["administrator", "owner"]))])
     team = factories.TeamFactory(name="Old name")
-    old_team_values = serializers.TeamSerializer(instance=team).data
+    old_team_values = TeamSerializer(instance=team).data
 
-    new_team_values = serializers.TeamSerializer(instance=factories.TeamFactory()).data
+    new_team_values = TeamSerializer(instance=factories.TeamFactory()).data
     response = client.put(
         f"/api/v1.0/teams/{team.id!s}/",
         new_team_values,
@@ -186,5 +184,5 @@ def test_api_teams_update_administrator_or_owner_of_another():
     assert response.json() == {"detail": "No Team matches the given query."}
 
     team.refresh_from_db()
-    team_values = serializers.TeamSerializer(instance=team).data
+    team_values = TeamSerializer(instance=team).data
     assert team_values == old_team_values

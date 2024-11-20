@@ -9,7 +9,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from core import factories, models
-from core.api import serializers
+from core.api.serializers.teams import TeamAccessSerializer
 
 pytestmark = pytest.mark.django_db
 
@@ -17,7 +17,7 @@ pytestmark = pytest.mark.django_db
 def test_api_team_accesses_update_anonymous():
     """Anonymous users should not be allowed to update a team access."""
     access = factories.TeamAccessFactory()
-    old_values = serializers.TeamAccessSerializer(instance=access).data
+    old_values = TeamAccessSerializer(instance=access).data
 
     new_values = {
         "id": uuid4(),
@@ -34,7 +34,7 @@ def test_api_team_accesses_update_anonymous():
         assert response.status_code == 401
 
     access.refresh_from_db()
-    updated_values = serializers.TeamAccessSerializer(instance=access).data
+    updated_values = TeamAccessSerializer(instance=access).data
     assert updated_values == old_values
 
 
@@ -45,7 +45,7 @@ def test_api_team_accesses_update_authenticated_unrelated():
     """
     user = factories.UserFactory()
     access = factories.TeamAccessFactory()
-    old_values = serializers.TeamAccessSerializer(instance=access).data
+    old_values = TeamAccessSerializer(instance=access).data
 
     new_values = {
         "id": uuid4(),
@@ -64,7 +64,7 @@ def test_api_team_accesses_update_authenticated_unrelated():
         assert response.status_code == 403
 
     access.refresh_from_db()
-    updated_values = serializers.TeamAccessSerializer(instance=access).data
+    updated_values = TeamAccessSerializer(instance=access).data
     assert updated_values == old_values
 
 
@@ -73,7 +73,7 @@ def test_api_team_accesses_update_authenticated_member():
     user = factories.UserFactory()
     team = factories.TeamFactory(users=[(user, "member")])
     access = factories.TeamAccessFactory(team=team)
-    old_values = serializers.TeamAccessSerializer(instance=access).data
+    old_values = TeamAccessSerializer(instance=access).data
 
     new_values = {
         "id": uuid4(),
@@ -92,7 +92,7 @@ def test_api_team_accesses_update_authenticated_member():
         assert response.status_code == 403
 
     access.refresh_from_db()
-    updated_values = serializers.TeamAccessSerializer(instance=access).data
+    updated_values = TeamAccessSerializer(instance=access).data
     assert updated_values == old_values
 
 
@@ -107,7 +107,7 @@ def test_api_team_accesses_update_administrator_except_owner():
         team=team,
         role=random.choice(["administrator", "member"]),
     )
-    old_values = serializers.TeamAccessSerializer(instance=access).data
+    old_values = TeamAccessSerializer(instance=access).data
 
     new_values = {
         "id": uuid4(),
@@ -133,7 +133,7 @@ def test_api_team_accesses_update_administrator_except_owner():
             assert response.status_code == 200
 
         access.refresh_from_db()
-        updated_values = serializers.TeamAccessSerializer(instance=access).data
+        updated_values = TeamAccessSerializer(instance=access).data
         if field == "role":
             assert updated_values == {**old_values, "role": new_values["role"]}
         else:
@@ -149,7 +149,7 @@ def test_api_team_accesses_update_administrator_from_owner():
     team = factories.TeamFactory(users=[(user, "administrator")])
     other_user = factories.UserFactory()
     access = factories.TeamAccessFactory(team=team, user=other_user, role="owner")
-    old_values = serializers.TeamAccessSerializer(instance=access).data
+    old_values = TeamAccessSerializer(instance=access).data
 
     new_values = {
         "id": uuid4(),
@@ -167,7 +167,7 @@ def test_api_team_accesses_update_administrator_from_owner():
         )
         assert response.status_code == 403
         access.refresh_from_db()
-        updated_values = serializers.TeamAccessSerializer(instance=access).data
+        updated_values = TeamAccessSerializer(instance=access).data
         assert updated_values == old_values
 
 
@@ -184,7 +184,7 @@ def test_api_team_accesses_update_administrator_to_owner():
         user=other_user,
         role=random.choice(["administrator", "member"]),
     )
-    old_values = serializers.TeamAccessSerializer(instance=access).data
+    old_values = TeamAccessSerializer(instance=access).data
 
     new_values = {
         "id": uuid4(),
@@ -208,7 +208,7 @@ def test_api_team_accesses_update_administrator_to_owner():
             assert response.status_code == 200
 
         access.refresh_from_db()
-        updated_values = serializers.TeamAccessSerializer(instance=access).data
+        updated_values = TeamAccessSerializer(instance=access).data
         assert updated_values == old_values
 
 
@@ -224,7 +224,7 @@ def test_api_team_accesses_update_owner_except_owner():
         team=team,
         role=random.choice(["administrator", "member"]),
     )
-    old_values = serializers.TeamAccessSerializer(instance=access).data
+    old_values = TeamAccessSerializer(instance=access).data
 
     new_values = {
         "id": uuid4(),
@@ -250,7 +250,7 @@ def test_api_team_accesses_update_owner_except_owner():
             assert response.status_code == 200
 
         access.refresh_from_db()
-        updated_values = serializers.TeamAccessSerializer(instance=access).data
+        updated_values = TeamAccessSerializer(instance=access).data
 
         if field == "role":
             assert updated_values == {**old_values, "role": new_values["role"]}
@@ -266,7 +266,7 @@ def test_api_team_accesses_update_owner_for_owners():
     user = factories.UserFactory()
     team = factories.TeamFactory(users=[(user, "owner")])
     access = factories.TeamAccessFactory(team=team, role="owner")
-    old_values = serializers.TeamAccessSerializer(instance=access).data
+    old_values = TeamAccessSerializer(instance=access).data
 
     new_values = {
         "id": uuid4(),
@@ -284,7 +284,7 @@ def test_api_team_accesses_update_owner_for_owners():
         )
         assert response.status_code == 403
         access.refresh_from_db()
-        updated_values = serializers.TeamAccessSerializer(instance=access).data
+        updated_values = TeamAccessSerializer(instance=access).data
         assert updated_values == old_values
 
 
@@ -296,7 +296,7 @@ def test_api_team_accesses_update_owner_self():
     user = factories.UserFactory()
     team = factories.TeamFactory()
     access = factories.TeamAccessFactory(team=team, user=user, role="owner")
-    old_values = serializers.TeamAccessSerializer(instance=access).data
+    old_values = TeamAccessSerializer(instance=access).data
     new_role = random.choice(["administrator", "member"])
 
     client = APIClient()

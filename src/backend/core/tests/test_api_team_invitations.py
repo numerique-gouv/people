@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core import factories
-from core.api import serializers
+from core.api.serializers.teams import InvitationSerializer
 
 pytestmark = pytest.mark.django_db
 
@@ -17,9 +17,7 @@ pytestmark = pytest.mark.django_db
 def test_api_team_invitations__create__anonymous():
     """Anonymous users should not be able to create invitations."""
     team = factories.TeamFactory()
-    invitation_values = serializers.InvitationSerializer(
-        factories.InvitationFactory.build()
-    ).data
+    invitation_values = InvitationSerializer(factories.InvitationFactory.build()).data
 
     response = APIClient().post(
         f"/api/v1.0/teams/{team.id}/invitations/",
@@ -36,9 +34,7 @@ def test_api_team_invitations__create__authenticated_outsider():
     """Users outside of team should not be permitted to invite to team."""
     user = factories.UserFactory()
     team = factories.TeamFactory()
-    invitation_values = serializers.InvitationSerializer(
-        factories.InvitationFactory.build()
-    ).data
+    invitation_values = InvitationSerializer(factories.InvitationFactory.build()).data
 
     client = APIClient()
     client.force_login(user)
@@ -60,9 +56,7 @@ def test_api_team_invitations__create__privileged_members(role):
     user = factories.UserFactory()
     team = factories.TeamFactory(users=[(user, role)])
 
-    invitation_values = serializers.InvitationSerializer(
-        factories.InvitationFactory.build()
-    ).data
+    invitation_values = InvitationSerializer(factories.InvitationFactory.build()).data
 
     client = APIClient()
     client.force_login(user)
@@ -82,9 +76,7 @@ def test_api_team_invitations__create__members():
     user = factories.UserFactory()
     team = factories.TeamFactory(users=[(user, "member")])
 
-    invitation_values = serializers.InvitationSerializer(
-        factories.InvitationFactory.build()
-    ).data
+    invitation_values = InvitationSerializer(factories.InvitationFactory.build()).data
 
     client = APIClient()
     client.force_login(user)
@@ -133,7 +125,7 @@ def test_api_team_invitations__create__cannot_duplicate_invitation():
     factories.TeamAccessFactory(team=team, user=user, role="administrator")
 
     # Create a new invitation to the same team with the exact same email address
-    duplicated_invitation = serializers.InvitationSerializer(
+    duplicated_invitation = InvitationSerializer(
         factories.InvitationFactory.build(email=existing_invitation.email)
     ).data
 
@@ -158,7 +150,7 @@ def test_api_team_invitations__create__cannot_invite_existing_users():
     team = factories.TeamFactory(users=[(user, "administrator")])
 
     # Build an invitation to the email of an exising identity in the db
-    invitation_values = serializers.InvitationSerializer(
+    invitation_values = InvitationSerializer(
         factories.InvitationFactory.build(email=existing_user.email, team=team)
     ).data
 

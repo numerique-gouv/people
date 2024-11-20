@@ -23,6 +23,10 @@ and this project adheres to
 
 -  🔊(backend) update logger config to info #542
 
+### Changed
+
+- 🚚(backend) split api modules to improve readability #540
+
 ## [1.5.0] - 2024-11-14
 
 ### Removed

@@ -14,8 +14,8 @@ from rest_framework.status import (
 from rest_framework.test import APIClient
 
 from core import factories, models
-from core.api import serializers
-from core.api.viewsets import Pagination
+from core.api.serializers.users import UserSerializer
+from core.api.viewsets.base import Pagination
 from core.factories import TeamAccessFactory
 
 from mailbox_manager.factories import MailDomainAccessFactory
@@ -621,8 +621,8 @@ def test_api_users_update_anonymous():
     """Anonymous users should not be able to update users via the API."""
     user = factories.UserFactory()
 
-    old_user_values = dict(serializers.UserSerializer(instance=user).data)
-    new_user_values = serializers.UserSerializer(instance=factories.UserFactory()).data
+    old_user_values = dict(UserSerializer(instance=user).data)
+    new_user_values = UserSerializer(instance=factories.UserFactory()).data
 
     response = APIClient().put(
         f"/api/v1.0/users/{user.id!s}/",
@@ -636,7 +636,7 @@ def test_api_users_update_anonymous():
     }
 
     user.refresh_from_db()
-    user_values = dict(serializers.UserSerializer(instance=user).data)
+    user_values = dict(UserSerializer(instance=user).data)
     for key, value in user_values.items():
         assert value == old_user_values[key]
 
@@ -651,10 +651,8 @@ def test_api_users_update_authenticated_self():
     client = APIClient()
     client.force_login(user)
 
-    old_user_values = dict(serializers.UserSerializer(instance=user).data)
-    new_user_values = dict(
-        serializers.UserSerializer(instance=factories.UserFactory()).data
-    )
+    old_user_values = dict(UserSerializer(instance=user).data)
+    new_user_values = dict(UserSerializer(instance=factories.UserFactory()).data)
 
     response = client.put(
         f"/api/v1.0/users/{user.id!s}/",
@@ -664,7 +662,7 @@ def test_api_users_update_authenticated_self():
 
     assert response.status_code == HTTP_200_OK
     user.refresh_from_db()
-    user_values = dict(serializers.UserSerializer(instance=user).data)
+    user_values = dict(UserSerializer(instance=user).data)
     for key, value in user_values.items():
         if key in ["language", "timezone"]:
             assert value == new_user_values[key]
@@ -680,8 +678,8 @@ def test_api_users_update_authenticated_other():
     client.force_login(user)
 
     user = factories.UserFactory()
-    old_user_values = dict(serializers.UserSerializer(instance=user).data)
-    new_user_values = serializers.UserSerializer(instance=factories.UserFactory()).data
+    old_user_values = dict(UserSerializer(instance=user).data)
+    new_user_values = UserSerializer(instance=factories.UserFactory()).data
 
     response = client.put(
         f"/api/v1.0/users/{user.id!s}/",
@@ -691,7 +689,7 @@ def test_api_users_update_authenticated_other():
 
     assert response.status_code == HTTP_403_FORBIDDEN
     user.refresh_from_db()
-    user_values = dict(serializers.UserSerializer(instance=user).data)
+    user_values = dict(UserSerializer(instance=user).data)
     for key, value in user_values.items():
         assert value == old_user_values[key]
 
@@ -700,10 +698,8 @@ def test_api_users_patch_anonymous():
     """Anonymous users should not be able to patch users via the API."""
     user = factories.UserFactory()
 
-    old_user_values = dict(serializers.UserSerializer(instance=user).data)
-    new_user_values = dict(
-        serializers.UserSerializer(instance=factories.UserFactory()).data
-    )
+    old_user_values = dict(UserSerializer(instance=user).data)
+    new_user_values = dict(UserSerializer(instance=factories.UserFactory()).data)
 
     for key, new_value in new_user_values.items():
         response = APIClient().patch(
@@ -717,7 +713,7 @@ def test_api_users_patch_anonymous():
         }
 
     user.refresh_from_db()
-    user_values = dict(serializers.UserSerializer(instance=user).data)
+    user_values = dict(UserSerializer(instance=user).data)
     for key, value in user_values.items():
         assert value == old_user_values[key]
 
@@ -732,10 +728,8 @@ def test_api_users_patch_authenticated_self():
     client = APIClient()
     client.force_login(user)
 
-    old_user_values = dict(serializers.UserSerializer(instance=user).data)
-    new_user_values = dict(
-        serializers.UserSerializer(instance=factories.UserFactory()).data
-    )
+    old_user_values = dict(UserSerializer(instance=user).data)
+    new_user_values = dict(UserSerializer(instance=factories.UserFactory()).data)
 
     for key, new_value in new_user_values.items():
         response = client.patch(
@@ -746,7 +740,7 @@ def test_api_users_patch_authenticated_self():
         assert response.status_code == HTTP_200_OK
 
     user.refresh_from_db()
-    user_values = dict(serializers.UserSerializer(instance=user).data)
+    user_values = dict(UserSerializer(instance=user).data)
     for key, value in user_values.items():
         if key in ["language", "timezone"]:
             assert value == new_user_values[key]
@@ -762,10 +756,8 @@ def test_api_users_patch_authenticated_other():
     client.force_login(user)
 
     other_user = factories.UserFactory()
-    old_user_values = dict(serializers.UserSerializer(instance=other_user).data)
-    new_user_values = dict(
-        serializers.UserSerializer(instance=factories.UserFactory()).data
-    )
+    old_user_values = dict(UserSerializer(instance=other_user).data)
+    new_user_values = dict(UserSerializer(instance=factories.UserFactory()).data)
 
     for key, new_value in new_user_values.items():
         response = client.put(
@@ -776,7 +768,7 @@ def test_api_users_patch_authenticated_other():
         assert response.status_code == HTTP_403_FORBIDDEN
 
     other_user.refresh_from_db()
-    user_values = dict(serializers.UserSerializer(instance=other_user).data)
+    user_values = dict(UserSerializer(instance=other_user).data)
     for key, value in user_values.items():
         assert value == old_user_values[key]
 

@@ -8,7 +8,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from core import factories, models
-from core.api import serializers
+from core.api.serializers.contacts import ContactSerializer
 
 pytestmark = pytest.mark.django_db
 
@@ -425,11 +425,9 @@ def test_api_contacts_create_authenticated_existing_override():
 def test_api_contacts_update_anonymous():
     """Anonymous users should not be allowed to update a contact."""
     contact = factories.ContactFactory()
-    old_contact_values = serializers.ContactSerializer(instance=contact).data
+    old_contact_values = ContactSerializer(instance=contact).data
 
-    new_contact_values = serializers.ContactSerializer(
-        instance=factories.ContactFactory()
-    ).data
+    new_contact_values = ContactSerializer(instance=factories.ContactFactory()).data
     new_contact_values["base"] = str(factories.ContactFactory().id)
     response = APIClient().put(
         f"/api/v1.0/contacts/{contact.id!s}/",
@@ -442,7 +440,7 @@ def test_api_contacts_update_anonymous():
     }
 
     contact.refresh_from_db()
-    contact_values = serializers.ContactSerializer(instance=contact).data
+    contact_values = ContactSerializer(instance=contact).data
     assert contact_values == old_contact_values
 
 
@@ -456,11 +454,9 @@ def test_api_contacts_update_authenticated_owned():
     client.force_login(user)
 
     contact = factories.ContactFactory(owner=user)  # Owned by the logged-in user
-    old_contact_values = serializers.ContactSerializer(instance=contact).data
+    old_contact_values = ContactSerializer(instance=contact).data
 
-    new_contact_values = serializers.ContactSerializer(
-        instance=factories.ContactFactory()
-    ).data
+    new_contact_values = ContactSerializer(instance=factories.ContactFactory()).data
     new_contact_values["base"] = str(factories.ContactFactory().id)
 
     response = client.put(
@@ -472,7 +468,7 @@ def test_api_contacts_update_authenticated_owned():
     assert response.status_code == 200
 
     contact.refresh_from_db()
-    contact_values = serializers.ContactSerializer(instance=contact).data
+    contact_values = ContactSerializer(instance=contact).data
     for key, value in contact_values.items():
         if key in ["base", "owner", "id"]:
             assert value == old_contact_values[key]
@@ -493,10 +489,8 @@ def test_api_contacts_update_authenticated_profile():
     user.profile_contact = contact
     user.save()
 
-    old_contact_values = serializers.ContactSerializer(instance=contact).data
-    new_contact_values = serializers.ContactSerializer(
-        instance=factories.ContactFactory()
-    ).data
+    old_contact_values = ContactSerializer(instance=contact).data
+    new_contact_values = ContactSerializer(instance=factories.ContactFactory()).data
     new_contact_values["base"] = str(factories.ContactFactory().id)
 
     response = client.put(
@@ -507,7 +501,7 @@ def test_api_contacts_update_authenticated_profile():
 
     assert response.status_code == 200
     contact.refresh_from_db()
-    contact_values = serializers.ContactSerializer(instance=contact).data
+    contact_values = ContactSerializer(instance=contact).data
     for key, value in contact_values.items():
         if key in ["base", "owner", "id"]:
             assert value == old_contact_values[key]
@@ -525,11 +519,9 @@ def test_api_contacts_update_authenticated_other():
     client.force_login(user)
 
     contact = factories.ContactFactory()  # owned by another user
-    old_contact_values = serializers.ContactSerializer(instance=contact).data
+    old_contact_values = ContactSerializer(instance=contact).data
 
-    new_contact_values = serializers.ContactSerializer(
-        instance=factories.ContactFactory()
-    ).data
+    new_contact_values = ContactSerializer(instance=factories.ContactFactory()).data
     new_contact_values["base"] = str(factories.ContactFactory().id)
 
     response = client.put(
@@ -541,7 +533,7 @@ def test_api_contacts_update_authenticated_other():
     assert response.status_code == 403
 
     contact.refresh_from_db()
-    contact_values = serializers.ContactSerializer(instance=contact).data
+    contact_values = ContactSerializer(instance=contact).data
     assert contact_values == old_contact_values
 
 
