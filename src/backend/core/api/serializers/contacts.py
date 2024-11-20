@@ -273,3 +273,4 @@ class InvitationSerializer(serializers.ModelSerializer):
         attrs["team_id"] = team_id
         attrs["issuer"] = user
         return attrs
+ 
