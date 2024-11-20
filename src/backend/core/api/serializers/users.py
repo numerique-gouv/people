@@ -1,53 +1,11 @@
-"""Client serializers for the People core app."""
+"""Users serializers for the People core app."""
 
 from rest_framework import exceptions, serializers
 from timezone_field.rest_framework import TimeZoneSerializerField
 
 from core import models
 
-
-class ContactSerializer(serializers.ModelSerializer):
-    """Serialize contacts."""
-
-    class Meta:
-        model = models.Contact
-        fields = [
-            "id",
-            "base",
-            "data",
-            "full_name",
-            "owner",
-            "short_name",
-        ]
-        read_only_fields = ["id", "owner"]
-
-    def update(self, instance, validated_data):
-        """Make "base" field readonly but only for update/patch."""
-        validated_data.pop("base", None)
-        return super().update(instance, validated_data)
-
-
-class DynamicFieldsModelSerializer(serializers.ModelSerializer):
-    """
-    A ModelSerializer that takes an additional `fields` argument that
-    controls which fields should be displayed.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """Pass arguments to superclass except 'fields', then drop fields not listed therein."""
-
-        # Don't pass the 'fields' arg up to the superclass
-        fields = kwargs.pop("fields", None)
-
-        # Instantiate the superclass normally
-        super().__init__(*args, **kwargs)
-
-        if fields is not None:
-            # Drop any fields that are not specified in the `fields` argument.
-            allowed = set(fields)
-            existing = set(self.fields)
-            for field_name in existing - allowed:
-                self.fields.pop(field_name)
+from .base import DynamicFieldsModelSerializer
 
 
 class UserSerializer(DynamicFieldsModelSerializer):
