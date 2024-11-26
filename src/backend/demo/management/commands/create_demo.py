@@ -13,6 +13,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils.text import slugify
 
 from faker import Faker
+from treebeard.mp_tree import MP_Node
 
 from core import models
 
@@ -45,7 +46,29 @@ class BulkQueue:
         if not objects:
             return
 
-        objects[0]._meta.model.objects.bulk_create(objects, ignore_conflicts=False)  # noqa: SLF001
+        objects_model = objects[0]._meta.model  # noqa: SLF001
+        if issubclass(objects_model, MP_Node):
+            # For treebeard models, we need to create the tree structure
+            # in a specific way. This is not perfect but it works for the
+            # current use case.
+            model_fields = objects_model._meta.concrete_fields  # noqa: SLF001
+            bulk_data = [
+                {
+                    "data": {
+                        field.name: field.value_from_object(obj)
+                        for field in model_fields
+                        if field.value_from_object(obj)
+                    }
+                }
+                for obj in objects
+            ]
+            objects_model.load_bulk(bulk_data)
+        else:
+            objects_model.objects.bulk_create(
+                objects,
+                ignore_conflicts=False,
+            )
+
         # In debug mode, Django keeps query cache which creates a memory leak in this case
         db.reset_queries()
         self.queue[objects[0]._meta.model.__name__] = []  # noqa: SLF001
