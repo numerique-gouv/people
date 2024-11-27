@@ -99,13 +99,6 @@ class BaseModel(models.Model):
 class Contact(BaseModel):
     """User contacts"""
 
-    base = models.ForeignKey(
-        "self",
-        on_delete=models.SET_NULL,
-        related_name="overriding_contacts",
-        null=True,
-        blank=True,
-    )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -136,19 +129,6 @@ class Contact(BaseModel):
         ordering = ("full_name", "short_name")
         verbose_name = _("contact")
         verbose_name_plural = _("contacts")
-        unique_together = ("owner", "base")
-        constraints = [
-            models.CheckConstraint(
-                condition=~models.Q(base__isnull=False, owner__isnull=True),
-                name="base_owner_constraint",
-                violation_error_message="A contact overriding a base contact must be owned.",
-            ),
-            models.CheckConstraint(
-                condition=~models.Q(base=models.F("id")),
-                name="base_not_self",
-                violation_error_message="A contact cannot be based on itself.",
-            ),
-        ]
 
     def __str__(self):
         return self.full_name or self.short_name
@@ -156,12 +136,6 @@ class Contact(BaseModel):
     def clean(self):
         """Validate fields."""
         super().clean()
-
-        # Check if the contact points to a base contact that itself points to another base contact
-        if self.base_id and self.base.base_id:
-            raise exceptions.ValidationError(
-                "A contact cannot point to a base contact that itself points to a base contact."
-            )
 
         # Validate the content of the "data" field against our jsonschema definition
         try:

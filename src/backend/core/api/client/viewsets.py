@@ -151,8 +151,6 @@ class ContactViewSet(
             Q(owner__isnull=True) | Q(owner=user),
             # - are profile contacts for a user
             user__isnull=True,
-            # - are overriden base contacts
-            overriding_contacts__isnull=True,
         )
 
         # Search by case-insensitive and accent-insensitive similarity

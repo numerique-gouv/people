@@ -115,7 +115,6 @@ class ContactFactory(BaseContactFactory):
     class Meta:
         model = models.Contact
 
-    base = factory.SubFactory("core.factories.ContactFactory", base=None, owner=None)
     owner = factory.SubFactory("core.factories.UserFactory", profile_contact=None)
 
 

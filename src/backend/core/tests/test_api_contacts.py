@@ -2,8 +2,6 @@
 Test contacts API endpoints in People's core app.
 """
 
-from django.test.utils import override_settings
-
 import pytest
 from rest_framework.test import APIClient
 
@@ -76,13 +74,7 @@ def test_api_contacts_list_authenticated_no_query():
 
     # Let's have 5 contacts in database:
     assert user.profile_contact is not None  # Excluded because profile contact
-    base_contact = factories.BaseContactFactory()  # Excluded because overridden
-    factories.ContactFactory(
-        base=base_contact
-    )  # Excluded because belongs to other user
-    contact2 = factories.ContactFactory(
-        base=base_contact, owner=user, full_name="Bernard"
-    )  # Included
+    contact2 = factories.ContactFactory(owner=user, full_name="Bernard")  # Included
 
     client = APIClient()
     client.force_login(user)
@@ -93,7 +85,6 @@ def test_api_contacts_list_authenticated_no_query():
     assert response.json() == [
         {
             "id": str(contact2.id),
-            "base": str(base_contact.id),
             "owner": str(contact2.owner.id),
             "data": contact2.data,
             "full_name": contact2.full_name,
@@ -267,7 +258,6 @@ def test_api_contacts_retrieve_authenticated_owned():
     assert response.status_code == 200
     assert response.json() == {
         "id": str(contact.id),
-        "base": str(contact.base.id),
         "owner": str(contact.owner.id),
         "data": contact.data,
         "full_name": contact.full_name,
@@ -289,7 +279,6 @@ def test_api_contacts_retrieve_authenticated_public():
     assert response.status_code == 200
     assert response.json() == {
         "id": str(contact.id),
-        "base": None,
         "owner": None,
         "data": contact.data,
         "full_name": contact.full_name,
@@ -327,42 +316,16 @@ def test_api_contacts_create_anonymous_forbidden():
     assert not models.Contact.objects.exists()
 
 
-def test_api_contacts_create_authenticated_missing_base():
-    """Anonymous users should be able to create users."""
-    user = factories.UserFactory(profile_contact=None)
-
-    client = APIClient()
-    client.force_login(user)
-
-    response = client.post(
-        "/api/v1.0/contacts/",
-        {
-            "full_name": "David Bowman",
-            "short_name": "Dave",
-        },
-        format="json",
-    )
-    assert response.status_code == 400
-    assert models.Contact.objects.exists() is False
-
-    assert response.json() == {"base": ["This field is required."]}
-
-
 def test_api_contacts_create_authenticated_successful():
     """Authenticated users should be able to create contacts."""
     user = factories.UserFactory(profile_contact=None)
-    base_contact = factories.BaseContactFactory()
 
     client = APIClient()
     client.force_login(user)
 
-    # Existing override for another user should not interfere
-    factories.ContactFactory(base=base_contact)
-
     response = client.post(
         "/api/v1.0/contacts/",
         {
-            "base": str(base_contact.id),
             "full_name": "David Bowman",
             "short_name": "Dave",
             "data": CONTACT_DATA,
@@ -371,12 +334,11 @@ def test_api_contacts_create_authenticated_successful():
     )
 
     assert response.status_code == 201
-    assert models.Contact.objects.count() == 3
+    assert models.Contact.objects.count() == 1
 
     contact = models.Contact.objects.get(owner=user)
     assert response.json() == {
         "id": str(contact.id),
-        "base": str(base_contact.id),
         "data": CONTACT_DATA,
         "full_name": "David Bowman",
         "owner": str(user.id),
@@ -386,40 +348,7 @@ def test_api_contacts_create_authenticated_successful():
     assert contact.full_name == "David Bowman"
     assert contact.short_name == "Dave"
     assert contact.data == CONTACT_DATA
-    assert contact.base == base_contact
     assert contact.owner == user
-
-
-@override_settings(ALLOW_API_USER_CREATE=True)
-def test_api_contacts_create_authenticated_existing_override():
-    """
-    Trying to create a contact for base contact that is already overridden by the user
-    should receive a 400 error.
-    """
-    user = factories.UserFactory(profile_contact=None)
-    base_contact = factories.BaseContactFactory()
-    factories.ContactFactory(base=base_contact, owner=user)
-
-    client = APIClient()
-    client.force_login(user)
-
-    response = client.post(
-        "/api/v1.0/contacts/",
-        {
-            "base": str(base_contact.id),
-            "full_name": "David Bowman",
-            "short_name": "Dave",
-            "data": CONTACT_DATA,
-        },
-        format="json",
-    )
-
-    assert response.status_code == 400
-    assert models.Contact.objects.count() == 2
-
-    assert response.json() == {
-        "__all__": ["Contact with this Owner and Base already exists."]
-    }
 
 
 def test_api_contacts_update_anonymous():
@@ -461,7 +390,6 @@ def test_api_contacts_update_authenticated_owned():
     new_contact_values = serializers.ContactSerializer(
         instance=factories.ContactFactory()
     ).data
-    new_contact_values["base"] = str(factories.ContactFactory().id)
 
     response = client.put(
         f"/api/v1.0/contacts/{contact.id!s}/",
@@ -474,7 +402,7 @@ def test_api_contacts_update_authenticated_owned():
     contact.refresh_from_db()
     contact_values = serializers.ContactSerializer(instance=contact).data
     for key, value in contact_values.items():
-        if key in ["base", "owner", "id"]:
+        if key in ["owner", "id"]:
             assert value == old_contact_values[key]
         else:
             assert value == new_contact_values[key]
@@ -497,7 +425,6 @@ def test_api_contacts_update_authenticated_profile():
     new_contact_values = serializers.ContactSerializer(
         instance=factories.ContactFactory()
     ).data
-    new_contact_values["base"] = str(factories.ContactFactory().id)
 
     response = client.put(
         f"/api/v1.0/contacts/{contact.id!s}/",
@@ -509,7 +436,7 @@ def test_api_contacts_update_authenticated_profile():
     contact.refresh_from_db()
     contact_values = serializers.ContactSerializer(instance=contact).data
     for key, value in contact_values.items():
-        if key in ["base", "owner", "id"]:
+        if key in ["owner", "id"]:
             assert value == old_contact_values[key]
         else:
             assert value == new_contact_values[key]
@@ -530,7 +457,6 @@ def test_api_contacts_update_authenticated_other():
     new_contact_values = serializers.ContactSerializer(
         instance=factories.ContactFactory()
     ).data
-    new_contact_values["base"] = str(factories.ContactFactory().id)
 
     response = client.put(
         f"/api/v1.0/contacts/{contact.id!s}/",
@@ -552,7 +478,7 @@ def test_api_contacts_delete_list_anonymous():
     response = APIClient().delete("/api/v1.0/contacts/")
 
     assert response.status_code == 401
-    assert models.Contact.objects.count() == 4
+    assert models.Contact.objects.count() == 2
 
 
 def test_api_contacts_delete_list_authenticated():
@@ -567,7 +493,7 @@ def test_api_contacts_delete_list_authenticated():
     response = client.delete("/api/v1.0/contacts/")
 
     assert response.status_code == 405
-    assert models.Contact.objects.count() == 4
+    assert models.Contact.objects.count() == 2
 
 
 def test_api_contacts_delete_anonymous():
@@ -578,7 +504,7 @@ def test_api_contacts_delete_anonymous():
     response = client.delete(f"/api/v1.0/contacts/{contact.id!s}/")
 
     assert response.status_code == 401
-    assert models.Contact.objects.count() == 2
+    assert models.Contact.objects.count() == 1
 
 
 def test_api_contacts_delete_authenticated_public():
@@ -615,7 +541,7 @@ def test_api_contacts_delete_authenticated_owner():
     )
 
     assert response.status_code == 204
-    assert models.Contact.objects.count() == 1
+    assert not models.Contact.objects.count()
     assert models.Contact.objects.filter(id=contact.id).exists() is False
 
 
@@ -624,7 +550,7 @@ def test_api_contacts_delete_authenticated_profile():
     Authenticated users should be allowed to delete their profile contact.
     """
     user = factories.UserFactory()
-    contact = factories.ContactFactory(owner=user, base=None)
+    contact = factories.ContactFactory(owner=user)
     user.profile_contact = contact
     user.save()
 
@@ -654,4 +580,4 @@ def test_api_contacts_delete_authenticated_other():
     )
 
     assert response.status_code == 403
-    assert models.Contact.objects.count() == 2
+    assert models.Contact.objects.count() == 1

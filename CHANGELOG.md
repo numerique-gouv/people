@@ -19,6 +19,10 @@ and this project adheres to
 
 -  🐛(admin) add organization on user #555
 
+### Removed
+
+- ⚰️(contacts) remove "base" contact inheritance #563
+
 ## [1.6.1] - 2024-11-22
 
 ### Fixed
