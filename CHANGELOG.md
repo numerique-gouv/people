@@ -14,6 +14,7 @@ and this project adheres to
 
 ### Added
 
+- ✨(maildomain_access) add API endpoint to search users #508
 - ✨(mailbox) allow to activate mailbox
 - ✨(mailbox) allow to disable mailbox
 - ✨(backend) add ServiceProvider #522
