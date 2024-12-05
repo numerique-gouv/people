@@ -10,10 +10,12 @@ and this project adheres to
 
 ### Added
 
+- ✨(anct) auto create domains #622
 - ✨(teams) add Team dependencies #560
 - ✨(organization) add admin action for plugin #640
 - ✨(anct) fetch and display organization names of communes #583
 - ✨(frontend) display email if no username #562
+- ✨(anct) fetch and display organization names of communes #583
 - 🧑‍💻(oidc) add ability to pull registration ID (e.g. SIRET) from OIDC #577
 
 ### Fixed
