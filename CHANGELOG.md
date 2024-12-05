@@ -12,6 +12,7 @@ and this project adheres to
 
 -  ✨(contacts) add notes & force full_name #565
 -  ✨(contacts) return profile contact from same organization
+-  ✨(contacts) allow filter list API with email
 
 ### Changed
 
