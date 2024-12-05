@@ -1,6 +1,6 @@
 import { fetchAPI } from '@/api';
 
-import { User } from './types';
+import { Organization, User } from './types';
 
 /**
  * Asynchronously retrieves the current user's data from the API.
