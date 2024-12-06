@@ -19,6 +19,7 @@ from rest_framework.permissions import AllowAny
 from core import models
 from core.api import permissions
 from core.api.client import serializers
+from core.utils.raw_sql import gen_sql_filter_json_array
 
 SIMILARITY_THRESHOLD = 0.04
 
@@ -139,27 +140,40 @@ class ContactViewSet(
     queryset = models.Contact.objects.all()
     serializer_class = serializers.ContactSerializer
     throttle_classes = [BurstRateThrottle, SustainedRateThrottle]
+    ordering_fields = ["full_name", "short_name", "created_at"]
+    ordering = ["full_name"]
 
     def list(self, request, *args, **kwargs):
         """Limit listed users by a query with throttle protection."""
         user = self.request.user
         queryset = self.filter_queryset(self.get_queryset())
 
-        # Exclude contacts that:
+        # List only contacts that:
         queryset = queryset.filter(
-            # - belong to another user (keep public and owned contacts)
-            Q(owner__isnull=True) | Q(owner=user),
-            # - are profile contacts for a user
-            user__isnull=True,
-            # - are overriden base contacts
+            # - are owned by the user
+            Q(owner=user)
+            # - are profile contacts for a user from the same organization
+            | Q(user__organization_id=user.organization_id),
+            # - are not overriden by another contact
             overridden_by__isnull=True,
         )
 
-        # Search by case-insensitive and accent-insensitive similarity
+        # Search by case-insensitive and accent-insensitive on:
+        # - full name
+        # - short name
+        # - email (from data `emails` field)
         if query := self.request.GET.get("q", ""):
             queryset = queryset.filter(
                 Q(full_name__unaccent__icontains=query)
                 | Q(short_name__unaccent__icontains=query)
+                | Q(
+                    id__in=gen_sql_filter_json_array(
+                        queryset.model,
+                        "data->'emails'",
+                        "value",
+                        query,
+                    )
+                )
             )
 
         serializer = self.get_serializer(queryset, many=True)
