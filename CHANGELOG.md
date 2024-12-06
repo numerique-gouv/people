@@ -10,9 +10,10 @@ and this project adheres to
 
 ### Added
 
--  ✨(contacts) add notes & force full_name #565
--  ✨(contacts) return profile contact from same organization
--  ✨(contacts) allow filter list API with email
+- ✨(contacts) add notes & force full_name #565
+- ✨(contacts) return profile contact from same organization
+- ✨(contacts) allow filter list API with email
+- ✨(contacts) add "abilities" to API endpoint data #585
 
 ### Changed
 
