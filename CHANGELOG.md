@@ -11,6 +11,7 @@ and this project adheres to
 ### Added
 
 -  ✨(contacts) add notes & force full_name #565
+- 💄(frontend) redirect home according to abilities #588
 
 ### Changed
 
