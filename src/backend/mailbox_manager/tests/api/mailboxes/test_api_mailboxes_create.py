@@ -306,10 +306,39 @@ def test_api_mailboxes__create_pending_mailboxes(domain_status):
     assert mailbox.status == "pending"
 
 
+def test_api_mailboxes__should_not_create_duplicate_mailbox():
+    """
+    Should return a clear error when attempting to create duplicate mailbox.
+    """
+    access = factories.MailDomainAccessFactory(
+        role=enums.MailDomainRoleChoices.ADMIN,
+        domain=factories.MailDomainEnabledFactory(),
+    )
+    existing_mailbox = factories.MailboxFactory(domain=access.domain)
+
+    client = APIClient()
+    client.force_login(access.user)
+
+    # create dict with exactly the same data as existing mailbox
+    mailbox_values = serializers.MailboxSerializer(existing_mailbox).data
+
+    response = client.post(
+        f"/api/v1.0/mail-domains/{access.domain.slug}/mailboxes/",
+        mailbox_values,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert models.Mailbox.objects.filter(
+        local_part=existing_mailbox.local_part
+    ).exists()
+    assert response.json() == {
+        "__all__": ["Mailbox with this Local_part and Domain already exists."]
+    }
+
+
 ### REACTING TO DIMAIL-API
 ### We mock dimail's responses to avoid testing dimail's container too
-
-
 def test_api_mailboxes__unrelated_user_provisioning_api_not_called():
     """
     Provisioning API should not be called if an user tries
