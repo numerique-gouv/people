@@ -10,6 +10,7 @@ and this project adheres to
 
 ### Added
 
+- 🐛(mailboxes) fix logic when attempting to duplicate mailboxes #534
 -  ✨(contacts) add notes & force full_name #565
 
 ### Changed
