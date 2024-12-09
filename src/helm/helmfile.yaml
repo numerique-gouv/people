@@ -28,6 +28,12 @@ releases:
           password: pass
         architecture: standalone
 
+  - name: dimail
+    installed: {{ eq .Environment.Name "dev" | toYaml }}
+    missingFileHandler: Warn
+    namespace: {{ .Namespace }}
+    chart: ./dimail
+
   - name: extra
     installed: {{ ne .Environment.Name "dev" | toYaml }}
     namespace: {{ .Namespace }}
