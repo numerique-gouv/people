@@ -3,15 +3,15 @@ set -o errexit
 
 CURRENT_DIR=$(pwd)
 
-# 0. Create ca
 echo "0. Create ca"
+# 0. Create ca
 mkcert -install
 cd /tmp
 mkcert "127.0.0.1.nip.io" "*.127.0.0.1.nip.io"
 cd $CURRENT_DIR
 
-# 1. Create registry container unless it already exists
 echo "1. Create registry container unless it already exists"
+# 1. Create registry container unless it already exists
 reg_name='kind-registry'
 reg_port='5001'
 if [ "$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)" != 'true' ]; then
@@ -20,8 +20,8 @@ if [ "$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true
 		registry:2
 fi
 
-# 2. Create kind cluster with containerd registry config dir enabled
 echo "2. Create kind cluster with containerd registry config dir enabled"
+# 2. Create kind cluster with containerd registry config dir enabled
 # TODO: kind will eventually enable this by default and this patch will
 # be unnecessary.
 #
@@ -29,7 +29,7 @@ echo "2. Create kind cluster with containerd registry config dir enabled"
 # https://github.com/kubernetes-sigs/kind/issues/2875
 # https://github.com/containerd/containerd/blob/main/docs/cri/config.md#registry-configuration
 # See: https://github.com/containerd/containerd/blob/main/docs/hosts.md
-cat <<EOF | kind create cluster --config=-
+cat <<EOF | kind create cluster --name regie --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
@@ -52,14 +52,10 @@ nodes:
   - containerPort: 443
     hostPort: 443
     protocol: TCP
-- role: worker
-  image: kindest/node:v1.27.3
-- role: worker
-  image: kindest/node:v1.27.3
 EOF
 
-# 3. Add the registry config to the nodes
 echo "3. Add the registry config to the nodes"
+# 3. Add the registry config to the nodes
 #
 # This is necessary because localhost resolves to loopback addresses that are
 # network-namespace local.
@@ -68,22 +64,22 @@ echo "3. Add the registry config to the nodes"
 # We want a consistent name that works from both ends, so we tell containerd to
 # alias localhost:${reg_port} to the registry container when pulling images
 REGISTRY_DIR="/etc/containerd/certs.d/localhost:${reg_port}"
-for node in $(kind get nodes); do
+for node in $(kind get nodes --name regie); do
 	docker exec "${node}" mkdir -p "${REGISTRY_DIR}"
 	cat <<EOF | docker exec -i "${node}" cp /dev/stdin "${REGISTRY_DIR}/hosts.toml"
 [host."http://${reg_name}:5000"]
 EOF
 done
 
-# 4. Connect the registry to the cluster network if not already connected
 echo "4. Connect the registry to the cluster network if not already connected"
+# 4. Connect the registry to the cluster network if not already connected
 # This allows kind to bootstrap the network but ensures they're on the same network
 if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
 	docker network connect "kind" "${reg_name}"
 fi
 
-# 5. Document the local registry
 echo "5. Document the local registry"
+# 5. Document the local registry
 # https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
@@ -97,6 +93,47 @@ data:
     help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 EOF
 
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health {
+          lameduck 5s
+        }
+        ready
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+          ttl 30
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf {
+          max_concurrent 1000
+        }
+        rewrite stop {
+          name regex (.*).127.0.0.1.nip.io ingress-nginx-controller.ingress-nginx.svc.cluster.local answer auto
+        }
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+EOF
+
+kubectl -n kube-system rollout restart deployments/coredns
+
+echo "6. Install ingress-nginx"
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 kubectl -n ingress-nginx create secret tls mkcert --key /tmp/127.0.0.1.nip.io+1-key.pem --cert /tmp/127.0.0.1.nip.io+1.pem
 kubectl -n ingress-nginx patch deployments.apps ingress-nginx-controller --type 'json' -p '[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value":"--default-ssl-certificate=ingress-nginx/mkcert"}]'
+
+echo "7. Setup namespace"
+kubectl create ns desk
+kubectl config set-context --current --namespace=desk
+kubectl -n desk create secret generic mkcert --from-file=rootCA.pem="$(mkcert -CAROOT)/rootCA.pem"
