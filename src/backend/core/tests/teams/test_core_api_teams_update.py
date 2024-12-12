@@ -15,6 +15,7 @@ from rest_framework.test import APIClient
 
 from core import factories
 from core.api.client import serializers
+from core.models import Team
 
 pytestmark = pytest.mark.django_db
 
@@ -219,3 +220,75 @@ def test_api_teams_update_authenticated_owners_add_service_providers():
     team.refresh_from_db()
     assert team.service_providers.count() == 2
     assert set(team.service_providers.all()) == {service_provider_1, service_provider_2}
+
+
+@pytest.mark.parametrize(
+    "role",
+    ["owner", "administrator", "member"],
+)
+def test_api_teams_update_whatever_access_of_child_team(client, role):
+    """
+    Being member, administrator or owner of a team should not grant
+    authorization to update a parent team.
+    """
+    user = factories.UserFactory()
+
+    client.force_login(user)
+
+    root_team = Team.objects.create(name="Root")
+    first_team = Team.objects.create(name="First", parent_id=root_team.pk)
+    second_team = Team.objects.create(name="Second", parent_id=first_team.pk)
+
+    # user is a member of the second team
+    factories.TeamAccessFactory(team=second_team, user=user, role=role)
+
+    response = client.patch(
+        f"/api/v1.0/teams/{first_team.pk}/",
+        {
+            "name": "New name",
+        },
+        format="json",
+    )
+
+    assert response.status_code == HTTP_403_FORBIDDEN
+    assert response.json() == {
+        "detail": "You do not have permission to perform this action."
+    }
+
+    first_team.refresh_from_db()
+    assert first_team.name == "First"
+
+
+@pytest.mark.parametrize(
+    "role",
+    ["owner", "administrator", "member"],
+)
+def test_api_teams_update_whatever_access_of_parent_team(client, role):
+    """
+    Being member, administrator or owner of a team should not grant
+    authorization to update a child team.
+    """
+    user = factories.UserFactory()
+
+    client.force_login(user)
+
+    root_team = Team.objects.create(name="Root")
+    first_team = Team.objects.create(name="First", parent_id=root_team.pk)
+    second_team = Team.objects.create(name="Second", parent_id=first_team.pk)
+
+    # user is a member of the first team
+    factories.TeamAccessFactory(team=first_team, user=user, role=role)
+
+    response = client.patch(
+        f"/api/v1.0/teams/{second_team.pk}/",
+        {
+            "name": "New name",
+        },
+        format="json",
+    )
+
+    assert response.status_code == HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "No Team matches the given query."}
+
+    second_team.refresh_from_db()
+    assert second_team.name == "Second"

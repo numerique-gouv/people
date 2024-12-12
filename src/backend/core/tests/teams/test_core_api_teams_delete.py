@@ -12,6 +12,7 @@ from rest_framework.status import (
 from rest_framework.test import APIClient
 
 from core import factories, models
+from core.models import Team
 
 pytestmark = pytest.mark.django_db
 
@@ -113,3 +114,59 @@ def test_api_teams_delete_authenticated_owner():
 
     assert response.status_code == HTTP_204_NO_CONTENT
     assert models.Team.objects.exists() is False
+
+
+@pytest.mark.parametrize(
+    "role",
+    ["owner", "administrator", "member"],
+)
+def test_api_teams_delete_authenticated_owner_parent_team(client, role):
+    """
+    Authenticated users should not be able to delete a parent team they
+    don't own.
+    """
+    user = factories.UserFactory()
+
+    client.force_login(user)
+
+    root_team = Team.objects.create(name="Root")
+    first_team = Team.objects.create(name="First", parent_id=root_team.pk)
+    second_team = Team.objects.create(name="Second", parent_id=first_team.pk)
+
+    # user is a member of the second team
+    factories.TeamAccessFactory(team=second_team, user=user, role=role)
+
+    response = client.delete(f"/api/v1.0/teams/{first_team.pk}/")
+
+    assert response.status_code == HTTP_403_FORBIDDEN
+    assert response.json() == {
+        "detail": "You do not have permission to perform this action."
+    }
+    assert models.Team.objects.count() == 3
+
+
+@pytest.mark.parametrize(
+    "role",
+    ["owner", "administrator", "member"],
+)
+def test_api_teams_delete_authenticated_owner_child_team(client, role):
+    """
+    Authenticated users should not be able to delete a children team they
+    don't own.
+    """
+    user = factories.UserFactory()
+
+    client.force_login(user)
+
+    root_team = Team.objects.create(name="Root")
+    first_team = Team.objects.create(name="First", parent_id=root_team.pk)
+    second_team = Team.objects.create(name="Second", parent_id=first_team.pk)
+
+    # user is a member of the first team
+    factories.TeamAccessFactory(team=first_team, user=user, role=role)
+
+    response = client.delete(f"/api/v1.0/teams/{second_team.pk}/")
+
+    assert response.status_code == HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "No Team matches the given query."}
+    assert models.Team.objects.count() == 3
