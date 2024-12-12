@@ -14,6 +14,7 @@ and this project adheres to
 
 - ✨(dimail) automate allows requests to dimail
 -  ✨(contacts) add notes & force full_name #565
+- ✨(organizations) add siret to name conversion #584
 
 ### Changed
 
