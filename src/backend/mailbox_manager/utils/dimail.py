@@ -394,3 +394,23 @@ class DimailAPIClient:
             )
             return response
         return self.raise_exception_for_unexpected_response(response)
+
+    def check_domain(self, domain):
+        """Send a request to check domain."""
+
+        response = session.get(
+            f"{self.API_URL}/domains/{domain.slug}/check/",
+            json={"active": "no"},
+            headers={"Authorization": f"Basic {self.API_CREDENTIALS}"},
+            verify=True,
+            timeout=10,
+        )
+
+        if response.status_code == status.HTTP_200_OK:
+            if response.json()["state"] == "broken":
+                domain.status = enums.MailDomainStatusChoices.FAILED
+                domain.save()
+
+            return response
+
+        return self.raise_exception_for_unexpected_response(response)

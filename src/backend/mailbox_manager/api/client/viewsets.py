@@ -2,7 +2,7 @@
 
 from django.db.models import Subquery
 
-from rest_framework import exceptions, filters, mixins, viewsets
+from rest_framework import exceptions, filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -58,6 +58,16 @@ class MailDomainViewSet(
                 "role": str(core_models.RoleChoices.OWNER),
             }
         )
+
+    @action(detail=True, methods=["GET"])
+    def check(self, request, slug=None):
+        """Request domain check from dimail."""
+        domain = models.MailDomain.objects.get(slug=slug)
+
+        client = DimailAPIClient()
+        dimail_response = client.check_domain(domain)
+
+        return Response(dimail_response.json(), status=dimail_response.status_code)
 
 
 # pylint: disable=too-many-ancestors
