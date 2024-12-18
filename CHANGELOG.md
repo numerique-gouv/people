@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- ✨(teams) add Team dependencies #560
+
 ## [1.9.1] - 2024-12-18
 
 ## [1.9.0] - 2024-12-17
