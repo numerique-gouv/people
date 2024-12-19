@@ -311,7 +311,14 @@ class DimailAPIClient:
         if response.status_code != status.HTTP_200_OK:
             return self.raise_exception_for_unexpected_response(response)
 
-        dimail_mailboxes = response.json()
+        try:
+            import pdb; pdb.set_trace()
+        except requests.exceptions.JSONDecodeError as err:
+            logger.error(
+                "Import failed because of wrong json format: %s",
+                err,
+            )
+            return []
 
         people_mailboxes = models.Mailbox.objects.filter(domain=domain)
         imported_mailboxes = []
