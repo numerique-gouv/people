@@ -2,10 +2,8 @@
 Unit tests for dimail client
 """
 
+import logging
 import re
-from email.errors import HeaderParseError, NonASCIILocalPartDefect
-from logging import Logger
-from unittest import mock
 
 import pytest
 import responses
@@ -49,10 +47,11 @@ def test_dimail_synchronization__already_sync():
                         "givenName": mailbox.first_name,
                         "surName": mailbox.last_name,
                         "displayName": f"{mailbox.first_name} {mailbox.last_name}",
+                        "additionalSenders": [],
                     }
                     for mailbox in pre_sync_mailboxes
                 ]
-            ),
+            ).replace("'", '"'),
             status=status.HTTP_200_OK,
             content_type="application/json",
         )
@@ -64,10 +63,11 @@ def test_dimail_synchronization__already_sync():
     assert set(models.Mailbox.objects.filter(domain=domain)) == set(pre_sync_mailboxes)
 
 
-@mock.patch.object(Logger, "warning")
-def test_dimail_synchronization__synchronize_mailboxes(mock_warning):
-    """A mailbox existing solely on dimail should be synchronized
-    upon calling sync function on its domain"""
+def test_dimail_synchronization__synchronize_mailboxes(caplog):
+    """A mailbox existing only on dimail should be synchronized
+    upon calling sync function on its domain."""
+    caplog.set_level(logging.INFO)
+
     domain = factories.MailDomainEnabledFactory()
     assert not models.Mailbox.objects.exists()
 
@@ -89,6 +89,16 @@ def test_dimail_synchronization__synchronize_mailboxes(mock_warning):
             "givenName": "Admin",
             "surName": "Context",
             "displayName": "Context Admin",
+            "additionalSenders": [],
+        }
+        mailbox_valid_additional_senders = {
+            "type": "mailbox",
+            "status": "broken",
+            "email": f"prudence_crandall@{domain.name}",
+            "givenName": "Admin",
+            "surName": "Context",
+            "displayName": "Context Admin",
+            "additionalSenders": ["prudence@ct.gov"],
         }
         mailbox_with_wrong_domain = {
             "type": "mailbox",
@@ -98,7 +108,7 @@ def test_dimail_synchronization__synchronize_mailboxes(mock_warning):
             "surName": "Doe",
             "displayName": "John Doe",
         }
-        mailbox_with_invalid_domain = {
+        mailbox_invalid_domain = {
             "type": "mailbox",
             "status": "broken",
             "email": f"naw@ake@{domain.name}",
@@ -121,36 +131,47 @@ def test_dimail_synchronization__synchronize_mailboxes(mock_warning):
             body=str(
                 [
                     mailbox_valid,
+                    mailbox_valid_additional_senders,
                     mailbox_with_wrong_domain,
-                    mailbox_with_invalid_domain,
+                    mailbox_invalid_domain,
                     mailbox_with_invalid_local_part,
                 ]
-            ),
+            ).replace("'", '"'),
             status=status.HTTP_200_OK,
             content_type="application/json",
         )
 
         imported_mailboxes = dimail_client.import_mailboxes(domain)
 
-        # 3 imports failed: wrong domain, HeaderParseError, NonASCIILocalPartDefect
-        assert mock_warning.call_count == 3
+    # 1 token requested
+    # + 3 imports failed: wrong domain, HeaderParseError, NonASCIILocalPartDefect
+    assert len(caplog.records) == 4
 
-        # first we try to import email with a wrong domain
-        assert mock_warning.call_args_list[0][0] == (
-            "Import of email %s failed because of a wrong domain",
-            mailbox_with_wrong_domain["email"],
-        )
+    # first we try to import email with a wrong domain
+    assert (
+        caplog.records[1].message
+        == f"Import of email {mailbox_with_wrong_domain["email"]} failed because of a wrong domain"
+    )
 
-        # then we try to import email with invalid domain
-        invalid_mailbox_log = mock_warning.call_args_list[1][0]
-        assert invalid_mailbox_log[1] == mailbox_with_invalid_domain["email"]
-        assert isinstance(invalid_mailbox_log[2], HeaderParseError)
+    # then we try to import email with invalid domain
+    invalid_mailbox_log = caplog.records[2]
+    assert (
+        invalid_mailbox_log.message
+        == f"Import of email {mailbox_invalid_domain['email']} failed with error Invalid Domain"
+    )
 
-        # finally we try to import email with non ascii local part
-        non_ascii_mailbox_log = mock_warning.call_args_list[2][0]
-        assert non_ascii_mailbox_log[1] == mailbox_with_invalid_local_part["email"]
-        assert isinstance(non_ascii_mailbox_log[2], NonASCIILocalPartDefect)
+    # then we try to import email with non ascii local part
+    non_ascii_mailbox_log = caplog.records[3]
+    email = mailbox_with_invalid_local_part["email"]
+    assert (
+        non_ascii_mailbox_log.message
+        == f"Import of email {email} failed with error local-part contains non-ASCII characters)"
+    )
 
-        mailbox = models.Mailbox.objects.get()
-        assert mailbox.local_part == "oxadmin"
-        assert imported_mailboxes == [mailbox_valid["email"]]
+    assert imported_mailboxes == [
+        mailbox_valid["email"],
+        mailbox_valid_additional_senders["email"],
+    ]
+    mailboxes = models.Mailbox.objects.all()
+    assert mailboxes[0].local_part == "oxadmin"
+    assert mailboxes[1].local_part == "prudence_crandall"
