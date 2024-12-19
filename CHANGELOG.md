@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+- 🐛(dimail) fix mailboxes import from dimail #612
+
 ## [1.9.1] - 2024-12-18
 
 ## [1.9.0] - 2024-12-17

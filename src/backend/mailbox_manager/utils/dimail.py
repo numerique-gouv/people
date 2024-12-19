@@ -1,6 +1,5 @@
 """A minimalist client to synchronize with mailbox provisioning API."""
 
-import ast
 import json
 import smtplib
 from email.errors import HeaderParseError, NonASCIILocalPartDefect
@@ -312,9 +311,14 @@ class DimailAPIClient:
         if response.status_code != status.HTTP_200_OK:
             return self.raise_exception_for_unexpected_response(response)
 
-        dimail_mailboxes = ast.literal_eval(
-            response.content.decode("utf-8")
-        )  # format output str to proper list
+        try:
+            import pdb; pdb.set_trace()
+        except requests.exceptions.JSONDecodeError as err:
+            logger.error(
+                "Import failed because of wrong json format: %s",
+                err,
+            )
+            return []
 
         people_mailboxes = models.Mailbox.objects.filter(domain=domain)
         imported_mailboxes = []
@@ -326,7 +330,10 @@ class DimailAPIClient:
                     # sometimes dimail api returns email from another domain,
                     # so we decide to exclude this kind of email
                     address = Address(addr_spec=dimail_mailbox["email"])
-                    if address.domain == domain.name:
+                    if (
+                        address.domain == domain.name
+                        and dimail_mailbox["givenName"] is not None
+                    ):
                         # creates a mailbox on our end
                         mailbox = models.Mailbox.objects.create(
                             first_name=dimail_mailbox["givenName"],
