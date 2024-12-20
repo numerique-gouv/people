@@ -1,6 +1,8 @@
 """Authentication Backends for the People core app."""
 
 import logging
+import json
+
 from email.headerregistry import Address
 from typing import Optional
 
@@ -182,7 +184,7 @@ class OIDCAuthenticationBackend(MozillaOIDCAuthenticationBackend):
             ) from exc
 
         if organization_created:
-            logger.info("Organization %s created", organization)
+            logger.info("Organization %s created from create_user", organization)
 
         logger.info("Creating user %s / %s", sub, email)
 
@@ -193,7 +195,21 @@ class OIDCAuthenticationBackend(MozillaOIDCAuthenticationBackend):
             email=email,
             name=name,
         )
+        logger.info("Created %s / %s", user.name, user.id)
         if organization_created:
+            # TODO: Imports here suggest this code needs to move elsewhere
+            from mailbox_manager.models import MailDomain, MailDomainAccess, MailDomainRoleChoices
+
+            # Specific to Suite territoriale
+            response = requests.get(f"https://recherche-entreprises.api.gouv.fr/search?q={organization_registration_id}").text
+            orga = json.loads(response)["results"][0]
+            if (orga["nature_juridique"] == "7210"):
+                org_name = orga["siege"]["libelle_commune"]
+                organization.name = org_name
+                organization.save()
+                (domain,_) = MailDomain.objects.get_or_create(name=org_name.lower()+".collectivite.fr")
+                MailDomainAccess.objects.get_or_create(domain_id=domain.id, user_id=user.id, role=MailDomainRoleChoices.OWNER)
+
             # Warning: we may remove this behavior in the near future when we
             # add a feature to claim the organization ownership.
             OrganizationAccess.objects.create(
