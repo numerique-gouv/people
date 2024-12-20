@@ -17,7 +17,7 @@ import requests
 from rest_framework import status
 from urllib3.util import Retry
 
-from mailbox_manager import models
+from mailbox_manager import models, enums
 
 logger = getLogger(__name__)
 
@@ -399,15 +399,20 @@ class DimailAPIClient:
         """Send a request to check domain."""
 
         response = session.get(
-            f"{self.API_URL}/domains/{domain.slug}/check/",
-            json={"active": "no"},
+            f"{self.API_URL}/domains/{domain.name}/check/",
             headers={"Authorization": f"Basic {self.API_CREDENTIALS}"},
             verify=True,
             timeout=10,
         )
 
         if response.status_code == status.HTTP_200_OK:
-            if response.json()["state"] == "broken":
+            state = response.json()["state"]
+            import pdb; pdb.set_trace()
+            if domain.status == enums.MailDomainStatusChoices.PENDING and state == "ok":
+                domain.status = enums.MailDomainStatusChoices.ENABLED
+                domain.save()
+
+            if domain.status == enums.MailDomainStatusChoices.ENABLED and state == "broken":
                 domain.status = enums.MailDomainStatusChoices.FAILED
                 domain.save()
 

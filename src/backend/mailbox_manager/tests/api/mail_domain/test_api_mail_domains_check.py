@@ -31,7 +31,12 @@ def user():
 @pytest.fixture
 def domain():
     """Create an enabled domain"""
-    return factories.MailDomainFactory(name="test.domain.com", status="enabled")
+    return factories.MailDomainEnabledFactory()
+
+@pytest.fixture
+def pending_domain():
+    """Create an pending domain"""
+    return factories.MailDomainFactory()
 
 
 def test_api_mail_domains__check_anonymous(domain):
@@ -106,6 +111,47 @@ def test_api_mail_domains__check_domain_admin(user, domain):
     assert response.status_code == status.HTTP_200_OK
 
 
+def test_dimail_check__pending_is_ok(caplog, pending_domain, user):
+    """Check on a 'pending' domain should trigger a change of state if ok."""
+    factories.MailDomainAccessFactory(
+        user=user, domain=pending_domain, role=enums.MailDomainRoleChoices.OWNER
+    )
+
+    client = APIClient()
+    client.force_login(user)
+
+    # we use mock here as we don't know how to get a state : ok from dimail
+    with responses.RequestsMock() as rsps:
+        rsps.add(
+            rsps.GET,
+            re.compile(rf".*/domains/{pending_domain.name}/check/"),
+            body=str({'name': pending_domain.name, 'state': 'broken', 'valid': False, 'delivery': 'virtual', 'features': ['webmail', 'mailbox'], 'webmail_domain': None, 'imap_domain': None, 'smtp_domain': None, 'context_name': 'wolf-jenkins.net', 'transport': None, 'domain_exist': {'ok': False, 'internal': False, 'errors': [{'code': 'must_exist', 'detail': "Le domaine wolf-jenkins.net n'existe pas"}]}, 'mx': {'ok': True, 'internal': False, 'errors': []}, 'cname_imap': {'ok': True, 'internal': False, 'errors': []}, 'cname_smtp': {'ok': True, 'internal': False, 'errors': []}, 'cname_webmail': {'ok': True, 'internal': False, 'errors': []}, 'spf': {'ok': True, 'internal': False, 'errors': []}, 'dkim': {'ok': True, 'internal': False, 'errors': []}, 'postfix': {'ok': True, 'internal': True, 'errors': []}, 'ox': {'ok': True, 'internal': True, 'errors': []}, 'cert': {'ok': True, 'internal': True, 'errors': []}}).replace("'", '"'),
+            status=status.HTTP_200_OK,
+            content_type="application/json",
+        )
+        response = client.get(f"/api/v1.0/mail-domains/{pending_domain.slug}/check/")
+
+
+    assert pending_domain.status == enums.MailDomainStatusChoices.PENDING
+    response = client.get(f"/api/v1.0/mail-domains/{pending_domain.slug}/check/")
+    assert response.status_code == status.HTTP_200_OK
+    assert pending_domain.status == enums.MailDomainStatusChoices.ENABLED
+    
+
 def test_api_mail_domains__check_broken_domain_changes_status(user, domain):
-    """If a returning domain check marks the domain as 'broken', we set it to 'failed' in our database."""
-    pass
+    """Check on an 'enabled' domain should trigger a change of state if broken."""
+    factories.MailDomainAccessFactory(
+        user=user, domain=domain, role=enums.MailDomainRoleChoices.OWNER
+    )
+
+    dimail_client = DimailAPIClient()
+    dimail_client.create_domain(domain.name, user.sub)
+    dimail_client.create_user(user.sub)
+    dimail_client.create_allow(user.sub, domain.name)
+
+    client = APIClient()
+    client.force_login(user)
+    assert domain.status == enums.MailDomainStatusChoices.ENABLED
+    response = client.get(f"/api/v1.0/mail-domains/{domain.slug}/check/")
+    assert response.status_code == status.HTTP_200_OK and response.json()['state'] == "broken"
+    assert domain.status == enums.MailDomainStatusChoices.FAILED
