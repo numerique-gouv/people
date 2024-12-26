@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand, CommandError
 import requests
 from rest_framework import status
 
-from mailbox_manager.enums import MailDomainStatusChoices
+from mailbox_manager import enums
 from mailbox_manager.models import MailDomain, MailDomainAccess
 
 User = get_user_model()
@@ -67,7 +67,7 @@ class Command(BaseCommand):
         domain_name = "test.domain.com"
         if not MailDomain.objects.filter(name=domain_name).exists():
             MailDomain.objects.create(
-                name=domain_name, status=MailDomainStatusChoices.ENABLED
+                name=domain_name, status=enums.MailDomainStatusChoices.ENABLED
             )
         self.create_domain(domain_name)
 
@@ -81,6 +81,11 @@ class Command(BaseCommand):
         else:
             self.create_user(name=people_base_user.sub)
             self.create_allows(people_base_user.sub, domain_name)
+            # access role for john doe is missing
+            maildomain = MailDomain.objects.get(name=domain_name)
+            MailDomainAccess.objects.create(
+                user=User.objects.get(email="people@people.world"),
+                role=enums.MailDomainRoleChoices.OWNER, domain=maildomain)
 
         if options["populate_from_people"]:
             self._populate_dimail_from_people()
@@ -189,11 +194,11 @@ class Command(BaseCommand):
         # create missing domains
         for domain in domain_to_create:
             # enforce domain status
-            if domain.status != MailDomainStatusChoices.ENABLED:
+            if domain.status != enums.MailDomainStatusChoices.ENABLED:
                 self.stdout.write(
                     f"  - {domain.name} status {domain.status} -> ENABLED"
                 )
-                domain.status = MailDomainStatusChoices.ENABLED
+                domain.status = enums.MailDomainStatusChoices.ENABLED
                 domain.save()
             self.create_domain(domain.name)
 
