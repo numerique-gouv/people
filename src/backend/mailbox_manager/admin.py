@@ -9,6 +9,30 @@ from mailbox_manager import models
 from mailbox_manager.utils.dimail import DimailAPIClient
 
 
+@admin.action(description=_("Check domain health"))
+def check_domain_health(modeladmin, request, queryset):  # pylint: disable=unused-argument
+    """Admin action to check domain health with dimail and update domain status."""
+    client = DimailAPIClient()
+    domains_updated = []
+    for domain in queryset:
+        old_status = domain.status
+        try:
+            response = client.check_domain(domain)
+        except exceptions.HTTPError as err:
+            messages.error(
+                request,
+                _(f"Check domain health failed for {domain.name} with message: [{err}]"),
+                )
+        else:
+            new_status = domain.status
+            if old_status != new_status:
+                domains_updated.append(domain)
+            messages.success(
+                request,
+                f"Domain updated {','.join(domains_updated)} {response.status_code} {response.json()}"
+            )
+
+
 @admin.action(description=_("Synchronise from dimail"))
 def sync_mailboxes_from_dimail(modeladmin, request, queryset):  # pylint: disable=unused-argument
     """Admin action to synchronize existing mailboxes from dimail to our database."""
@@ -54,7 +78,7 @@ class MailDomainAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     readonly_fields = ["created_at", "slug"]
     inlines = (UserMailDomainAccessInline,)
-    actions = (sync_mailboxes_from_dimail,)
+    actions = (sync_mailboxes_from_dimail, check_domain_health)
 
 
 @admin.register(models.Mailbox)

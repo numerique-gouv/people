@@ -10,6 +10,7 @@ and this project adheres to
 
 ### Added
 
+- ✨(maildomain) add a check to verify health of a domain using dimail #601
 - 🧑‍💻(oidc) add ability to pull registration ID (e.g. SIRET) from OIDC #577
 
 ### Fixed
