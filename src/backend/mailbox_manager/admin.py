@@ -1,12 +1,40 @@
 """Admin classes and registrations for People's mailbox manager app."""
 
 from django.contrib import admin, messages
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from requests import exceptions
 
 from mailbox_manager import models
 from mailbox_manager.utils.dimail import DimailAPIClient
+
+
+@admin.action(description=_("Check domain health"))
+def check_domain_health(modeladmin, request, queryset):  # pylint: disable=unused-argument
+    """Admin action to check domain health with dimail and update domain status."""
+    client = DimailAPIClient()
+    domains_updated = []
+    for domain in queryset:
+        old_status = domain.status
+        try:
+            response = client.check_domain(domain)
+        except exceptions.HTTPError as err:
+            messages.error(
+                request,
+                _(f"Check domain health failed for {domain.name} with message: [{err}]"),
+                )
+        else:
+            new_status = domain.status
+            if old_status != new_status:
+                domains_updated.append(domain.name)
+            success_message = _("Check domain done with success")
+            if domains_updated:
+                success_message = success_message + _(f"<br/>Domains updated: {','.join(domains_updated)}")
+            messages.success(
+                request,
+                mark_safe(success_message),
+            )
 
 
 @admin.action(description=_("Synchronise from dimail"))
@@ -54,7 +82,7 @@ class MailDomainAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     readonly_fields = ["created_at", "slug"]
     inlines = (UserMailDomainAccessInline,)
-    actions = (sync_mailboxes_from_dimail,)
+    actions = (sync_mailboxes_from_dimail, check_domain_health)
 
 
 @admin.register(models.Mailbox)
