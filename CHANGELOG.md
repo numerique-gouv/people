@@ -10,6 +10,7 @@ and this project adheres to
 
 ### Added
 
+- ✨(anct) fetch and display organization names of communes #583
 - 🧑‍💻(oidc) add ability to pull registration ID (e.g. SIRET) from OIDC #577
 
 ### Fixed
