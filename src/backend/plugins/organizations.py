@@ -17,6 +17,15 @@ class ApiCall:
     url : str = ""
     params: dict = {}
     headers : dict = {}
+    response = None
+
+    def execute(self):
+        if (self.method == "POST"):
+            self.response = requests.request(
+                method=self.method,
+                url=f"https://{self.host}/{self.url}",
+                json=self.params,
+                headers=self.headers)
 
 class CommuneCreation(BaseOrganizationPlugin):
     """

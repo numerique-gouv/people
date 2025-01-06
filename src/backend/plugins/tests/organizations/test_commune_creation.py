@@ -8,7 +8,7 @@ from django.conf import settings
 from core.models import Organization
 from core.plugins.loader import get_organization_plugins
 
-from plugins.organizations import CommuneCreation
+from plugins.organizations import CommuneCreation, ApiCall
 
 pytestmark = pytest.mark.django_db
 
@@ -170,6 +170,25 @@ def test_extract_name_from_org_data_when_commune(
     plugin = CommuneCreation()
     name = plugin.get_organization_name_from_results(data, "21580304000017")
     assert name == "Varzy"
+
+def test_api_call_execution():
+    task = ApiCall()
+    task.method = "POST"
+    task.host = "some_host"
+    task.url = "some_url"
+    task.params = {"some_key":"some_value"}
+    task.headers = {"Some-Header": "Some-Header-Value"}
+    
+    with responses.RequestsMock() as rsps:
+        rsps.add(
+            rsps.POST,
+            url="https://some_host/some_url",
+            body='{"some_key": "some_value"}',
+            content_type="application/json",
+            headers={"Some-Header": "Some-Header-Value"}
+        )
+
+        task.execute()
 
 def test_tasks_on_commune_creation_include_zone_creation():
     plugin = CommuneCreation()
