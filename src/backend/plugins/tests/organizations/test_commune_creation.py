@@ -1,12 +1,14 @@
-"""Tests for the NameFromSiretOrganizationPlugin plugin."""
+"""Tests for the CommuneCreation plugin."""
 
 import pytest
 import responses
 
+from django.conf import settings
+
 from core.models import Organization
 from core.plugins.loader import get_organization_plugins
 
-from plugins.organizations import NameFromSiretOrganizationPlugin
+from plugins.organizations import CommuneCreation
 
 pytestmark = pytest.mark.django_db
 
@@ -25,7 +27,7 @@ def organization_plugins_settings_fixture(settings):
     _original_plugins = settings.ORGANIZATION_PLUGINS
 
     settings.ORGANIZATION_PLUGINS = [
-        "plugins.organizations.NameFromSiretOrganizationPlugin"
+        "plugins.organizations.CommuneCreation"
     ]
 
     # reset get_organization_plugins cache
@@ -165,6 +167,18 @@ def test_extract_name_from_org_data_when_commune(
         ]
     }
 
-    plugin = NameFromSiretOrganizationPlugin()
+    plugin = CommuneCreation()
     name = plugin.get_organization_name_from_results(data, "21580304000017")
     assert name == "Varzy"
+
+def test_tasks_on_commune_creation_include_zone_creation():
+    plugin = CommuneCreation()
+    name = "Varzy"
+
+    tasks = plugin.complete_commune_creation(name)
+
+    assert tasks[0].host == "api.scaleway.com"
+    assert tasks[0].url == "/domain/v2beta1/dns-zones"
+    assert tasks[0].method == "POST"
+    assert tasks[0].params == {"project_id":settings.DNS_PROVISIONING_API_PROJECT_ID, "domain":"collectivite.fr", "subdomain":"varzy"}
+    assert tasks[0].headers["X-Auth-Token"] == settings.DNS_PROVISIONING_API_CREDENTIALS

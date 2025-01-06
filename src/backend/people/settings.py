@@ -466,6 +466,18 @@ class Base(Configuration):
         environ_prefix=None,
     )
 
+    # DNS PROVISIONING API
+    DNS_PROVISIONING_API_CREDENTIALS = values.Value(
+        default=None,
+        environ_name="DNS_PROVISIONING_API_CREDENTIALS",
+        environ_prefix=None,
+    )
+    DNS_PROVISIONING_API_PROJECT_ID = values.Value(
+        default=None,
+        environ_name="DNS_PROVISIONING_API_PROJECT_ID",
+        environ_prefix=None,
+    )
+
     # Organizations
     ORGANIZATION_REGISTRATION_ID_VALIDATORS = json.loads(
         values.Value(
@@ -642,7 +654,7 @@ class Development(Base):
 
     OIDC_ORGANIZATION_REGISTRATION_ID_FIELD = "siret"
 
-    ORGANIZATION_PLUGINS = ["plugins.organizations.NameFromSiretOrganizationPlugin"]
+    ORGANIZATION_PLUGINS = ["plugins.organizations.CommuneCreation"]
 
     def __init__(self):
         """In dev, force installs needed for Swagger API."""
@@ -691,7 +703,7 @@ class Test(Base):
 
     OIDC_ORGANIZATION_REGISTRATION_ID_FIELD = "siret"
 
-    ORGANIZATION_PLUGINS = ["plugins.organizations.NameFromSiretOrganizationPlugin"]
+    ORGANIZATION_PLUGINS = ["plugins.organizations.CommuneCreation"]
 
     ORGANIZATION_REGISTRATION_ID_VALIDATORS = [
         {

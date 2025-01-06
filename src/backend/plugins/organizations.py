@@ -6,11 +6,19 @@ import requests
 from requests.adapters import HTTPAdapter, Retry
 
 from core.plugins.base import BaseOrganizationPlugin
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
-class NameFromSiretOrganizationPlugin(BaseOrganizationPlugin):
+class ApiCall:
+    method : str = "GET"
+    host : str = ""
+    url : str = ""
+    params: dict = {}
+    headers : dict = {}
+
+class CommuneCreation(BaseOrganizationPlugin):
     """
     This plugin is used to convert the organization registration ID
     to the proper name. For French organization the registration ID
@@ -48,6 +56,15 @@ class NameFromSiretOrganizationPlugin(BaseOrganizationPlugin):
 
         logger.warning("No organization name found for SIRET %s", siret)
         return None
+    
+    def complete_commune_creation(self, name: str) -> ApiCall:
+        result = ApiCall()
+        result.method = "POST"
+        result.host = "api.scaleway.com"
+        result.url = "/domain/v2beta1/dns-zones"
+        result.params = {"project_id":settings.DNS_PROVISIONING_API_PROJECT_ID, "domain":"collectivite.fr", "subdomain":"varzy"}
+        result.headers = {"X-Auth-Token": settings.DNS_PROVISIONING_API_CREDENTIALS}
+        return [result]
 
     def run_after_create(self, organization):
         """After creating an organization, update the organization name."""
