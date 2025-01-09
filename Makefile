@@ -361,3 +361,7 @@ tilt-up: ## start tilt - k8s local development
 release:  ## helper for release and deployment
 	python scripts/release.py
 .PHONY: release
+
+fetch-domain-status:
+	@$(MANAGE) fetch_domain_status
+.PHONY: fetch-domain-status
