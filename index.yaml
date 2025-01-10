@@ -1,0 +1,12 @@
+apiVersion: v1
+entries:
+  desk:
+  - apiVersion: v2
+    created: "2025-01-10T13:48:53.486954486Z"
+    digest: 455fb4075627754032d285ab9a0ece7fa7ab8976b779c9e22e7c635023313916
+    name: desk
+    type: application
+    urls:
+    - https://numerique-gouv.github.io/people/desk-0.0.1.tgz
+    version: 0.0.1
+generated: "2025-01-10T13:48:53.486107307Z"
