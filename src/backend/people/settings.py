@@ -202,6 +202,7 @@ class Base(Configuration):
 
     AUTHENTICATION_BACKENDS = [
         "django.contrib.auth.backends.ModelBackend",
+        "core.authentication.oauth2.backends.EmailModelBackend",
         "oauth2_provider.backends.OAuth2Backend",
         "core.authentication.backends.OIDCAuthenticationBackend",
     ]
@@ -569,6 +570,13 @@ class Base(Configuration):
             },
         }
 
+    @property
+    def LOGIN_URL(self):
+        """
+        Define the LOGIN_URL (Django) for the OIDC provider (reuse LOGIN_REDIRECT_URL)
+        """
+        return f"{self.LOGIN_REDIRECT_URL}/login/"
+
     @classmethod
     def post_setup(cls):
         """Post setup configuration.
@@ -627,7 +635,6 @@ class Development(Base):
     CORS_ALLOW_ALL_ORIGINS = True
     CSRF_TRUSTED_ORIGINS = ["http://localhost:8072", "http://localhost:3000"]
     DEBUG = True
-    LOGIN_URL = "/admin/login/"
 
     SESSION_COOKIE_NAME = "people_sessionid"
 
