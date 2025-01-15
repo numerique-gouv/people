@@ -216,9 +216,10 @@ test.describe('Mail domain', () => {
       ];
 
       test('checks if all tabs are visible', async ({ page }) => {
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptCommonApiCalls(page, mailDomainsFixtures);
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await assertMailDomainUpperElementsAreVisible(page);
 
@@ -231,9 +232,10 @@ test.describe('Mail domain', () => {
       test('checks all the elements are visible when domain exist but contains no mailboxes', async ({
         page,
       }) => {
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptCommonApiCalls(page, mailDomainsFixtures);
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await assertMailDomainUpperElementsAreVisible(page);
 
@@ -322,9 +324,10 @@ test.describe('Mail domain', () => {
           );
         };
 
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptApiCalls();
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await assertMailDomainUpperElementsAreVisible(page);
 
@@ -361,9 +364,10 @@ test.describe('Mail domain', () => {
       ];
 
       test('checks expected elements are visible', async ({ page }) => {
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptCommonApiCalls(page, mailDomainsFixtures);
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await expect(page).toHaveURL(/mail-domains\//);
 
@@ -405,9 +409,10 @@ test.describe('Mail domain', () => {
       ];
 
       test('checks expected elements are visible', async ({ page }) => {
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptCommonApiCalls(page, mailDomainsFixtures);
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await assertMailDomainUpperElementsAreVisible(page);
 
@@ -448,9 +453,10 @@ test.describe('Mail domain', () => {
       ];
 
       test('checks expected elements are visible', async ({ page }) => {
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptCommonApiCalls(page, mailDomainsFixtures);
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await assertMailDomainUpperElementsAreVisible(page);
 
@@ -552,9 +558,10 @@ test.describe('Mail domain', () => {
       test('checks all the elements are visible when domain exist but contains no mailboxes', async ({
         page,
       }) => {
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptCommonApiCalls(page, mailDomainsFixtures);
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await assertMailDomainUpperElementsAreVisible(page);
 
@@ -643,9 +650,10 @@ test.describe('Mail domain', () => {
           );
         };
 
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptApiCalls();
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await assertMailDomainUpperElementsAreVisible(page);
 
@@ -682,9 +690,10 @@ test.describe('Mail domain', () => {
       ];
 
       test('checks expected elements are visible', async ({ page }) => {
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptCommonApiCalls(page, mailDomainsFixtures);
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await expect(page).toHaveURL(/mail-domains\//);
 
@@ -726,9 +735,10 @@ test.describe('Mail domain', () => {
       ];
 
       test('checks expected elements are visible', async ({ page }) => {
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptCommonApiCalls(page, mailDomainsFixtures);
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await assertMailDomainUpperElementsAreVisible(page);
 
@@ -769,9 +779,10 @@ test.describe('Mail domain', () => {
       ];
 
       test('checks expected elements are visible', async ({ page }) => {
+        const requestPromise = page.waitForRequest('**/api/v1.0/mail-domains/\?*');
         await interceptCommonApiCalls(page, mailDomainsFixtures);
-
         await clickOnMailDomainsNavButton(page);
+        await requestPromise;
 
         await assertMailDomainUpperElementsAreVisible(page);
 
