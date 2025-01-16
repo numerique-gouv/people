@@ -13,6 +13,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils.text import slugify
 
 from faker import Faker
+from oauth2_provider.models import Application
 
 from core import models
 
@@ -293,6 +294,23 @@ def create_demo(stdout):  # pylint: disable=too-many-locals
                 )
 
         queue.flush()
+
+    # OIDC configuration
+    try:
+        Application.objects.get(client_id="people-idp")
+    except Application.DoesNotExist:
+        application = Application(
+            client_id="people-idp",
+            client_secret="local-tests-only",
+            client_type=Application.CLIENT_CONFIDENTIAL,
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+            name="People Identity Provider",
+            algorithm=Application.RS256_ALGORITHM,
+            redirect_uris="http://localhost:8083/realms/people/broker/oidc-people-local/endpoint",
+            skip_authorization=True,
+        )
+        application.clean()
+        application.save()
 
 
 class Command(BaseCommand):

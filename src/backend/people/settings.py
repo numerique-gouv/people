@@ -17,6 +17,8 @@ from django.utils.translation import gettext_lazy as _
 
 import sentry_sdk
 from configurations import Configuration, values
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import ignore_logger
 
@@ -193,12 +195,15 @@ class Base(Configuration):
         "django.middleware.common.CommonMiddleware",
         "django.middleware.csrf.CsrfViewMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "oauth2_provider.middleware.OAuth2TokenMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
         "dockerflow.django.middleware.DockerflowMiddleware",
     ]
 
     AUTHENTICATION_BACKENDS = [
         "django.contrib.auth.backends.ModelBackend",
+        "core.authentication.oauth2.backends.EmailModelBackend",
+        "oauth2_provider.backends.OAuth2Backend",
         "core.authentication.backends.OIDCAuthenticationBackend",
     ]
 
@@ -213,9 +218,10 @@ class Base(Configuration):
         # Third party apps
         "corsheaders",
         "dockerflow.django",
-        "rest_framework",
-        "parler",
         "easy_thumbnails",
+        "oauth2_provider",
+        "parler",
+        "rest_framework",
         # Django
         "django.contrib.auth",
         "django.contrib.contenttypes",
@@ -448,6 +454,32 @@ class Base(Configuration):
         environ_prefix=None,
     )
 
+    # OIDC - Identity Provider
+
+    OAUTH2_PROVIDER = {
+        "OIDC_ENABLED": values.BooleanValue(
+            default=False,
+            environ_name="OAUTH2_PROVIDER_OIDC_ENABLED",
+            environ_prefix=None,
+        ),
+        "OIDC_RSA_PRIVATE_KEY": values.Value(
+            environ_name="OAUTH2_PROVIDER_OIDC_RSA_PRIVATE_KEY",
+            environ_prefix=None,
+        ),
+        "SCOPES": {
+            "openid": "OpenID Connect scope",
+            "profile": "Basic profile",
+            "email": "Email address",
+        },
+        "OAUTH2_VALIDATOR_CLASS": values.Value(
+            # XXX: set to "core.authentication.oauth2.validators.ProConnectValidator"
+            # in deployment settings.
+            default="core.authentication.oauth2.validators.BaseValidator",
+            environ_name="OAUTH2_PROVIDER_VALIDATOR_CLASS",
+            environ_prefix=None,
+        ),
+    }
+
     # MAILBOX-PROVISIONING API
     WEBMAIL_URL = values.Value(
         default=None,
@@ -537,6 +569,13 @@ class Base(Configuration):
                 "hide_untranslated": False,
             },
         }
+
+    @property
+    def LOGIN_URL(self):
+        """
+        Define the LOGIN_URL (Django) for the OIDC provider (reuse LOGIN_REDIRECT_URL)
+        """
+        return f"{self.LOGIN_REDIRECT_URL}/login/"
 
     @classmethod
     def post_setup(cls):
@@ -642,6 +681,25 @@ class Development(Base):
     OIDC_ORGANIZATION_REGISTRATION_ID_FIELD = "siret"
 
     ORGANIZATION_PLUGINS = ["plugins.organizations.NameFromSiretOrganizationPlugin"]
+
+    # OIDC Provider
+    # - Generate RSA private key
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=4096,
+    )
+
+    # - Serialize private key to PEM format
+    private_key_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+
+    # - Set the OIDC_RSA_PRIVATE_KEY
+    OAUTH2_PROVIDER = Base.OAUTH2_PROVIDER | {
+        "OIDC_RSA_PRIVATE_KEY": private_key_pem.decode("utf-8"),
+    }
 
     def __init__(self):
         """In dev, force installs needed for Swagger API."""
