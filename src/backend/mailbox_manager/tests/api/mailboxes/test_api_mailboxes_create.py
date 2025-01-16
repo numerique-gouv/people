@@ -19,6 +19,10 @@ from core import factories as core_factories
 
 from mailbox_manager import enums, factories, models
 from mailbox_manager.api.client import serializers
+from mailbox_manager.tests.fixtures.dimail import (
+    TOKEN_OK,
+    response_mailbox_created,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -102,19 +106,15 @@ def test_api_mailboxes__create_roles_success(role):
         rsps.add(
             rsps.GET,
             re.compile(r".*/token/"),
-            body='{"access_token": "domain_owner_token"}',
+            body=TOKEN_OK,
             status=status.HTTP_200_OK,
             content_type="application/json",
         )
         rsps.add(
             rsps.POST,
             re.compile(rf".*/domains/{mail_domain.name}/mailboxes/"),
-            body=str(
-                {
-                    "email": f"{mailbox_values['local_part']}@{mail_domain.name}",
-                    "password": "newpass",
-                    "uuid": "uuid",
-                }
+            body=response_mailbox_created(
+                f"{mailbox_values["local_part"]}@{mail_domain.name}"
             ),
             status=status.HTTP_201_CREATED,
             content_type="application/json",

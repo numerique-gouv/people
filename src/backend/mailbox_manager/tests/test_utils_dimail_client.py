@@ -16,7 +16,7 @@ from rest_framework import status
 from mailbox_manager import enums, factories, models
 from mailbox_manager.utils.dimail import DimailAPIClient
 
-from .fixtures.dimail import CHECK_DOMAIN_BROKEN
+from .fixtures.dimail import CHECK_DOMAIN_BROKEN, TOKEN_OK, response_mailbox_created
 
 pytestmark = pytest.mark.django_db
 
@@ -203,20 +203,14 @@ def test_dimail___pending_mailboxes_enabled_upon_domain_activation(caplog):
         rsps.add(
             rsps.GET,
             re.compile(r".*/token/"),
-            body='{"access_token": "domain_owner_token"}',
+            body=TOKEN_OK,
             status=status.HTTP_200_OK,
             content_type="application/json",
         )
         rsps.add(
             rsps.POST,
             re.compile(rf".*/domains/{domain.name}/mailboxes/"),
-            body=str(
-                {
-                    "email": f"mock@{domain.name}",
-                    "password": "newpass",
-                    "uuid": "uuid",
-                }
-            ),
+            body=response_mailbox_created(f"mock@{domain.name}"),
             status=status.HTTP_201_CREATED,
             content_type="application/json",
         )
