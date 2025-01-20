@@ -2,30 +2,37 @@
 
 import logging
 
+from django.conf import settings
+
 import requests
 from requests.adapters import HTTPAdapter, Retry
 
 from core.plugins.base import BaseOrganizationPlugin
-from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
 class ApiCall:
-    method : str = "GET"
-    host : str = ""
-    url : str = ""
+    """Encapsulates a call to an external API"""
+
+    method: str = "GET"
+    base: str = ""
+    url: str = ""
     params: dict = {}
-    headers : dict = {}
+    headers: dict = {}
     response = None
 
     def execute(self):
-        if (self.method == "POST"):
+        """Call the specified API endpoint with supplied parameters and record response"""
+        if self.method == "POST":
             self.response = requests.request(
                 method=self.method,
-                url=f"https://{self.host}/{self.url}",
+                url=f"{self.base}/{self.url}",
                 json=self.params,
-                headers=self.headers)
+                headers=self.headers,
+                timeout=5,
+            )
+
 
 class CommuneCreation(BaseOrganizationPlugin):
     """
@@ -65,15 +72,39 @@ class CommuneCreation(BaseOrganizationPlugin):
 
         logger.warning("No organization name found for SIRET %s", siret)
         return None
-    
+
     def complete_commune_creation(self, name: str) -> ApiCall:
-        result = ApiCall()
-        result.method = "POST"
-        result.host = "api.scaleway.com"
-        result.url = "/domain/v2beta1/dns-zones"
-        result.params = {"project_id":settings.DNS_PROVISIONING_API_PROJECT_ID, "domain":"collectivite.fr", "subdomain":"varzy"}
-        result.headers = {"X-Auth-Token": settings.DNS_PROVISIONING_API_CREDENTIALS}
-        return [result]
+        """Specify the tasks to be completed after a commune is created."""
+        inputs = {"name": name.lower()}
+
+        create_zone = ApiCall()
+        create_zone.method = "POST"
+        create_zone.base = "https://api.scaleway.com"
+        create_zone.url = "/domain/v2beta1/dns-zones"
+        create_zone.params = {
+            "project_id": settings.DNS_PROVISIONING_API_PROJECT_ID,
+            "domain": "collectivite.fr",
+            "subdomain": inputs["name"],
+        }
+        create_zone.headers = {
+            "X-Auth-Token": settings.DNS_PROVISIONING_API_CREDENTIALS
+        }
+
+        create_domain = ApiCall()
+        create_domain.method = "POST"
+        create_domain.base = settings.MAIL_PROVISIONING_API_URL
+        create_domain.url = "/domains"
+        create_domain.params = {
+            "name": inputs["name"],
+            "delivery": "virtual",
+            "features": ["webmail"],
+            "context_name": inputs["name"],
+        }
+        create_domain.headers = {
+            "Authorization": f"Basic: {settings.MAIL_PROVISIONING_API_CREDENTIALS}"
+        }
+
+        return [create_zone, create_domain]
 
     def run_after_create(self, organization):
         """After creating an organization, update the organization name."""

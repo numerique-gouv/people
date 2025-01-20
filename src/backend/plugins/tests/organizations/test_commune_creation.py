@@ -1,14 +1,14 @@
 """Tests for the CommuneCreation plugin."""
 
+from django.conf import settings
+
 import pytest
 import responses
-
-from django.conf import settings
 
 from core.models import Organization
 from core.plugins.loader import get_organization_plugins
 
-from plugins.organizations import CommuneCreation, ApiCall
+from plugins.organizations import ApiCall, CommuneCreation
 
 pytestmark = pytest.mark.django_db
 
@@ -19,16 +19,14 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture(name="organization_plugins_settings")
-def organization_plugins_settings_fixture(settings):
+def organization_plugins_settings_fixture(op_settings):
     """
     Fixture to set the organization plugins settings and
     leave the initial state after the test.
     """
-    _original_plugins = settings.ORGANIZATION_PLUGINS
+    _original_plugins = op_settings.ORGANIZATION_PLUGINS
 
-    settings.ORGANIZATION_PLUGINS = [
-        "plugins.organizations.CommuneCreation"
-    ]
+    op_settings.ORGANIZATION_PLUGINS = ["plugins.organizations.CommuneCreation"]
 
     # reset get_organization_plugins cache
     get_organization_plugins.cache_clear()
@@ -37,7 +35,7 @@ def organization_plugins_settings_fixture(settings):
     yield
 
     # reset get_organization_plugins cache
-    settings.ORGANIZATION_PLUGINS = _original_plugins
+    op_settings.ORGANIZATION_PLUGINS = _original_plugins
     get_organization_plugins.cache_clear()
     get_organization_plugins()  # call to populate the cache
 
@@ -171,33 +169,63 @@ def test_extract_name_from_org_data_when_commune(
     name = plugin.get_organization_name_from_results(data, "21580304000017")
     assert name == "Varzy"
 
+
 def test_api_call_execution():
+    """Test that calling execute() faithfully executes the API call"""
     task = ApiCall()
     task.method = "POST"
-    task.host = "some_host"
+    task.base = "https://some_host"
     task.url = "some_url"
-    task.params = {"some_key":"some_value"}
+    task.params = {"some_key": "some_value"}
     task.headers = {"Some-Header": "Some-Header-Value"}
-    
+
     with responses.RequestsMock() as rsps:
         rsps.add(
             rsps.POST,
             url="https://some_host/some_url",
             body='{"some_key": "some_value"}',
             content_type="application/json",
-            headers={"Some-Header": "Some-Header-Value"}
+            headers={"Some-Header": "Some-Header-Value"},
         )
 
         task.execute()
 
+
 def test_tasks_on_commune_creation_include_zone_creation():
+    """Test the first task in commune creation: creating the DNS sub-zone"""
     plugin = CommuneCreation()
     name = "Varzy"
 
     tasks = plugin.complete_commune_creation(name)
 
-    assert tasks[0].host == "api.scaleway.com"
+    assert tasks[0].base == "https://api.scaleway.com"
     assert tasks[0].url == "/domain/v2beta1/dns-zones"
     assert tasks[0].method == "POST"
-    assert tasks[0].params == {"project_id":settings.DNS_PROVISIONING_API_PROJECT_ID, "domain":"collectivite.fr", "subdomain":"varzy"}
+    assert tasks[0].params == {
+        "project_id": settings.DNS_PROVISIONING_API_PROJECT_ID,
+        "domain": "collectivite.fr",
+        "subdomain": "varzy",
+    }
     assert tasks[0].headers["X-Auth-Token"] == settings.DNS_PROVISIONING_API_CREDENTIALS
+
+
+def test_tasks_on_commune_creation_include_dimail_domain_creation():
+    """Test the second task in commune creation: creating the domain in Dimail"""
+    plugin = CommuneCreation()
+    name = "Merlaut"
+
+    tasks = plugin.complete_commune_creation(name)
+
+    assert tasks[1].base == settings.MAIL_PROVISIONING_API_URL
+    assert tasks[1].url == "/domains"
+    assert tasks[1].method == "POST"
+    assert tasks[1].params == {
+        "name": "merlaut",
+        "delivery": "virtual",
+        "features": ["webmail"],
+        "context_name": "merlaut",
+    }
+    assert (
+        tasks[1].headers["Authorization"]
+        == f"Basic: {settings.MAIL_PROVISIONING_API_CREDENTIALS}"
+    )
