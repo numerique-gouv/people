@@ -92,6 +92,7 @@ class MailDomainAdmin(admin.ModelAdmin):
 
     list_display = (
         "name",
+        "count_mailboxes",
         "created_at",
         "updated_at",
         "slug",
