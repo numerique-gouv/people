@@ -73,6 +73,10 @@ class MailDomain(BaseModel):
             "manage_accesses": is_owner_or_admin,
         }
 
+    @property
+    def count_mailboxes(self):
+        return self.mail_domain.count()
+
 
 class MailDomainAccess(BaseModel):
     """Allow to manage users' accesses to mail domains."""
