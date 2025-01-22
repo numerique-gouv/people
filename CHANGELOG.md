@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- 🐛(dimail) fix imported mailboxes should be enabled instead of pending #659 
+
 ## [1.10.0] - 2025-01-21
 
 ### Added
