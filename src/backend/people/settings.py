@@ -465,6 +465,21 @@ class Base(Configuration):
         environ_name="MAIL_PROVISIONING_API_CREDENTIALS",
         environ_prefix=None,
     )
+    DNS_PROVISIONING_API_URL = values.Value(
+        default="https://api.scaleway.com",
+        environ_name="DNS_PROVISIONING_API_URL",
+        environ_prefix=None,
+    )
+    DNS_PROVISIONING_RESOURCE_ID = values.Value(
+        default=None,
+        environ_name="DNS_PROVISIONING_RESOURCE_ID",
+        environ_prefix=None,
+    )
+    DNS_PROVISIONING_API_CREDENTIALS = values.Value(
+        default=None,
+        environ_name="DNS_PROVISIONING_API_CREDENTIALS",
+        environ_prefix=None,
+    )
 
     # Organizations
     ORGANIZATION_REGISTRATION_ID_VALIDATORS = json.loads(
@@ -642,8 +657,6 @@ class Development(Base):
 
     OIDC_ORGANIZATION_REGISTRATION_ID_FIELD = "siret"
 
-    ORGANIZATION_PLUGINS = ["plugins.organizations.NameFromSiretOrganizationPlugin"]
-
     def __init__(self):
         """In dev, force installs needed for Swagger API."""
         # pylint: disable=invalid-name
@@ -690,8 +703,6 @@ class Test(Base):
     MAIL_PROVISIONING_API_CREDENTIALS = "bGFfcmVnaWU6cGFzc3dvcmQ="
 
     OIDC_ORGANIZATION_REGISTRATION_ID_FIELD = "siret"
-
-    ORGANIZATION_PLUGINS = ["plugins.organizations.NameFromSiretOrganizationPlugin"]
 
     ORGANIZATION_REGISTRATION_ID_VALIDATORS = [
         {

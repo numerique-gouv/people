@@ -2,6 +2,8 @@
 
 import logging
 
+from django.conf import settings
+
 import requests
 from requests.adapters import HTTPAdapter, Retry
 
@@ -37,14 +39,9 @@ class NameFromSiretOrganizationPlugin(BaseOrganizationPlugin):
     def get_organization_name_from_results(self, data, siret):
         """Return the organization name from the results of a SIRET search."""
         for result in data["results"]:
-            nature = "nature_juridique"
-            commune = nature in result and result[nature] == "7210"
             for organization in result["matching_etablissements"]:
                 if organization.get("siret") == siret:
-                    if commune:
-                        return organization["libelle_commune"].title()
-
-                return self._extract_name_from_organization_data(organization)
+                    return self._extract_name_from_organization_data(organization)
 
         logger.warning("No organization name found for SIRET %s", siret)
         return None
@@ -81,3 +78,148 @@ class NameFromSiretOrganizationPlugin(BaseOrganizationPlugin):
         organization.name = name
         organization.save(update_fields=["name", "updated_at"])
         logger.info("Organization %s name updated to %s", organization, name)
+
+    def run_after_grant_access(self, organization_access):
+        """After granting an organization access, we don't need to do anything."""
+
+
+class ApiCall:
+    """Encapsulates a call to an external API"""
+
+    inputs: dict = {}
+    method: str = "GET"
+    base: str = ""
+    url: str = ""
+    params: dict = {}
+    headers: dict = {}
+    response = None
+
+    def execute(self):
+        """Call the specified API endpoint with supplied parameters and record response"""
+        if self.method == "POST":
+            self.response = requests.request(
+                method=self.method,
+                url=f"{self.base}/{self.url}",
+                json=self.params,
+                headers=self.headers,
+                timeout=5,
+            )
+
+
+class CommuneCreation(BaseOrganizationPlugin):
+    """
+    This plugin handles setup tasks for French communes.
+    """
+
+    _api_url = "https://recherche-entreprises.api.gouv.fr/search?q={siret}"
+
+    def get_organization_name_from_results(self, data, siret):
+        """Return the organization name from the results of a SIRET search."""
+        for result in data["results"]:
+            nature = "nature_juridique"
+            commune = nature in result and result[nature] == "7210"
+            if commune:
+                return result["siege"]["libelle_commune"].title()
+
+        logger.warning("Not a commune: SIRET %s", siret)
+        return None
+
+    def dns_call(self, spec):
+        """Call to add a DNS record"""
+        records = [
+            {"name": item["target"], "type": item["type"], "data": item["value"]}
+            for item in spec.response
+        ]
+        result = ApiCall()
+        result.method = "PATCH"
+        result.base = "https://api.scaleway.com"
+        result.url = (
+            f"/domain/v2beta1/dns-zones/{spec.inputs['name']}.collectivite.fr/records"
+        )
+        result.params = {"changes": [{"add": {"records": records}}]}
+        return result
+
+    def complete_commune_creation(self, name: str) -> ApiCall:
+        """Specify the tasks to be completed after a commune is created."""
+        inputs = {"name": name.lower()}
+
+        create_zone = ApiCall()
+        create_zone.method = "POST"
+        create_zone.base = "https://api.scaleway.com"
+        create_zone.url = "/domain/v2beta1/dns-zones"
+        create_zone.params = {
+            "project_id": settings.DNS_PROVISIONING_RESOURCE_ID,
+            "domain": "collectivite.fr",
+            "subdomain": inputs["name"],
+        }
+        create_zone.headers = {
+            "X-Auth-Token": settings.DNS_PROVISIONING_API_CREDENTIALS
+        }
+
+        create_domain = ApiCall()
+        create_domain.method = "POST"
+        create_domain.base = settings.MAIL_PROVISIONING_API_URL
+        create_domain.url = "/domains"
+        create_domain.params = {
+            "name": f"{inputs['name']}.collectivite.fr",
+            "delivery": "virtual",
+            "features": ["webmail", "mailbox"],
+            "context_name": f"{inputs['name']}.collectivite.fr",
+        }
+        create_domain.headers = {
+            "Authorization": f"Basic: {settings.MAIL_PROVISIONING_API_CREDENTIALS}"
+        }
+
+        spec_domain = ApiCall()
+        spec_domain.inputs = inputs
+        spec_domain.base = settings.MAIL_PROVISIONING_API_URL
+        spec_domain.url = f"/domains/{inputs['name']}.collectivite.fr/spec"
+        spec_domain.headers = {
+            "Authorization": f"Basic: {settings.MAIL_PROVISIONING_API_CREDENTIALS}"
+        }
+
+        return [create_zone, create_domain, spec_domain]
+
+    def complete_zone_creation(self, spec_call):
+        """Specify the tasks to be performed to set up the zone."""
+        return self.dns_call(spec_call)
+
+    def run_after_create(self, organization):
+        """After creating an organization, update the organization name."""
+        logger.info("In CommuneCreation")
+        if not organization.registration_id_list:
+            # No registration ID to convert...
+            return
+
+        # In the nominal case, there is only one registration ID because
+        # the organization as been created from it.
+        try:
+            # Retry logic as the API may be rate limited
+            s = requests.Session()
+            retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[429])
+            s.mount("https://", HTTPAdapter(max_retries=retries))
+
+            siret = organization.registration_id_list[0]
+            response = s.get(self._api_url.format(siret=siret), timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            name = self.get_organization_name_from_results(data, siret)
+            logger.info(f"CommuneCreation: {name}")
+            # Not a commune ?
+            if not name:
+                return
+        except requests.RequestException as exc:
+            logger.exception("%s: Unable to fetch organization name from SIRET", exc)
+            return
+
+        organization.name = name
+        organization.save(update_fields=["name", "updated_at"])
+        logger.info("Organization %s name updated to %s", organization, name)
+
+        # Compute and execute the rest of the process
+        tasks = self.complete_commune_creation(name)
+
+    def run_after_grant_access(self, organization_access):
+        """After granting an organization access, check for needed domain access grant."""
+        orga = organization_access.organization
+        user = organization_access.user
