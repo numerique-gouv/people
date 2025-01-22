@@ -2,6 +2,8 @@
 Test stats endpoint
 """
 
+from django.core.cache import cache
+
 import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -43,6 +45,7 @@ def test_api_stats__expected_count():
         10, domain=domains_models.MailDomain.objects.all()[1]
     )
 
+    cache.clear()  # clear cache to avoid interferences from previous tests
     response = APIClient().get("/api/v1.0/stats/")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
@@ -52,3 +55,16 @@ def test_api_stats__expected_count():
         "mailboxes": 10,
         "teams": 3,
     }
+
+
+def test_api_stats__cache_as_expected():
+    """Cache should prevent excessive calls."""
+    cache.clear()  # clear cache to avoid interferences from previous tests
+
+    core_factories.UserFactory.create_batch(2)
+    APIClient().get("/api/v1.0/stats/")
+
+    core_factories.UserFactory()  # There is now a total of 3 users
+
+    new_response = APIClient().get("/api/v1.0/stats/")
+    assert new_response.json()["total_users"] == 2
