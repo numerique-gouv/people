@@ -79,8 +79,9 @@ class NameFromSiretOrganizationPlugin(BaseOrganizationPlugin):
         organization.save(update_fields=["name", "updated_at"])
         logger.info("Organization %s name updated to %s", organization, name)
 
-    def run_after_grant_access(self, organization):
-        pass
+    def run_after_grant_access(self, organization_access):
+        """After granting an organization access, we don't need to do anything."""
+
 
 class ApiCall:
     """Encapsulates a call to an external API"""
@@ -112,30 +113,15 @@ class CommuneCreation(BaseOrganizationPlugin):
 
     _api_url = "https://recherche-entreprises.api.gouv.fr/search?q={siret}"
 
-    @staticmethod
-    def _extract_name_from_organization_data(organization_data):
-        """Extract the name from the organization data."""
-        try:
-            return organization_data["liste_enseignes"][0].title()
-        except KeyError:
-            logger.warning("Missing key 'liste_enseignes' in %s", organization_data)
-        except IndexError:
-            logger.warning("Empty list 'liste_enseignes' in %s", organization_data)
-        return None
-
     def get_organization_name_from_results(self, data, siret):
         """Return the organization name from the results of a SIRET search."""
         for result in data["results"]:
             nature = "nature_juridique"
             commune = nature in result and result[nature] == "7210"
-            for organization in result["matching_etablissements"]:
-                if organization.get("siret") == siret:
-                    if commune:
-                        return organization["libelle_commune"].title()
+            if commune:
+                return result["siege"]["libelle_commune"].title()
 
-                return self._extract_name_from_organization_data(organization)
-
-        logger.warning("No organization name found for SIRET %s", siret)
+        logger.warning("Not a commune: SIRET %s", siret)
         return None
 
     def dns_call(self, spec):
@@ -147,7 +133,9 @@ class CommuneCreation(BaseOrganizationPlugin):
         result = ApiCall()
         result.method = "PATCH"
         result.base = "https://api.scaleway.com"
-        result.url = f"/domain/v2beta1/dns-zones/{spec.inputs["name"]}.collectivite.fr/records"
+        result.url = (
+            f"/domain/v2beta1/dns-zones/{spec.inputs['name']}.collectivite.fr/records"
+        )
         result.params = {"changes": [{"add": {"records": records}}]}
         return result
 
@@ -198,6 +186,7 @@ class CommuneCreation(BaseOrganizationPlugin):
 
     def run_after_create(self, organization):
         """After creating an organization, update the organization name."""
+        logger.info("In CommuneCreation")
         if not organization.registration_id_list:
             # No registration ID to convert...
             return
@@ -215,6 +204,8 @@ class CommuneCreation(BaseOrganizationPlugin):
             response.raise_for_status()
             data = response.json()
             name = self.get_organization_name_from_results(data, siret)
+            logger.info(f"CommuneCreation: {name}")
+            # Not a commune ?
             if not name:
                 return
         except requests.RequestException as exc:
@@ -225,5 +216,10 @@ class CommuneCreation(BaseOrganizationPlugin):
         organization.save(update_fields=["name", "updated_at"])
         logger.info("Organization %s name updated to %s", organization, name)
 
-    def run_after_grant_access(self, organization):
-        pass
+        # Compute and execute the rest of the process
+        tasks = self.complete_commune_creation(name)
+
+    def run_after_grant_access(self, organization_access):
+        """After granting an organization access, check for needed domain access grant."""
+        orga = organization_access.organization
+        user = organization_access.user
