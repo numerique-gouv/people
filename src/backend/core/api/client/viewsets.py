@@ -7,6 +7,8 @@ from functools import reduce
 from django.conf import settings
 from django.db.models import OuterRef, Q, Subquery, Value
 from django.db.models.functions import Coalesce
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 from rest_framework import (
     decorators,
@@ -596,6 +598,7 @@ class StatView(views.APIView):
 
     permission_classes = [AllowAny]
 
+    @method_decorator(cache_page(3600))
     def get(self, request):
         """
         GET /api/v1.0/stats/
